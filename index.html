@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محلل الصفقات</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --card2: #16161f;
+    --border: #1e1e2e;
+    --accent: #00e5a0;
+    --accent2: #00b4ff;
+    --red: #ff4d6d;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --gold: #f5c842;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 16px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .logo-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #fff 40%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle { color: var(--muted); font-size: 14px; font-weight: 300; }
+
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,229,160,0.04) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(0,229,160,0.03);
+  }
+
+  .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
+
+  .upload-icon {
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    background: rgba(0,229,160,0.1);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .upload-zone p { color: var(--muted); font-size: 13px; }
+  #fileInput { display: none; }
+
+  #previewContainer { display: none; margin-bottom: 20px; position: relative; }
+  #previewContainer img { width: 100%; border-radius: 16px; border: 1px solid var(--border); }
+
+  .clear-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255,77,109,0.15);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: var(--red);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .clear-btn:hover { background: rgba(255,77,109,0.25); }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    color: #000;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .analyze-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,229,160,0.3);
+  }
+
+  .loading { display: none; text-align: center; padding: 48px; }
+
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: var(--muted); font-size: 14px; }
+
+  #results { display: none; }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .results-title { font-size: 20px; font-weight: 700; }
+
+  .reset-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card.profit::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,229,160,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .summary-card.loss::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(255,77,109,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .summary-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .summary-amount {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .summary-amount.profit { color: var(--accent); }
+  .summary-amount.loss { color: var(--red); }
+
+  .summary-pct {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .summary-pct.profit { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .summary-pct.loss { background: rgba(255,77,109,0.12); color: var(--red); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+
+  .stat-value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.red { color: var(--red); }
+
+  .trades-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .trades-section-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .trade-row {
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .trade-row:last-child { border-bottom: none; }
+  .trade-row:hover { background: rgba(255,255,255,0.02); }
+
+  .col-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+
+  .col-value { font-size: 14px; font-weight: 600; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .badge.buy { background: rgba(0,180,255,0.12); color: var(--accent2); }
+  .badge.profit { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .badge.loss { background: rgba(255,77,109,0.12); color: var(--red); }
+
+  .raw-analysis {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+  }
+
+  .raw-analysis summary { cursor: pointer; color: var(--muted); font-size: 13px; user-select: none; }
+  .raw-analysis p { margin-top: 14px; font-size: 13px; color: var(--muted); line-height: 1.8; white-space: pre-wrap; }
+
+  .error-box {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 14px;
+    padding: 20px;
+    color: var(--red);
+    font-size: 14px;
+    text-align: center;
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .trade-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo-badge">محلل الصفقات الذكي</div>
+    <h1>📊 حلل صفقتك في ثانية</h1>
+    <p class="subtitle">ارفع صورة من منصة التداول — سنحسب الربح والخسارة تلقائياً</p>
+  </header>
+
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">📷</div>
+    <h3>ارفع صورة المنصة</h3>
+    <p>اسحب الصورة هنا أو اضغط للاختيار</p>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div id="previewContainer">
+    <img id="previewImg" src="" alt="Preview">
+    <button class="clear-btn" id="clearBtn">✕ إزالة</button>
+  </div>
+
+  <button class="analyze-btn" id="analyzeBtn" disabled>
+    <span>🔍</span> تحليل الصورة واحتساب الأرباح
+  </button>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>جاري قراءة الصفقات وحساب النتائج...</p>
+  </div>
+
+  <div id="results">
+    <div class="results-header">
+      <div class="results-title">نتائج التحليل</div>
+      <button class="reset-btn" id="resetBtn">↩ تحليل صورة جديدة</button>
+    </div>
+
+    <div class="summary-card" id="summaryCard">
+      <div class="summary-label">إجمالي الربح / الخسارة</div>
+      <div class="summary-amount" id="summaryAmount">—</div>
+      <div class="summary-pct" id="summaryPct">—</div>
+    </div>
+
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <div class="trades-section">
+      <div class="trades-section-header">تفاصيل الصفقات</div>
+      <div id="tradesBody"></div>
+    </div>
+
+    <details class="raw-analysis">
+      <summary>عرض تحليل النموذج الخام</summary>
+      <p id="rawText"></p>
+    </details>
+  </div>
+
+</div>
+
+<script>
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const previewContainer = document.getElementById('previewContainer');
+const previewImg = document.getElementById('previewImg');
+const clearBtn = document.getElementById('clearBtn');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loadingEl = document.getElementById('loading');
+const resultsEl = document.getElementById('results');
+const errorBox = document.getElementById('errorBox');
+const resetBtn = document.getElementById('resetBtn');
+
+let imageBase64 = null;
+let imageMime = 'image/png';
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadFile(file);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+clearBtn.addEventListener('click', resetUpload);
+resetBtn.addEventListener('click', fullReset);
+
+function loadFile(file) {
+  imageMime = file.type || 'image/png';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    imageBase64 = dataUrl.split(',')[1];
+    previewImg.src = dataUrl;
+    uploadZone.style.display = 'none';
+    previewContainer.style.display = 'block';
+    analyzeBtn.disabled = false;
+    errorBox.style.display = 'none';
+    resultsEl.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetUpload() {
+  imageBase64 = null;
+  previewImg.src = '';
+  fileInput.value = '';
+  uploadZone.style.display = 'block';
+  previewContainer.style.display = 'none';
+  analyzeBtn.disabled = true;
+  errorBox.style.display = 'none';
+  resultsEl.style.display = 'none';
+}
+
+function fullReset() {
+  resetUpload();
+  loadingEl.style.display = 'none';
+}
+
+analyzeBtn.addEventListener('click', analyze);
+
+async function analyze() {
+  if (!imageBase64) return;
+  errorBox.style.display = 'none';
+  resultsEl.style.display = 'none';
+  loadingEl.style.display = 'block';
+  analyzeBtn.disabled = true;
+
+  try {
+    // ✅ يستدعي الـ backend الآمن بدل Anthropic مباشرة
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64, imageMime })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    const rawText = data.rawText || '';
+
+    let parsed;
+    try {
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch {
+      throw new Error('تعذّر قراءة البيانات. تأكد أن الصورة تحتوي على صفقات واضحة.');
+    }
+
+    loadingEl.style.display = 'none';
+    renderResults(parsed, rawText);
+
+  } catch (err) {
+    loadingEl.style.display = 'none';
+    analyzeBtn.disabled = false;
+    errorBox.style.display = 'block';
+    errorBox.textContent = '⚠️ ' + (err.message || 'حدث خطأ أثناء التحليل');
+  }
+}
+
+function fmt(num) {
+  return Number(num).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderResults(data, rawText) {
+  const trades = data.trades || [];
+
+  const grouped = {};
+  trades.forEach(t => {
+    const key = (t.symbol || 'unknown').toUpperCase();
+    if (!grouped[key]) grouped[key] = { buys: [], sells: [], name: t.name || key };
+    if (t.type === 'buy') grouped[key].buys.push(t);
+    else if (t.type === 'sell') grouped[key].sells.push(t);
+    if (t.name) grouped[key].name = t.name;
+  });
+
+  let totalProfit = 0;
+  let totalInvested = 0;
+  const rows = [];
+
+  Object.entries(grouped).forEach(([sym, g]) => {
+    const buyTotal = g.buys.reduce((s, t) => s + (parseFloat(t.total) || 0), 0);
+    const sellTotal = g.sells.reduce((s, t) => s + (parseFloat(t.total) || 0), 0);
+    const buyShares = g.buys.reduce((s, t) => s + (parseFloat(t.shares) || 0), 0);
+    const sellShares = g.sells.reduce((s, t) => s + (parseFloat(t.shares) || 0), 0);
+
+    if (buyTotal > 0 && sellTotal > 0) {
+      const profit = sellTotal - buyTotal;
+      const pct = (profit / buyTotal) * 100;
+      totalProfit += profit;
+      totalInvested += buyTotal;
+      rows.push({ sym, name: g.name, shares: buyShares, buyTotal, sellTotal, profit, pct });
+    } else if (buyTotal > 0) {
+      totalInvested += buyTotal;
+      rows.push({ sym, name: g.name, shares: buyShares, buyTotal, sellTotal: null, profit: null, pct: null });
+    } else {
+      rows.push({ sym, name: g.name, shares: sellShares, buyTotal: null, sellTotal, profit: null, pct: null });
+    }
+  });
+
+  const isProfit = totalProfit >= 0;
+  const summaryCard = document.getElementById('summaryCard');
+  const summaryAmount = document.getElementById('summaryAmount');
+  const summaryPct = document.getElementById('summaryPct');
+  summaryCard.className = 'summary-card ' + (isProfit ? 'profit' : 'loss');
+  summaryAmount.className = 'summary-amount ' + (isProfit ? 'profit' : 'loss');
+  summaryAmount.textContent = (isProfit ? '+' : '') + fmt(totalProfit) + ' ﷼';
+  summaryPct.className = 'summary-pct ' + (isProfit ? 'profit' : 'loss');
+  const overallPct = totalInvested > 0 ? (totalProfit / totalInvested * 100) : 0;
+  summaryPct.textContent = (isProfit ? '▲ ' : '▼ ') + Math.abs(overallPct).toFixed(2) + '%';
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">رأس المال</div>
+      <div class="stat-value gold">${fmt(totalInvested)} ﷼</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">عدد الصفقات</div>
+      <div class="stat-value">${trades.length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">نسبة العائد</div>
+      <div class="stat-value ${isProfit ? 'green' : 'red'}">${overallPct >= 0 ? '+' : ''}${overallPct.toFixed(2)}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">الأسهم المتداولة</div>
+      <div class="stat-value">${Object.keys(grouped).length}</div>
+    </div>
+  `;
+
+  document.getElementById('tradesBody').innerHTML = rows.map(r => {
+    const profitHtml = r.profit !== null
+      ? `<div>
+           <div class="col-label">الربح / الخسارة</div>
+           <div class="col-value">
+             <span class="badge ${r.profit >= 0 ? 'profit' : 'loss'}">
+               ${r.profit >= 0 ? '+' : ''}${fmt(r.profit)} ﷼
+             </span>
+           </div>
+         </div>
+         <div>
+           <div class="col-label">النسبة</div>
+           <div class="col-value" style="color:${r.pct >= 0 ? 'var(--accent)' : 'var(--red)'}">
+             ${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}%
+           </div>
+         </div>`
+      : `<div>
+           <div class="col-label">الحالة</div>
+           <div class="col-value"><span class="badge buy">مفتوحة</span></div>
+         </div><div></div>`;
+
+    return `
+      <div class="trade-row">
+        <div>
+          <div class="col-label">الرمز</div>
+          <div class="col-value">${r.sym}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.name}</div>
+        </div>
+        <div>
+          <div class="col-label">تكلفة الشراء</div>
+          <div class="col-value">${r.buyTotal !== null ? fmt(r.buyTotal) + ' ﷼' : '—'}</div>
+        </div>
+        <div>
+          <div class="col-label">عائد البيع</div>
+          <div class="col-value">${r.sellTotal !== null ? fmt(r.sellTotal) + ' ﷼' : '—'}</div>
+        </div>
+        ${profitHtml}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('rawText').textContent = rawText;
+  resultsEl.style.display = 'block';
+  analyzeBtn.disabled = false;
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

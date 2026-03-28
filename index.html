@@ -6,450 +6,467 @@
 <title>محلل الصفقات</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* ── DARK (default) ── */
   :root {
-    --bg: #0a0a0f;
-    --card: #111118;
-    --card2: #16161f;
-    --border: #1e1e2e;
-    --accent: #00e5a0;
-    --accent2: #00b4ff;
-    --red: #ff4d6d;
-    --text: #e8e8f0;
-    --muted: #5a5a7a;
-    --gold: #f5c842;
+    --bg: #0a0a0f; --card: #111118; --card2: #16161f;
+    --border: #1e1e2e; --accent: #00e5a0; --accent2: #00b4ff;
+    --red: #ff4d6d; --text: #e8e8f0; --muted: #5a5a7a; --gold: #f5c842;
+    --grid-color: rgba(0,229,160,0.03);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  /* ── LIGHT ── */
+  body.light {
+    --bg: #f0f2f5; --card: #ffffff; --card2: #f5f7fa;
+    --border: #e0e4eb; --accent: #00b37a; --accent2: #0090d4;
+    --red: #e0294a; --text: #111827; --muted: #7a8499; --gold: #c9900a;
+    --grid-color: rgba(0,179,122,0.04);
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'IBM Plex Sans Arabic', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    direction: rtl;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; direction: rtl;
+    transition: background 0.3s, color 0.3s;
   }
-
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
 
-  .wrapper {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 32px 16px 60px;
-    position: relative;
-    z-index: 1;
+  .wrapper { max-width: 840px; margin: 0 auto; padding: 0 16px 60px; position: relative; z-index: 1; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; margin-bottom: 28px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 100;
+    transition: background 0.3s;
   }
+  .topbar-logo { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
 
-  header { text-align: center; margin-bottom: 40px; }
+  /* Theme toggle */
+  .theme-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--muted); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--muted); }
 
+  /* Login button in topbar */
+  .login-topbar-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 10px; padding: 8px 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .login-topbar-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .login-topbar-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* Logged-in user */
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
+  .user-name { font-size: 13px; color: var(--muted); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .signout-btn {
+    background: var(--card2); border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s;
+  }
+  .signout-btn:hover { color: var(--red); border-color: var(--red); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 28px; }
+  .tab-btn {
+    flex: 1; padding: 10px; border: none; border-radius: 9px; font-family: inherit;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    background: transparent; color: var(--muted);
+  }
+  .tab-btn.active { background: var(--card2); color: var(--text); }
+  .tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── HERO ── */
+  .hero { text-align: center; margin-bottom: 28px; }
   .logo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,229,160,0.08);
-    border: 1px solid rgba(0,229,160,0.2);
-    border-radius: 100px;
-    padding: 6px 18px;
-    font-size: 12px;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 100px; padding: 5px 16px; font-size: 11px; color: var(--accent);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .logo-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  .hero h1 {
+    font-size: clamp(22px,4vw,34px); font-weight: 700; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero p { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  /* login hint banner */
+  .login-hint {
+    background: rgba(0,229,160,0.06); border: 1px solid rgba(0,229,160,0.15);
+    border-radius: 12px; padding: 12px 18px; font-size: 13px; color: var(--accent);
+    text-align: center; margin-bottom: 20px; display: flex; align-items: center;
+    justify-content: center; gap: 10px;
+  }
+  .login-hint button {
+    background: var(--accent); color: #000; border: none; border-radius: 8px;
+    padding: 5px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
 
-  .logo-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-
-  h1 {
-    font-size: clamp(26px, 5vw, 40px);
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 10px;
-    background: linear-gradient(135deg, #fff 40%, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .subtitle { color: var(--muted); font-size: 14px; font-weight: 300; }
-
+  /* ── UPLOAD ── */
   .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 20px;
-    padding: 48px 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: var(--card);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
+    border: 2px dashed var(--border); border-radius: 20px; padding: 48px 32px;
+    text-align: center; cursor: pointer; transition: all 0.3s; background: var(--card);
+    position: relative; overflow: hidden; margin-bottom: 20px;
   }
-
   .upload-zone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: radial-gradient(ellipse at center, rgba(0,229,160,0.04) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
+    opacity: 0; transition: opacity 0.3s;
   }
-
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--accent);
-    background: rgba(0,229,160,0.03);
-  }
-
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); }
   .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
-
-  .upload-icon {
-    width: 64px; height: 64px;
-    margin: 0 auto 16px;
-    background: rgba(0,229,160,0.1);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-  }
-
+  .upload-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(0,229,160,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
   .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
   .upload-zone p { color: var(--muted); font-size: 13px; }
   #fileInput { display: none; }
 
   #previewContainer { display: none; margin-bottom: 20px; position: relative; }
   #previewContainer img { width: 100%; border-radius: 16px; border: 1px solid var(--border); }
-
   .clear-btn {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(255,77,109,0.15);
-    border: 1px solid rgba(255,77,109,0.3);
-    color: var(--red);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(255,77,109,0.15); border: 1px solid rgba(255,77,109,0.3);
+    color: var(--red); border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s;
   }
-
   .clear-btn:hover { background: rgba(255,77,109,0.25); }
 
   .analyze-btn {
-    width: 100%;
-    padding: 18px;
+    width: 100%; padding: 18px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: 14px;
-    color: #000;
-    font-size: 17px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
+    border: none; border-radius: 14px; color: #000;
+    font-size: 17px; font-weight: 700; font-family: inherit; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin-bottom: 28px;
   }
-
   .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .analyze-btn:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0,229,160,0.3);
-  }
+  .analyze-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,229,160,0.3); }
 
   .loading { display: none; text-align: center; padding: 48px; }
-
-  .spinner {
-    width: 48px; height: 48px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-
+  .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading p { color: var(--muted); font-size: 14px; }
 
+  .error-box {
+    background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 14px; padding: 16px 20px; color: var(--red); font-size: 14px;
+    text-align: center; display: none; margin-bottom: 16px;
+  }
+  .save-notice {
+    background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 12px; padding: 12px 18px; font-size: 13px; color: var(--accent);
+    text-align: center; margin-bottom: 16px; display: none;
+  }
+
+  /* ── RESULTS ── */
   #results { display: none; }
-
-  .results-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
   .results-title { font-size: 20px; font-weight: 700; }
-
   .reset-btn {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
+    background: var(--card2); border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.2s;
   }
-
   .reset-btn:hover { color: var(--text); border-color: var(--muted); }
 
-  .summary-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .summary-card.profit::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(0,229,160,0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .summary-card.loss::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(255,77,109,0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .summary-label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-
-  .summary-amount {
-    font-size: clamp(32px, 6vw, 52px);
-    font-weight: 700;
-    letter-spacing: -2px;
-    line-height: 1;
-    margin-bottom: 12px;
-  }
-
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+  .summary-card.profit::before { content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: radial-gradient(circle, rgba(0,229,160,0.1) 0%, transparent 70%); pointer-events: none; }
+  .summary-card.loss::before { content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,77,109,0.1) 0%, transparent 70%); pointer-events: none; }
+  .summary-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .summary-amount { font-size: clamp(32px, 6vw, 52px); font-weight: 700; letter-spacing: -2px; line-height: 1; margin-bottom: 12px; }
   .summary-amount.profit { color: var(--accent); }
   .summary-amount.loss { color: var(--red); }
-
-  .summary-pct {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 14px;
-    border-radius: 100px;
-    font-size: 14px;
-    font-weight: 600;
-  }
-
+  .summary-pct { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 100px; font-size: 14px; font-weight: 600; }
   .summary-pct.profit { background: rgba(0,229,160,0.12); color: var(--accent); }
   .summary-pct.loss { background: rgba(255,77,109,0.12); color: var(--red); }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 6px;
-  }
-
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
   .stat-value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
   .stat-value.gold { color: var(--gold); }
   .stat-value.green { color: var(--accent); }
   .stat-value.red { color: var(--red); }
 
-  .trades-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-
-  .trades-section-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .trade-row {
-    padding: 18px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
-    gap: 12px;
-    align-items: center;
-    transition: background 0.2s;
-  }
-
+  .trades-section { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
+  .trades-section-header { padding: 18px 24px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .trade-row { padding: 16px 24px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 12px; align-items: center; transition: background 0.2s; }
   .trade-row:last-child { border-bottom: none; }
-  .trade-row:hover { background: rgba(255,255,255,0.02); }
-
-  .col-label {
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 3px;
-  }
-
+  .trade-row:hover { background: var(--card2); }
+  .col-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
   .col-value { font-size: 14px; font-weight: 600; }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
   .badge.buy { background: rgba(0,180,255,0.12); color: var(--accent2); }
   .badge.profit { background: rgba(0,229,160,0.12); color: var(--accent); }
   .badge.loss { background: rgba(255,77,109,0.12); color: var(--red); }
 
-  .raw-analysis {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 24px;
-  }
+  /* ── HISTORY ── */
+  #historyTab { display: none; }
+  .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .history-title { font-size: 20px; font-weight: 700; }
+  .history-count { font-size: 13px; color: var(--muted); background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; }
+  .history-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .history-empty div { font-size: 48px; margin-bottom: 16px; }
+  .history-empty p { font-size: 14px; }
+  .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; position: relative; box-shadow: var(--shadow); }
+  .history-card:hover { border-color: var(--muted); }
+  .history-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .history-date { font-size: 12px; color: var(--muted); }
+  .history-profit { font-size: 18px; font-weight: 700; }
+  .history-profit.profit { color: var(--accent); }
+  .history-profit.loss { color: var(--red); }
+  .history-pct { font-size: 12px; padding: 2px 10px; border-radius: 6px; font-weight: 600; margin-right: 8px; }
+  .history-pct.profit { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .history-pct.loss { background: rgba(255,77,109,0.12); color: var(--red); }
+  .history-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .history-meta-item { font-size: 12px; color: var(--muted); }
+  .history-meta-item strong { color: var(--text); }
+  .history-symbols { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .symbol-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 600; color: var(--accent2); }
+  .delete-btn { position: absolute; top: 12px; left: 12px; background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.2s; line-height: 1; }
+  .delete-btn:hover { color: var(--red); background: rgba(255,77,109,0.1); }
+  .history-loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .overview-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
 
-  .raw-analysis summary { cursor: pointer; color: var(--muted); font-size: 13px; user-select: none; }
-  .raw-analysis p { margin-top: 14px; font-size: 13px; color: var(--muted); line-height: 1.8; white-space: pre-wrap; }
-
-  .error-box {
-    background: rgba(255,77,109,0.08);
-    border: 1px solid rgba(255,77,109,0.2);
-    border-radius: 14px;
-    padding: 20px;
-    color: var(--red);
-    font-size: 14px;
-    text-align: center;
-    display: none;
-    margin-bottom: 16px;
+  /* login required message in history */
+  .login-required { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .login-required div { font-size: 48px; margin-bottom: 16px; }
+  .login-required p { font-size: 14px; margin-bottom: 20px; }
+  .login-required button {
+    background: white; color: #111; border: none; border-radius: 12px;
+    padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: inherit; display: inline-flex; align-items: center; gap: 10px;
+    transition: all 0.2s;
   }
+  .login-required button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .login-required button svg { width: 18px; }
 
   @media (max-width: 600px) {
     .trade-row { grid-template-columns: 1fr 1fr; }
+    .user-name { display: none; }
   }
 </style>
 </head>
 <body>
 <div class="wrapper">
 
-  <header>
-    <div class="logo-badge">محلل الصفقات الذكي</div>
-    <h1>📊 حلل صفقتك في ثانية</h1>
-    <p class="subtitle">ارفع صورة من منصة التداول — سنحسب الربح والخسارة تلقائياً</p>
-  </header>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">📊 محلل الصفقات</div>
+    <div class="topbar-right">
+      <!-- Theme toggle -->
+      <button class="theme-btn" id="themeBtn" title="تبديل الوضع">🌙</button>
 
-  <div class="upload-zone" id="uploadZone">
-    <div class="upload-icon">📷</div>
-    <h3>ارفع صورة المنصة</h3>
-    <p>اسحب الصورة هنا أو اضغط للاختيار</p>
-    <input type="file" id="fileInput" accept="image/*">
+      <!-- Guest state -->
+      <div id="guestControls">
+        <button class="login-topbar-btn" id="loginTopbarBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          تسجيل الدخول
+        </button>
+      </div>
+
+      <!-- Logged in state -->
+      <div id="userControls" style="display:none; align-items:center; gap:8px;">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span class="user-name" id="userName"></span>
+        <button class="signout-btn" id="signoutBtn">خروج</button>
+      </div>
+    </div>
   </div>
 
-  <div id="previewContainer">
-    <img id="previewImg" src="" alt="Preview">
-    <button class="clear-btn" id="clearBtn">✕ إزالة</button>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabAnalyze" onclick="switchTab('analyze')">🔍 تحليل جديد</button>
+    <button class="tab-btn" id="tabHistory" onclick="switchTab('history')">📋 السجل</button>
   </div>
 
-  <button class="analyze-btn" id="analyzeBtn" disabled>
-    <span>🔍</span> تحليل الصورة واحتساب الأرباح
-  </button>
+  <!-- ── ANALYZE TAB ── -->
+  <div id="analyzeTab">
+    <div class="hero">
+      <div class="logo-badge">محلل ذكي</div>
+      <h1>حلل صفقتك في ثانية</h1>
+      <p>ارفع صورة من منصة التداول — سنحسب الربح والخسارة تلقائياً</p>
+    </div>
 
-  <div class="error-box" id="errorBox"></div>
+    <!-- hint for guests -->
+    <div class="login-hint" id="loginHint" style="display:none;">
+      💡 سجّل دخولك لحفظ سجل صفقاتك تلقائياً
+      <button onclick="doLogin()">تسجيل الدخول</button>
+    </div>
 
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p>جاري قراءة الصفقات وحساب النتائج...</p>
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📷</div>
+      <h3>ارفع صورة المنصة</h3>
+      <p>اسحب الصورة هنا أو اضغط للاختيار</p>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div id="previewContainer">
+      <img id="previewImg" src="" alt="Preview">
+      <button class="clear-btn" id="clearBtn">✕ إزالة</button>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" disabled>
+      <span>🔍</span> تحليل الصورة واحتساب الأرباح
+    </button>
+
+    <div class="error-box" id="errorBox"></div>
+    <div class="save-notice" id="saveNotice">✅ تم حفظ الصفقة في سجلك</div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>جاري قراءة الصفقات وحساب النتائج...</p>
+    </div>
+
+    <div id="results">
+      <div class="results-header">
+        <div class="results-title">نتائج التحليل</div>
+        <button class="reset-btn" id="resetBtn">↩ تحليل جديد</button>
+      </div>
+      <div class="summary-card" id="summaryCard">
+        <div class="summary-label">إجمالي الربح / الخسارة</div>
+        <div class="summary-amount" id="summaryAmount">—</div>
+        <div class="summary-pct" id="summaryPct">—</div>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="trades-section">
+        <div class="trades-section-header">تفاصيل الصفقات</div>
+        <div id="tradesBody"></div>
+      </div>
+    </div>
   </div>
 
-  <div id="results">
-    <div class="results-header">
-      <div class="results-title">نتائج التحليل</div>
-      <button class="reset-btn" id="resetBtn">↩ تحليل صورة جديدة</button>
+  <!-- ── HISTORY TAB ── -->
+  <div id="historyTab">
+    <!-- if not logged in -->
+    <div id="historyLoginRequired" style="display:none;">
+      <div class="login-required">
+        <div>🔐</div>
+        <p>سجّل دخولك لعرض سجل صفقاتك</p>
+        <button onclick="doLogin()">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          تسجيل الدخول بـ Google
+        </button>
+      </div>
     </div>
-
-    <div class="summary-card" id="summaryCard">
-      <div class="summary-label">إجمالي الربح / الخسارة</div>
-      <div class="summary-amount" id="summaryAmount">—</div>
-      <div class="summary-pct" id="summaryPct">—</div>
+    <!-- if logged in -->
+    <div id="historyContent" style="display:none;">
+      <div class="history-header">
+        <div class="history-title">سجل الصفقات</div>
+        <span class="history-count" id="historyCount">0 صفقة</span>
+      </div>
+      <div class="overview-grid" id="overviewGrid"></div>
+      <div id="historyList"><div class="history-loading">جاري التحميل...</div></div>
     </div>
-
-    <div class="stats-grid" id="statsGrid"></div>
-
-    <div class="trades-section">
-      <div class="trades-section-header">تفاصيل الصفقات</div>
-      <div id="tradesBody"></div>
-    </div>
-
-    <details class="raw-analysis">
-      <summary>عرض تحليل النموذج الخام</summary>
-      <p id="rawText"></p>
-    </details>
   </div>
 
 </div>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDi9aDbuhUT7uO4jN60B5TrcIh2bo0Qu0w",
+  authDomain: "awaed-profits.firebaseapp.com",
+  projectId: "awaed-profits",
+  storageBucket: "awaed-profits.firebasestorage.app",
+  messagingSenderId: "1063357554987",
+  appId: "1:1063357554987:web:8bb9f0a297f00d5f8f656e"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+let lastResult = null;
+
+// ── Theme ──
+const themeBtn = document.getElementById('themeBtn');
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'light') { document.body.classList.add('light'); themeBtn.textContent = '☀️'; }
+
+themeBtn.addEventListener('click', () => {
+  const isLight = document.body.classList.toggle('light');
+  themeBtn.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
+
+// ── Auth ──
+window.doLogin = function() {
+  signInWithPopup(auth, provider).catch(e => alert('فشل تسجيل الدخول: ' + e.message));
+};
+
+document.getElementById('loginTopbarBtn').addEventListener('click', () => window.doLogin());
+document.getElementById('signoutBtn').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('guestControls').style.display = 'none';
+    document.getElementById('userControls').style.display = 'flex';
+    document.getElementById('userAvatar').src = user.photoURL || '';
+    document.getElementById('userName').textContent = user.displayName || user.email;
+    document.getElementById('loginHint').style.display = 'none';
+  } else {
+    document.getElementById('guestControls').style.display = 'flex';
+    document.getElementById('userControls').style.display = 'none';
+    document.getElementById('loginHint').style.display = 'flex';
+  }
+  // refresh history tab if open
+  const histTab = document.getElementById('historyTab');
+  if (histTab.style.display !== 'none') renderHistoryTab();
+});
+
+// ── Tabs ──
+window.switchTab = function(tab) {
+  document.getElementById('analyzeTab').style.display = tab === 'analyze' ? 'block' : 'none';
+  document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('tabAnalyze').classList.toggle('active', tab === 'analyze');
+  document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
+  if (tab === 'history') renderHistoryTab();
+};
+
+function renderHistoryTab() {
+  if (currentUser) {
+    document.getElementById('historyLoginRequired').style.display = 'none';
+    document.getElementById('historyContent').style.display = 'block';
+    loadHistory();
+  } else {
+    document.getElementById('historyLoginRequired').style.display = 'block';
+    document.getElementById('historyContent').style.display = 'none';
+  }
+}
+
+// ── Upload ──
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
 const previewContainer = document.getElementById('previewContainer');
@@ -460,16 +477,15 @@ const loadingEl = document.getElementById('loading');
 const resultsEl = document.getElementById('results');
 const errorBox = document.getElementById('errorBox');
 const resetBtn = document.getElementById('resetBtn');
+const saveNotice = document.getElementById('saveNotice');
 
-let imageBase64 = null;
-let imageMime = 'image/png';
+let imageBase64 = null, imageMime = 'image/png';
 
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
 uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) loadFile(file);
 });
@@ -481,72 +497,51 @@ function loadFile(file) {
   imageMime = file.type || 'image/png';
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    imageBase64 = dataUrl.split(',')[1];
-    previewImg.src = dataUrl;
+    imageBase64 = e.target.result.split(',')[1];
+    previewImg.src = e.target.result;
     uploadZone.style.display = 'none';
     previewContainer.style.display = 'block';
     analyzeBtn.disabled = false;
     errorBox.style.display = 'none';
     resultsEl.style.display = 'none';
+    saveNotice.style.display = 'none';
   };
   reader.readAsDataURL(file);
 }
 
 function resetUpload() {
-  imageBase64 = null;
-  previewImg.src = '';
-  fileInput.value = '';
-  uploadZone.style.display = 'block';
-  previewContainer.style.display = 'none';
-  analyzeBtn.disabled = true;
-  errorBox.style.display = 'none';
-  resultsEl.style.display = 'none';
+  imageBase64 = null; previewImg.src = ''; fileInput.value = '';
+  uploadZone.style.display = 'block'; previewContainer.style.display = 'none';
+  analyzeBtn.disabled = true; errorBox.style.display = 'none';
+  resultsEl.style.display = 'none'; saveNotice.style.display = 'none';
 }
+function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
 
-function fullReset() {
-  resetUpload();
-  loadingEl.style.display = 'none';
-}
-
+// ── Analyze ──
 analyzeBtn.addEventListener('click', analyze);
 
 async function analyze() {
   if (!imageBase64) return;
-  errorBox.style.display = 'none';
-  resultsEl.style.display = 'none';
-  loadingEl.style.display = 'block';
+  errorBox.style.display = 'none'; resultsEl.style.display = 'none';
+  saveNotice.style.display = 'none'; loadingEl.style.display = 'block';
   analyzeBtn.disabled = true;
-
   try {
-    // ✅ يستدعي الـ backend الآمن بدل Anthropic مباشرة
     const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64, imageMime })
     });
-
     const data = await response.json();
     if (data.error) throw new Error(data.error);
-
-    const rawText = data.rawText || '';
-
     let parsed;
-    try {
-      const clean = rawText.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch {
-      throw new Error('تعذّر قراءة البيانات. تأكد أن الصورة تحتوي على صفقات واضحة.');
-    }
-
+    try { parsed = JSON.parse((data.rawText || '').replace(/```json|```/g, '').trim()); }
+    catch { throw new Error('تعذّر قراءة البيانات. تأكد أن الصورة واضحة.'); }
     loadingEl.style.display = 'none';
-    renderResults(parsed, rawText);
-
+    lastResult = renderResults(parsed);
+    if (currentUser) await saveToHistory(lastResult);
   } catch (err) {
-    loadingEl.style.display = 'none';
-    analyzeBtn.disabled = false;
+    loadingEl.style.display = 'none'; analyzeBtn.disabled = false;
     errorBox.style.display = 'block';
-    errorBox.textContent = '⚠️ ' + (err.message || 'حدث خطأ أثناء التحليل');
+    errorBox.textContent = '⚠️ ' + (err.message || 'حدث خطأ');
   }
 }
 
@@ -554,9 +549,8 @@ function fmt(num) {
   return Number(num).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function renderResults(data, rawText) {
+function renderResults(data) {
   const trades = data.trades || [];
-
   const grouped = {};
   trades.forEach(t => {
     const key = (t.symbol || 'unknown').toUpperCase();
@@ -565,107 +559,144 @@ function renderResults(data, rawText) {
     else if (t.type === 'sell') grouped[key].sells.push(t);
     if (t.name) grouped[key].name = t.name;
   });
-
-  let totalProfit = 0;
-  let totalInvested = 0;
+  let totalProfit = 0, totalInvested = 0;
   const rows = [];
-
   Object.entries(grouped).forEach(([sym, g]) => {
-    const buyTotal = g.buys.reduce((s, t) => s + (parseFloat(t.total) || 0), 0);
-    const sellTotal = g.sells.reduce((s, t) => s + (parseFloat(t.total) || 0), 0);
-    const buyShares = g.buys.reduce((s, t) => s + (parseFloat(t.shares) || 0), 0);
-    const sellShares = g.sells.reduce((s, t) => s + (parseFloat(t.shares) || 0), 0);
-
-    if (buyTotal > 0 && sellTotal > 0) {
-      const profit = sellTotal - buyTotal;
-      const pct = (profit / buyTotal) * 100;
-      totalProfit += profit;
-      totalInvested += buyTotal;
-      rows.push({ sym, name: g.name, shares: buyShares, buyTotal, sellTotal, profit, pct });
-    } else if (buyTotal > 0) {
-      totalInvested += buyTotal;
-      rows.push({ sym, name: g.name, shares: buyShares, buyTotal, sellTotal: null, profit: null, pct: null });
+    const buyTotal = g.buys.reduce((s,t)=>s+(parseFloat(t.total)||0),0);
+    const sellTotal = g.sells.reduce((s,t)=>s+(parseFloat(t.total)||0),0);
+    const buyShares = g.buys.reduce((s,t)=>s+(parseFloat(t.shares)||0),0);
+    const sellShares = g.sells.reduce((s,t)=>s+(parseFloat(t.shares)||0),0);
+    if (buyTotal>0&&sellTotal>0) {
+      const profit=sellTotal-buyTotal, pct=(profit/buyTotal)*100;
+      totalProfit+=profit; totalInvested+=buyTotal;
+      rows.push({sym,name:g.name,shares:buyShares,buyTotal,sellTotal,profit,pct});
+    } else if (buyTotal>0) {
+      totalInvested+=buyTotal;
+      rows.push({sym,name:g.name,shares:buyShares,buyTotal,sellTotal:null,profit:null,pct:null});
     } else {
-      rows.push({ sym, name: g.name, shares: sellShares, buyTotal: null, sellTotal, profit: null, pct: null });
+      rows.push({sym,name:g.name,shares:sellShares,buyTotal:null,sellTotal,profit:null,pct:null});
     }
   });
 
-  const isProfit = totalProfit >= 0;
-  const summaryCard = document.getElementById('summaryCard');
-  const summaryAmount = document.getElementById('summaryAmount');
-  const summaryPct = document.getElementById('summaryPct');
-  summaryCard.className = 'summary-card ' + (isProfit ? 'profit' : 'loss');
-  summaryAmount.className = 'summary-amount ' + (isProfit ? 'profit' : 'loss');
-  summaryAmount.textContent = (isProfit ? '+' : '') + fmt(totalProfit) + ' ﷼';
-  summaryPct.className = 'summary-pct ' + (isProfit ? 'profit' : 'loss');
-  const overallPct = totalInvested > 0 ? (totalProfit / totalInvested * 100) : 0;
-  summaryPct.textContent = (isProfit ? '▲ ' : '▼ ') + Math.abs(overallPct).toFixed(2) + '%';
+  const isProfit=totalProfit>=0;
+  const overallPct=totalInvested>0?(totalProfit/totalInvested*100):0;
+  document.getElementById('summaryCard').className='summary-card '+(isProfit?'profit':'loss');
+  const sa=document.getElementById('summaryAmount');
+  sa.className='summary-amount '+(isProfit?'profit':'loss');
+  sa.textContent=(isProfit?'+':'')+fmt(totalProfit)+' ﷼';
+  const sp=document.getElementById('summaryPct');
+  sp.className='summary-pct '+(isProfit?'profit':'loss');
+  sp.textContent=(isProfit?'▲ ':'▼ ')+Math.abs(overallPct).toFixed(2)+'%';
 
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">رأس المال</div>
-      <div class="stat-value gold">${fmt(totalInvested)} ﷼</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">عدد الصفقات</div>
-      <div class="stat-value">${trades.length}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">نسبة العائد</div>
-      <div class="stat-value ${isProfit ? 'green' : 'red'}">${overallPct >= 0 ? '+' : ''}${overallPct.toFixed(2)}%</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">الأسهم المتداولة</div>
-      <div class="stat-value">${Object.keys(grouped).length}</div>
-    </div>
-  `;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">رأس المال</div><div class="stat-value gold">${fmt(totalInvested)} ﷼</div></div>
+    <div class="stat-card"><div class="stat-label">عدد الصفقات</div><div class="stat-value">${trades.length}</div></div>
+    <div class="stat-card"><div class="stat-label">نسبة العائد</div><div class="stat-value ${isProfit?'green':'red'}">${overallPct>=0?'+':''}${overallPct.toFixed(2)}%</div></div>
+    <div class="stat-card"><div class="stat-label">الأسهم</div><div class="stat-value">${Object.keys(grouped).length}</div></div>`;
 
-  document.getElementById('tradesBody').innerHTML = rows.map(r => {
-    const profitHtml = r.profit !== null
-      ? `<div>
-           <div class="col-label">الربح / الخسارة</div>
-           <div class="col-value">
-             <span class="badge ${r.profit >= 0 ? 'profit' : 'loss'}">
-               ${r.profit >= 0 ? '+' : ''}${fmt(r.profit)} ﷼
-             </span>
-           </div>
-         </div>
-         <div>
-           <div class="col-label">النسبة</div>
-           <div class="col-value" style="color:${r.pct >= 0 ? 'var(--accent)' : 'var(--red)'}">
-             ${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}%
-           </div>
-         </div>`
-      : `<div>
-           <div class="col-label">الحالة</div>
-           <div class="col-value"><span class="badge buy">مفتوحة</span></div>
-         </div><div></div>`;
-
-    return `
-      <div class="trade-row">
-        <div>
-          <div class="col-label">الرمز</div>
-          <div class="col-value">${r.sym}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.name}</div>
-        </div>
-        <div>
-          <div class="col-label">تكلفة الشراء</div>
-          <div class="col-value">${r.buyTotal !== null ? fmt(r.buyTotal) + ' ﷼' : '—'}</div>
-        </div>
-        <div>
-          <div class="col-label">عائد البيع</div>
-          <div class="col-value">${r.sellTotal !== null ? fmt(r.sellTotal) + ' ﷼' : '—'}</div>
-        </div>
-        ${profitHtml}
-      </div>
-    `;
+  document.getElementById('tradesBody').innerHTML=rows.map(r=>{
+    const ph=r.profit!==null
+      ?`<div><div class="col-label">الربح/الخسارة</div><div class="col-value"><span class="badge ${r.profit>=0?'profit':'loss'}">${r.profit>=0?'+':''}${fmt(r.profit)} ﷼</span></div></div>
+        <div><div class="col-label">النسبة</div><div class="col-value" style="color:${r.pct>=0?'var(--accent)':'var(--red)'}">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div></div>`
+      :`<div><div class="col-label">الحالة</div><div class="col-value"><span class="badge buy">مفتوحة</span></div></div><div></div>`;
+    return `<div class="trade-row">
+      <div><div class="col-label">الرمز</div><div class="col-value">${r.sym}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${r.name}</div></div>
+      <div><div class="col-label">تكلفة الشراء</div><div class="col-value">${r.buyTotal!==null?fmt(r.buyTotal)+' ﷼':'—'}</div></div>
+      <div><div class="col-label">عائد البيع</div><div class="col-value">${r.sellTotal!==null?fmt(r.sellTotal)+' ﷼':'—'}</div></div>
+      ${ph}</div>`;
   }).join('');
 
-  document.getElementById('rawText').textContent = rawText;
-  resultsEl.style.display = 'block';
-  analyzeBtn.disabled = false;
-  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  resultsEl.style.display='block'; analyzeBtn.disabled=false;
+  resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+  return {trades,rows,totalProfit,totalInvested,overallPct,symbols:Object.keys(grouped)};
 }
+
+// ── Save ──
+async function saveToHistory(result) {
+  if (!currentUser||!result) return;
+  try {
+    await addDoc(collection(db,'users',currentUser.uid,'history'),{
+      timestamp:serverTimestamp(),
+      totalProfit:result.totalProfit, totalInvested:result.totalInvested,
+      overallPct:result.overallPct, tradesCount:result.trades.length,
+      symbols:result.symbols,
+      rows:result.rows.map(r=>({sym:r.sym,name:r.name,buyTotal:r.buyTotal,sellTotal:r.sellTotal,profit:r.profit,pct:r.pct,shares:r.shares}))
+    });
+    saveNotice.style.display='block';
+    setTimeout(()=>saveNotice.style.display='none',3000);
+  } catch(e){console.error('Save error:',e);}
+}
+
+// ── History ──
+async function loadHistory() {
+  if (!currentUser) return;
+  const listEl=document.getElementById('historyList');
+  listEl.innerHTML='<div class="history-loading">جاري التحميل...</div>';
+  try {
+    const q=query(collection(db,'users',currentUser.uid,'history'),orderBy('timestamp','desc'));
+    const snap=await getDocs(q);
+    const docs=snap.docs;
+    document.getElementById('historyCount').textContent=docs.length+' صفقة';
+    let totalProfitAll=0,totalInvestedAll=0,wins=0;
+    docs.forEach(d=>{
+      const dd=d.data();
+      totalProfitAll+=dd.totalProfit||0;
+      totalInvestedAll+=dd.totalInvested||0;
+      if((dd.totalProfit||0)>0) wins++;
+    });
+    const winRate=docs.length>0?(wins/docs.length*100):0;
+    const overallReturn=totalInvestedAll>0?(totalProfitAll/totalInvestedAll*100):0;
+    const isOv=totalProfitAll>=0;
+    document.getElementById('overviewGrid').innerHTML=docs.length===0?'': `
+      <div class="overview-card"><div class="stat-label">إجمالي الأرباح</div><div class="stat-value ${isOv?'green':'red'}">${isOv?'+':''}${fmt(totalProfitAll)} ﷼</div></div>
+      <div class="overview-card"><div class="stat-label">إجمالي الاستثمار</div><div class="stat-value gold">${fmt(totalInvestedAll)} ﷼</div></div>
+      <div class="overview-card"><div class="stat-label">نسبة العائد الكلي</div><div class="stat-value ${isOv?'green':'red'}">${overallReturn>=0?'+':''}${overallReturn.toFixed(2)}%</div></div>
+      <div class="overview-card"><div class="stat-label">نسبة الفوز</div><div class="stat-value">${winRate.toFixed(0)}%</div></div>`;
+    if(docs.length===0){listEl.innerHTML='<div class="history-empty"><div>📭</div><p>لا يوجد سجل بعد — حلل صفقتك الأولى!</p></div>';return;}
+    listEl.innerHTML=docs.map(d=>{
+      const dd=d.data();
+      const isP=(dd.totalProfit||0)>=0;
+      const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString('ar-SA'):'—';
+      const symbols=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
+      return `<div class="history-card" onclick="expandHistory('${d.id}')">
+        <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">🗑</button>
+        <div class="history-card-top">
+          <div class="history-date">🕐 ${date}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="history-pct ${isP?'profit':'loss'}">${dd.overallPct>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>
+            <span class="history-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ﷼</span>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="history-meta-item">رأس المال: <strong>${fmt(dd.totalInvested||0)} ﷼</strong></div>
+          <div class="history-meta-item">الصفقات: <strong>${dd.tradesCount||0}</strong></div>
+        </div>
+        <div class="history-symbols">${symbols}</div>
+        <div id="detail-${d.id}" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+          ${(dd.rows||[]).map(r=>r.profit!==null?`
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+              <div><div style="font-weight:700;font-size:14px">${r.sym}</div><div style="font-size:11px;color:var(--muted)">${r.name}</div></div>
+              <div style="text-align:left">
+                <div style="font-size:13px;color:${r.profit>=0?'var(--accent)':'var(--red)'};font-weight:700">${r.profit>=0?'+':''}${fmt(r.profit)} ﷼</div>
+                <div style="font-size:11px;color:var(--muted)">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div>
+              </div>
+            </div>`:'').join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){listEl.innerHTML='<div class="history-loading">خطأ: '+e.message+'</div>';}
+}
+
+window.expandHistory=function(id){
+  const d=document.getElementById('detail-'+id);
+  if(d) d.style.display=d.style.display==='none'?'block':'none';
+};
+window.deleteHistory=async function(id,e){
+  e.stopPropagation();
+  if(!confirm('تأكيد الحذف؟')) return;
+  await deleteDoc(doc(db,'users',currentUser.uid,'history',id));
+  loadHistory();
+};
 </script>
 </body>
 </html>

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>محلل الصفقات</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.moyasar.com/mpf/1.7.3/moyasar.js"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.7.3/moyasar.css">
+<script src="https://cdn.moyasar.com/mpf/1.7.3/moyasar.js"></script>
 <style>
   :root {
     --bg:#0a0a0f;--card:#111118;--card2:#16161f;--border:#1e1e2e;
@@ -381,6 +381,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+// ── Handle payment callback redirect ──
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('status') === 'paid' && urlParams.get('plan')) {
+  window._pendingPlanActivation = urlParams.get('plan');
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyDi9aDbuhUT7uO4jN60B5TrcIh2bo0Qu0w",
   authDomain: "awaed-profits.firebaseapp.com",
@@ -430,6 +437,11 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('loginHint').style.display = 'none';
     await loadUserPlan();
     updatePlanUI();
+    // Auto activate if coming from payment redirect
+    if (window._pendingPlanActivation) {
+      await activatePlan(window._pendingPlanActivation, 'redirect');
+      window._pendingPlanActivation = null;
+    }
   } else {
     document.getElementById('guestControls').style.display = 'flex';
     document.getElementById('userControls').style.display = 'none';
@@ -506,24 +518,26 @@ window.openPayment = function(plan) {
     <div class="price-tag">${p.price} ريال/شهر</div>`;
 
   document.getElementById('paymentModal').classList.add('open');
-  document.getElementById('moyasarForm').innerHTML = '';
+  // Init Moyasar — inject div first then init
+  document.getElementById('moyasarForm').innerHTML = '<div class="mysr-form"></div>';
 
-  // Init Moyasar
-  Moyasar.init({
-    element: '#moyasarForm',
-    amount: p.price * 100, // halalas
-    currency: 'SAR',
-    description: `Awaed Profits - ${p.label}`,
-    publishable_api_key: 'pk_live_4A8FpY9CP5KgaWsAMwrQbysJ6swM1vUKpY5EYwam',
-    callback_url: window.location.href,
-    methods: ['creditcard', 'stcpay'],
-    on_completed: async function(payment) {
-      if (payment.status === 'paid') {
-        await activatePlan(plan, payment.id);
-        closePayment();
+  setTimeout(() => {
+    Moyasar.init({
+      element: '.mysr-form',
+      amount: p.price * 100,
+      currency: 'SAR',
+      description: `Awaed Profits - ${p.label}`,
+      publishable_api_key: 'pk_live_4A8FpY9CP5KgaWsAMwrQbysJ6swM1vUKpY5EYwam',
+      callback_url: window.location.origin + window.location.pathname + '?plan=' + plan + '&status=paid',
+      methods: ['creditcard', 'stcpay'],
+      on_completed: async function(payment) {
+        if (payment.status === 'paid') {
+          await activatePlan(plan, payment.id);
+          closePayment();
+        }
       }
-    }
-  });
+    });
+  }, 100);
 };
 
 window.closePayment = function() {

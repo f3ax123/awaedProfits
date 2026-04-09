@@ -785,13 +785,28 @@ async function loadUserPlan() {
       const d = snap.data();
       userPlan = d.plan || 'free';
       if (d.usageMonth !== mk) {
+        // Reset monthly usage — keep plan intact
         usageCount = 0;
-        await setDoc(doc(db,'users',currentUser.uid), {...d, usageCount:0, usageMonth:mk}, {merge:true});
-      } else usageCount = d.usageCount || 0;
+        await setDoc(doc(db, 'users', currentUser.uid),
+          { usageCount: 0, usageMonth: mk },
+          { merge: true });
+      } else {
+        usageCount = d.usageCount || 0;
+      }
     } else {
-      await setDoc(doc(db,'users',currentUser.uid), {plan:'free', usageCount:0, usageMonth:mk});
+      // First time: create document with all required fields
+      userPlan = 'free';
+      usageCount = 0;
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        plan: 'free',
+        usageCount: 0,
+        usageMonth: mk,
+        email: currentUser.email || '',
+        displayName: currentUser.displayName || '',
+        createdAt: serverTimestamp()
+      });
     }
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('loadUserPlan error:', e); }
 }
 
 function updatePlanUI() {
@@ -911,23 +926,20 @@ async function analyze() {
     loadingEl.style.display = 'none';
     lastResult = renderResults(parsed);
 
-    // FIX: Update usage count for logged-in users after successful analysis
+    // Save usage count — always include plan so reload doesn't lose it
     if (currentUser) {
       usageCount++;
       const now = new Date();
       await setDoc(doc(db, 'users', currentUser.uid),
-        { usageCount, usageMonth: `${now.getFullYear()}-${now.getMonth()}` },
+        { plan: userPlan, usageCount, usageMonth: `${now.getFullYear()}-${now.getMonth()}` },
         { merge: true });
       updatePlanUI();
-      // FIX: Always show save button for logged-in users
       saveResultBtn.style.display = 'flex';
       saveResultBtn.textContent = t('save');
       saveResultBtn.className = 'save-result-btn';
       saveResultBtn.disabled = false;
       lastResultSaved = false;
-    }
-    // FIX: For guests (not logged in), show save button that triggers login
-    else {
+    } else {
       saveResultBtn.style.display = 'flex';
       saveResultBtn.textContent = t('save');
       saveResultBtn.className = 'save-result-btn';
@@ -944,14 +956,19 @@ async function analyze() {
 window.saveCurrentResult = async function() {
   if (!currentUser) { window.doLogin(); return; }
   if (!lastResult || lastResultSaved) return;
-  saveResultBtn.disabled = true; saveResultBtn.textContent = t('saving');
+  saveResultBtn.disabled = true;
+  saveResultBtn.textContent = t('saving');
   try {
     await saveToHistory(lastResult);
     lastResultSaved = true;
     saveResultBtn.textContent = t('saved');
     saveResultBtn.className = 'save-result-btn saved';
+    // Refresh account/history if open
+    if (currentPage === 'account') renderAccountPage();
+    if (currentPage === 'history') loadHistory();
   } catch(e) {
-    saveResultBtn.disabled = false; saveResultBtn.textContent = t('save');
+    saveResultBtn.disabled = false;
+    saveResultBtn.textContent = t('save');
     alert(t('save_error') + e.message);
   }
 };
@@ -959,20 +976,20 @@ window.saveCurrentResult = async function() {
 function renderResults(data) {
   const trades = data.trades || [];
   const grouped = {};
-  trades.forEach(t => {
-    const k = (t.symbol || '?').toUpperCase();
-    if (!grouped[k]) grouped[k] = { buys:[], sells:[], name: t.name || k };
-    if (t.type === 'buy') grouped[k].buys.push(t);
-    else if (t.type === 'sell') grouped[k].sells.push(t);
-    if (t.name) grouped[k].name = t.name;
+  trades.forEach(trade => {
+    const k = (trade.symbol || '?').toUpperCase();
+    if (!grouped[k]) grouped[k] = { buys:[], sells:[], name: trade.name || k };
+    if (trade.type === 'buy') grouped[k].buys.push(trade);
+    else if (trade.type === 'sell') grouped[k].sells.push(trade);
+    if (trade.name) grouped[k].name = trade.name;
   });
 
   let tp = 0, ti = 0;
   const rows = [];
   Object.entries(grouped).forEach(([sym, g]) => {
-    const bt = g.buys.reduce((s, t) => s + (parseFloat(t.total)||0), 0);
-    const st = g.sells.reduce((s, t) => s + (parseFloat(t.total)||0), 0);
-    const bs = g.buys.reduce((s, t) => s + (parseFloat(t.shares)||0), 0);
+    const bt = g.buys.reduce((s, tr) => s + (parseFloat(tr.total)||0), 0);
+    const st = g.sells.reduce((s, tr) => s + (parseFloat(tr.total)||0), 0);
+    const bs = g.buys.reduce((s, tr) => s + (parseFloat(tr.shares)||0), 0);
     if (bt > 0 && st > 0) {
       const p = st - bt, pct = (p/bt)*100;
       tp += p; ti += bt;
@@ -1019,16 +1036,22 @@ function renderResults(data) {
 
 async function saveToHistory(result) {
   if (!currentUser || !result) return;
+  const now = new Date();
   await addDoc(collection(db, 'users', currentUser.uid, 'history'), {
     timestamp: serverTimestamp(),
-    totalProfit: result.totalProfit,
-    totalInvested: result.totalInvested,
-    overallPct: result.overallPct,
-    tradesCount: result.trades.length,
-    symbols: result.symbols,
-    rows: result.rows.map(r => ({
-      sym: r.sym, name: r.name, buyTotal: r.buyTotal, sellTotal: r.sellTotal,
-      profit: r.profit, pct: r.pct, shares: r.shares
+    totalProfit: Number(result.totalProfit) || 0,
+    totalInvested: Number(result.totalInvested) || 0,
+    overallPct: Number(result.overallPct) || 0,
+    tradesCount: result.trades ? result.trades.length : 0,
+    symbols: result.symbols || [],
+    rows: (result.rows || []).map(r => ({
+      sym: r.sym || '',
+      name: r.name || '',
+      buyTotal: r.buyTotal !== null ? Number(r.buyTotal) : null,
+      sellTotal: r.sellTotal !== null ? Number(r.sellTotal) : null,
+      profit: r.profit !== null ? Number(r.profit) : null,
+      pct: r.pct !== null ? Number(r.pct) : null,
+      shares: Number(r.shares) || 0
     }))
   });
 }
@@ -1259,8 +1282,13 @@ async function activatePlan(plan, paymentId) {
   if (!currentUser) return;
   const now = new Date();
   await setDoc(doc(db, 'users', currentUser.uid), {
-    plan, paymentId, planActivatedAt: serverTimestamp(),
-    usageCount: 0, usageMonth: `${now.getFullYear()}-${now.getMonth()}`
+    plan,
+    paymentId,
+    planActivatedAt: serverTimestamp(),
+    usageCount: 0,
+    usageMonth: `${now.getFullYear()}-${now.getMonth()}`,
+    email: currentUser.email || '',
+    displayName: currentUser.displayName || ''
   }, { merge: true });
   userPlan = plan; usageCount = 0; updatePlanUI();
   alert(t('plan_activated') + ' ' + planLabel(plan) + '!');

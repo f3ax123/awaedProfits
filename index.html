@@ -399,6 +399,11 @@
       <span class="i18n" data-key="analyze_btn">📊 تحليل الصورة واحتساب الأرباح</span>
     </button>
 
+    <!-- Save button — shown after analysis, above results -->
+    <button id="saveResultBtn" style="display:none; width:100%; padding:14px; background:var(--green); border:none; border-radius:14px; color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:16px; transition:all .3s;" onclick="saveCurrentResult()">
+      💾 حفظ في السجل
+    </button>
+
     <div class="error-box" id="errorBox"></div>
     <div class="loading" id="loading"><div class="spinner"></div><p class="i18n" data-key="analyzing">جاري قراءة الصفقات...</p></div>
 
@@ -406,8 +411,7 @@
       <div class="results-header">
         <div class="results-title i18n" data-key="results_title">نتائج التحليل</div>
         <div class="results-actions">
-          <button class="save-result-btn" id="saveResultBtn" style="display:none;" onclick="saveCurrentResult()">حفظ</button>
-          <button class="reset-btn" id="resetBtn" class="i18n" data-key="new_analysis">تحليل جديد</button>
+          <button class="reset-btn" id="resetBtn">تحليل جديد</button>
         </div>
       </div>
       <div class="summary-card" id="summaryCard">
@@ -663,7 +667,9 @@ function applyLang() {
   const clearBtn = document.getElementById('clearBtn');
   if (clearBtn) clearBtn.textContent = t('remove');
   const saveBtn = document.getElementById('saveResultBtn');
-  if (saveBtn && !saveBtn.classList.contains('saved')) saveBtn.textContent = t('save');
+  if (saveBtn && !saveBtn.classList.contains('saved')) {
+    saveBtn.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
+  }
   updatePlanUI();
 }
 
@@ -877,7 +883,8 @@ function loadFile(file) {
     previewImg.src = e.target.result;
     uploadZone.style.display = 'none'; previewContainer.style.display = 'block';
     analyzeBtn.disabled = false; errorBox.style.display = 'none';
-    resultsEl.style.display = 'none'; saveResultBtn.style.display = 'none';
+    resultsEl.style.display = 'none';
+    document.getElementById('saveResultBtn').style.display = 'none';
     lastResult = null; lastResultSaved = false;
   };
   reader.readAsDataURL(file);
@@ -887,7 +894,9 @@ function resetUpload() {
   imageBase64 = null; previewImg.src = ''; fileInput.value = '';
   uploadZone.style.display = 'block'; previewContainer.style.display = 'none';
   analyzeBtn.disabled = true; errorBox.style.display = 'none';
-  resultsEl.style.display = 'none'; saveResultBtn.style.display = 'none';
+  resultsEl.style.display = 'none';
+  const sb = document.getElementById('saveResultBtn');
+  sb.style.display = 'none'; sb.disabled = false;
   lastResult = null; lastResultSaved = false;
 }
 function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
@@ -927,26 +936,28 @@ async function analyze() {
 
     loadingEl.style.display = 'none';
     lastResult = renderResults(parsed);
+    lastResultSaved = false;
 
-    // Save usage count — always include plan so reload doesn't lose it
+    // Show save button immediately
+    const sb = document.getElementById('saveResultBtn');
+    sb.style.display = 'block';
+    sb.style.background = 'var(--green)';
+    sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
+    sb.disabled = false;
+
+    // Update usage count for logged-in users
     if (currentUser) {
-      usageCount++;
-      const now = new Date();
-      await setDoc(doc(db, 'users', currentUser.uid),
-        { plan: userPlan, usageCount, usageMonth: `${now.getFullYear()}-${now.getMonth()}` },
-        { merge: true });
-      updatePlanUI();
-      saveResultBtn.style.display = 'flex';
-      saveResultBtn.textContent = t('save');
-      saveResultBtn.className = 'save-result-btn';
-      saveResultBtn.disabled = false;
-      lastResultSaved = false;
-    } else {
-      saveResultBtn.style.display = 'flex';
-      saveResultBtn.textContent = t('save');
-      saveResultBtn.className = 'save-result-btn';
-      saveResultBtn.disabled = false;
-      lastResultSaved = false;
+      try {
+        usageCount++;
+        const now = new Date();
+        await setDoc(doc(db, 'users', currentUser.uid),
+          { plan: userPlan, usageCount, usageMonth: `${now.getFullYear()}-${now.getMonth()}` },
+          { merge: true });
+        updatePlanUI();
+      } catch(dbErr) {
+        console.error('Usage update failed:', dbErr);
+        // Don't block the user — just log
+      }
     }
 
   } catch (err) {
@@ -958,19 +969,21 @@ async function analyze() {
 window.saveCurrentResult = async function() {
   if (!currentUser) { window.doLogin(); return; }
   if (!lastResult || lastResultSaved) return;
-  saveResultBtn.disabled = true;
-  saveResultBtn.textContent = t('saving');
+  const sb = document.getElementById('saveResultBtn');
+  sb.disabled = true;
+  sb.textContent = currentLang === 'en' ? '⏳ Saving...' : '⏳ جاري الحفظ...';
   try {
     await saveToHistory(lastResult);
     lastResultSaved = true;
-    _historyCache = null; // invalidate so next visit shows fresh data
-    saveResultBtn.textContent = t('saved');
-    saveResultBtn.className = 'save-result-btn saved';
+    sb.textContent = currentLang === 'en' ? '✓ Saved!' : '✓ تم الحفظ!';
+    sb.style.background = 'var(--muted)';
+    sb.disabled = true;
+    _historyCache = null;
     if (currentPage === 'account') renderAccountPage();
     if (currentPage === 'history') loadHistory(true);
   } catch(e) {
-    saveResultBtn.disabled = false;
-    saveResultBtn.textContent = t('save');
+    sb.disabled = false;
+    sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
     alert(t('save_error') + e.message);
   }
 };

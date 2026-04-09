@@ -406,9 +406,7 @@
       <div class="results-header">
         <div class="results-title i18n" data-key="results_title">نتائج التحليل</div>
         <div class="results-actions">
-          <button class="save-result-btn" id="saveResultBtn" style="display:none;" onclick="saveCurrentResult()">
-            <span class="i18n" data-key="save">حفظ</span>
-          </button>
+          <button class="save-result-btn" id="saveResultBtn" style="display:none;" onclick="saveCurrentResult()">حفظ</button>
           <button class="reset-btn" id="resetBtn" class="i18n" data-key="new_analysis">تحليل جديد</button>
         </div>
       </div>
@@ -664,6 +662,8 @@ function applyLang() {
   if (resetBtn) resetBtn.textContent = t('new_analysis');
   const clearBtn = document.getElementById('clearBtn');
   if (clearBtn) clearBtn.textContent = t('remove');
+  const saveBtn = document.getElementById('saveResultBtn');
+  if (saveBtn && !saveBtn.classList.contains('saved')) saveBtn.textContent = t('save');
   updatePlanUI();
 }
 
@@ -691,6 +691,7 @@ function planLabel(p) { return currentLang === 'en' ? PLANS[p].labelEn : PLANS[p
 let currentUser = null, userPlan = 'free', usageCount = 0;
 let lastResult = null, lastResultSaved = false;
 let currentPage = 'analyze';
+let _historyCache = null; // cache: {docs, html, overview} — cleared on save/delete
 
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('status') === 'paid' && urlParams.get('plan')) {
@@ -769,6 +770,7 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('drawerUserSection').style.display = 'none';
     document.getElementById('loginHint').style.display = 'flex';
     userPlan = 'free'; usageCount = 0;
+    _historyCache = null;
     updatePlanUI();
   }
   if (currentPage === 'account') renderAccountPage();
@@ -961,11 +963,11 @@ window.saveCurrentResult = async function() {
   try {
     await saveToHistory(lastResult);
     lastResultSaved = true;
+    _historyCache = null; // invalidate so next visit shows fresh data
     saveResultBtn.textContent = t('saved');
     saveResultBtn.className = 'save-result-btn saved';
-    // Refresh account/history if open
     if (currentPage === 'account') renderAccountPage();
-    if (currentPage === 'history') loadHistory();
+    if (currentPage === 'history') loadHistory(true);
   } catch(e) {
     saveResultBtn.disabled = false;
     saveResultBtn.textContent = t('save');
@@ -1160,15 +1162,30 @@ function renderHistoryPage() {
   }
 }
 
-async function loadHistory() {
+async function loadHistory(forceRefresh = false) {
   if (!currentUser) return;
   const listEl = document.getElementById('historyList');
-  listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
+
+  // Show cache instantly if available
+  if (_historyCache && !forceRefresh) {
+    document.getElementById('historyCount').textContent = _historyCache.count;
+    document.getElementById('overviewGrid').innerHTML = _historyCache.overview;
+    listEl.innerHTML = _historyCache.html;
+    return;
+  }
+
+  // Show skeleton only if no cache
+  if (!_historyCache) {
+    listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
+  }
+
   try {
     const q = query(collection(db, 'users', currentUser.uid, 'history'), orderBy('timestamp', 'desc'));
     const snap = await getDocs(q);
     const docs = snap.docs;
-    document.getElementById('historyCount').textContent = docs.length + (currentLang === 'ar' ? ' صفقة' : ' trades');
+
+    const countText = docs.length + (currentLang === 'ar' ? ' صفقة' : ' trades');
+    document.getElementById('historyCount').textContent = countText;
 
     let tpa = 0, tia = 0, wins = 0;
     docs.forEach(d => {
@@ -1179,49 +1196,57 @@ async function loadHistory() {
     const wr = docs.length > 0 ? (wins/docs.length*100) : 0;
     const or = tia > 0 ? (tpa/tia*100) : 0, iov = tpa >= 0;
 
-    document.getElementById('overviewGrid').innerHTML = docs.length === 0 ? '' : `
+    const overviewHTML = docs.length === 0 ? '' : `
       <div class="overview-card"><div class="stat-label">${t('total_profit')}</div><div class="stat-value ${iov?'green':'red'}">${iov?'+':''}${fmt(tpa)} ${t('sar')}</div></div>
       <div class="overview-card"><div class="stat-label">${t('total_invest')}</div><div class="stat-value gold">${fmt(tia)} ${t('sar')}</div></div>
       <div class="overview-card"><div class="stat-label">${t('overall_return')}</div><div class="stat-value ${iov?'green':'red'}">${or>=0?'+':''}${or.toFixed(2)}%</div></div>
       <div class="overview-card"><div class="stat-label">${t('win_rate')}</div><div class="stat-value">${wr.toFixed(0)}%</div></div>`;
 
+    document.getElementById('overviewGrid').innerHTML = overviewHTML;
+
+    let listHTML;
     if (docs.length === 0) {
-      listEl.innerHTML = `<div class="history-empty"><div>📋</div><p>${t('no_history')}</p></div>`;
-      return;
+      listHTML = `<div class="history-empty"><div>📋</div><p>${t('no_history')}</p></div>`;
+    } else {
+      listHTML = docs.map(d => {
+        const dd = d.data(), isP = (dd.totalProfit||0) >= 0;
+        const date = dd.timestamp?.toDate
+          ? dd.timestamp.toDate().toLocaleString(currentLang === 'ar' ? 'ar-SA' : 'en-US')
+          : '—';
+        const syms = (dd.symbols||[]).map(s => `<span class="symbol-chip">${s}</span>`).join('');
+        return `<div class="history-card" onclick="expandHistory('${d.id}')">
+          <button class="delete-btn" onclick="deleteHistory('${d.id}',event)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;">${t('delete')}</button>
+          <div class="history-card-top">
+            <div class="history-date">${date}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="history-pct ${isP?'profit':'loss'}">${(dd.overallPct||0)>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>
+              <span class="history-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ${t('sar')}</span>
+            </div>
+          </div>
+          <div class="history-meta">
+            <div class="history-meta-item">${t('capital')}: <strong>${fmt(dd.totalInvested||0)} ${t('sar')}</strong></div>
+            <div class="history-meta-item">${t('trades_count')}: <strong>${dd.tradesCount||0}</strong></div>
+          </div>
+          <div class="history-symbols">${syms}</div>
+          <div id="detail-${d.id}" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+            ${(dd.rows||[]).map(r => r.profit !== null ? `
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+                <div><div style="font-weight:700;font-size:13px">${r.sym}</div><div style="font-size:11px;color:var(--muted)">${r.name}</div></div>
+                <div style="text-align:${currentLang==='ar'?'left':'right'}">
+                  <div style="font-size:13px;color:${r.profit>=0?'var(--green)':'var(--red)'};font-weight:700">${r.profit>=0?'+':''}${fmt(r.profit)} ${t('sar')}</div>
+                  <div style="font-size:11px;color:var(--muted)">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div>
+                </div>
+              </div>` : '').join('')}
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    listEl.innerHTML = docs.map(d => {
-      const dd = d.data(), isP = (dd.totalProfit||0) >= 0;
-      const date = dd.timestamp?.toDate
-        ? dd.timestamp.toDate().toLocaleString(currentLang === 'ar' ? 'ar-SA' : 'en-US')
-        : '—';
-      const syms = (dd.symbols||[]).map(s => `<span class="symbol-chip">${s}</span>`).join('');
-      return `<div class="history-card" onclick="expandHistory('${d.id}')">
-        <button class="delete-btn" onclick="deleteHistory('${d.id}',event)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;">${t('delete')}</button>
-        <div class="history-card-top">
-          <div class="history-date">${date}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="history-pct ${isP?'profit':'loss'}">${(dd.overallPct||0)>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>
-            <span class="history-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ${t('sar')}</span>
-          </div>
-        </div>
-        <div class="history-meta">
-          <div class="history-meta-item">${t('capital')}: <strong>${fmt(dd.totalInvested||0)} ${t('sar')}</strong></div>
-          <div class="history-meta-item">${t('trades_count')}: <strong>${dd.tradesCount||0}</strong></div>
-        </div>
-        <div class="history-symbols">${syms}</div>
-        <div id="detail-${d.id}" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
-          ${(dd.rows||[]).map(r => r.profit !== null ? `
-            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
-              <div><div style="font-weight:700;font-size:13px">${r.sym}</div><div style="font-size:11px;color:var(--muted)">${r.name}</div></div>
-              <div style="text-align:${currentLang==='ar'?'left':'right'}">
-                <div style="font-size:13px;color:${r.profit>=0?'var(--green)':'var(--red)'};font-weight:700">${r.profit>=0?'+':''}${fmt(r.profit)} ${t('sar')}</div>
-                <div style="font-size:11px;color:var(--muted)">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div>
-              </div>
-            </div>` : '').join('')}
-        </div>
-      </div>`;
-    }).join('');
+    listEl.innerHTML = listHTML;
+
+    // Store in cache
+    _historyCache = { count: countText, overview: overviewHTML, html: listHTML };
+
   } catch(e) { listEl.innerHTML = `<div class="history-loading">Error: ${e.message}</div>`; }
 }
 
@@ -1233,7 +1258,8 @@ window.deleteHistory = async (id, e) => {
   e.stopPropagation();
   if (!confirm(t('confirm_delete'))) return;
   await deleteDoc(doc(db, 'users', currentUser.uid, 'history', id));
-  loadHistory();
+  _historyCache = null;
+  loadHistory(true);
 };
 
 // ── Payment ───────────────────────────────────────────

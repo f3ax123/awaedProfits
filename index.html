@@ -1166,18 +1166,82 @@ async function renderAccountPage() {
 }
 
 // ── History Page ──────────────────────────────────────
-function renderHistoryPage() {
-  if (currentUser) {
-    document.getElementById('historyLoginRequired').style.display = 'none';
-    document.getElementById('historyContent').style.display = 'block';
-    loadHistory();
-  } else {
-    document.getElementById('historyLoginRequired').style.display = 'block';
-    document.getElementById('historyContent').style.display = 'none';
-    const p = document.querySelector('#historyLoginRequired p');
-    const btn = document.querySelector('#historyLoginRequired button');
-    if (p) p.textContent = t('login_for_history');
-    if (btn) btn.textContent = t('login_google');
+async function loadHistory(){
+  if(!currentUser) return;
+  const listEl = document.getElementById('historyList');
+  listEl.innerHTML = '<div class="history-loading">جاري التحميل...</div>';
+  try {
+    // ✅ الإصلاح: بدون orderBy لتجنب مشكلة الـ index
+    const colRef = collection(db, 'users', currentUser.uid, 'history');
+    const snap = await getDocs(colRef);
+    
+    // ✅ الترتيب يدوياً في JavaScript
+    const docs = snap.docs.sort((a, b) => {
+      const ta = a.data().timestamp?.toMillis?.() || 0;
+      const tb = b.data().timestamp?.toMillis?.() || 0;
+      return tb - ta;
+    });
+
+    document.getElementById('historyCount').textContent = docs.length + ' صفقة';
+    
+    if(docs.length === 0){
+      document.getElementById('overviewGrid').innerHTML = '';
+      listEl.innerHTML = '<div class="history-empty"><div>📋</div><p>لا يوجد سجل بعد!</p></div>';
+      return;
+    }
+
+    let tpa=0, tia=0, wins=0;
+    docs.forEach(d => {
+      const dd = d.data();
+      tpa += dd.totalProfit || 0;
+      tia += dd.totalInvested || 0;
+      if((dd.totalProfit || 0) > 0) wins++;
+    });
+    
+    const wr = docs.length > 0 ? (wins/docs.length*100) : 0;
+    const or = tia > 0 ? (tpa/tia*100) : 0;
+    const iov = tpa >= 0;
+    
+    document.getElementById('overviewGrid').innerHTML = `
+      <div class="overview-card"><div class="stat-label">إجمالي الأرباح</div><div class="stat-value ${iov?'green':'red'}">${iov?'+':''}${fmt(tpa)} ريال</div></div>
+      <div class="overview-card"><div class="stat-label">إجمالي الاستثمار</div><div class="stat-value gold">${fmt(tia)} ريال</div></div>
+      <div class="overview-card"><div class="stat-label">العائد الكلي</div><div class="stat-value ${iov?'green':'red'}">${or>=0?'+':''}${or.toFixed(2)}%</div></div>
+      <div class="overview-card"><div class="stat-label">نسبة الفوز</div><div class="stat-value">${wr.toFixed(0)}%</div></div>`;
+
+    listEl.innerHTML = docs.map(d => {
+      const dd = d.data();
+      const isP = (dd.totalProfit || 0) >= 0;
+      const date = dd.timestamp?.toDate ? dd.timestamp.toDate().toLocaleString('ar-SA') : '—';
+      const syms = (dd.symbols || []).map(s => `<span class="symbol-chip">${s}</span>`).join('');
+      return `<div class="history-card" onclick="expandHistory('${d.id}')">
+        <button class="delete-btn" onclick="deleteHistory('${d.id}',event)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;">حذف</button>
+        <div class="history-card-top">
+          <div class="history-date">${date}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="history-pct ${isP?'profit':'loss'}">${(dd.overallPct||0)>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>
+            <span class="history-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ريال</span>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="history-meta-item">رأس المال: <strong>${fmt(dd.totalInvested||0)} ريال</strong></div>
+          <div class="history-meta-item">الصفقات: <strong>${dd.tradesCount||0}</strong></div>
+        </div>
+        <div class="history-symbols">${syms}</div>
+        <div id="detail-${d.id}" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+          ${(dd.rows||[]).map(r=>r.profit!==null?`
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+              <div><div style="font-weight:700;font-size:13px">${r.sym}</div><div style="font-size:11px;color:var(--muted)">${r.name}</div></div>
+              <div style="text-align:left">
+                <div style="font-size:13px;color:${r.profit>=0?'var(--green)':'var(--red)'};font-weight:700">${r.profit>=0?'+':''}${fmt(r.profit)} ريال</div>
+                <div style="font-size:11px;color:var(--muted)">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div>
+              </div>
+            </div>`:'').join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('History error:', e);
+    listEl.innerHTML = '<div class="history-loading">خطأ في التحميل: ' + e.message + '</div>';
   }
 }
 
@@ -1199,8 +1263,13 @@ async function loadHistory(forceRefresh = false) {
   }
 
   try {
-    const q = query(collection(db, 'users', currentUser.uid, 'history'), orderBy('timestamp', 'desc'));
-    const snap = await getDocs(q);
+const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
+const docs_unsorted = snap.docs;
+const docs = docs_unsorted.sort((a, b) => {
+  const ta = a.data().timestamp?.toMillis?.() || 0;
+  const tb = b.data().timestamp?.toMillis?.() || 0;
+  return tb - ta;
+});
     const docs = snap.docs;
 
     const countText = docs.length + (currentLang === 'ar' ? ' صفقة' : ' trades');

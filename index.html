@@ -740,14 +740,21 @@ window.closeDrawer = function() {
 // ── Navigation ────────────────────────────────────────
 window.navigateTo = function(page) {
   closeDrawer();
+  window.location.hash = page === 'analyze' ? '' : page;
   ['analyze','account','history','pricing'].forEach(p => {
     document.getElementById(p+'Page').style.display = p === page ? 'block' : 'none';
     const btn = document.getElementById('dnav'+p.charAt(0).toUpperCase()+p.slice(1));
     if (btn) btn.classList.toggle('active', p === page);
   });
   currentPage = page;
-  if (page === 'account') renderAccountPage();
-  if (page === 'history') renderHistoryPage();
+if (currentPage === 'account') renderAccountPage();
+if (currentPage === 'history') renderHistoryPage();
+
+// استعادة الصفحة بعد reload
+const savedPage = window.location.hash.replace('#', '');
+if (savedPage && ['account', 'history', 'pricing'].includes(savedPage)) {
+  navigateTo(savedPage);
+}
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 ['account','history','pricing'].forEach(p => document.getElementById(p+'Page').style.display = 'none');

@@ -329,7 +329,7 @@
         <div class="drawer-user-plan" id="drawerUserPlan"></div>
       </div>
     </div>
-    <button class="signout-drawer-btn" onclick="doSignout()" id="signoutBtn">تسجيل الخروج</button>
+    <button class="signout-drawer-btn" onclick="doSignout()" id="signoutBtn">—</button>
   </div>
 
   <nav class="drawer-nav">
@@ -414,11 +414,15 @@
 
     <div id="previewContainer">
       <img id="previewImg" src="" alt="">
-      <button class="clear-btn" id="clearBtn">إزالة</button>
+      <button class="clear-btn" id="clearBtn">—</button>
     </div>
 
     <button class="analyze-btn" id="analyzeBtn" disabled>
       <span class="i18n" data-key="analyze_btn">📊 تحليل الصورة واحتساب الأرباح</span>
+    </button>
+
+    <button id="saveResultBtn" style="display:none; width:100%; padding:15px; background:var(--green); border:none; border-radius:14px; color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:16px; transition:all .3s;" onclick="saveCurrentResult()">
+      💾 حفظ في السجل
     </button>
 
     <div class="error-box" id="errorBox"></div>
@@ -428,7 +432,7 @@
       <div class="results-header">
         <div class="results-title i18n" data-key="results_title">نتائج التحليل</div>
         <div class="results-actions">
-          <button class="reset-btn" id="resetBtn">تحليل جديد</button>
+          <button class="reset-btn" id="resetBtn">—</button>
         </div>
       </div>
       <div class="summary-card" id="summaryCard">
@@ -525,7 +529,7 @@
           <li class="i18n" data-key="feat_history">سجل الصفقات</li>
           <li class="i18n" data-key="feat_basic">إحصائيات أساسية</li>
         </ul>
-        <button class="plan-btn secondary" id="freePlanBtn" disabled>باقتك الحالية</button>
+        <button class="plan-btn secondary" id="freePlanBtn" disabled>—</button>
       </div>
       <div class="plan-card">
         <div class="plan-name">Pro</div>
@@ -537,7 +541,7 @@
           <li class="i18n" data-key="feat_adv">إحصائيات متقدمة</li>
           <li class="i18n" data-key="feat_support">أولوية في الدعم</li>
         </ul>
-        <button class="plan-btn primary" id="proPlanBtn" onclick="openPayment('pro')">اشترك الآن</button>
+        <button class="plan-btn primary" id="proPlanBtn" onclick="openPayment('pro')">—</button>
         <div class="current-plan-tag" id="proCurrentTag" style="display:none;">✓ <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
       </div>
       <div class="plan-card featured">
@@ -551,7 +555,7 @@
           <li class="i18n" data-key="feat_priority">أولوية قصوى</li>
           <li class="i18n" data-key="feat_exclusive">ميزات حصرية قادمة</li>
         </ul>
-        <button class="plan-btn primary" id="maxPlanBtn" onclick="openPayment('max')">اشترك الآن</button>
+        <button class="plan-btn primary" id="maxPlanBtn" onclick="openPayment('max')">—</button>
         <div class="current-plan-tag" id="maxCurrentTag" style="display:none;">✓ <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
       </div>
     </div>
@@ -632,6 +636,10 @@ const STRINGS = {
     local_history_title:'سجل محلي (على هذا الجهاز)',
     local_history_note:'سيُحفظ تلقائياً عند تسجيل الدخول',
     guest_history_title:'صفقات محفوظة محلياً',
+    save_trade:'حفظ في السجل',
+    save_trade_done:'✓ تم الحفظ في السجل',
+    save_trade_saving:'⏳ جاري الحفظ...',
+    save_trade_local:'✓ تم الحفظ محلياً',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -673,6 +681,10 @@ const STRINGS = {
     local_history_title:'Local history (this device)',
     local_history_note:'Will sync to your account when you sign in',
     guest_history_title:'Locally saved trades',
+    save_trade:'Save to History',
+    save_trade_done:'✓ Saved to history',
+    save_trade_saving:'⏳ Saving...',
+    save_trade_local:'✓ Saved locally',
   }
 };
 
@@ -694,6 +706,8 @@ function applyLang() {
   if (resetBtn) resetBtn.textContent = t('new_analysis');
   const clearBtn = document.getElementById('clearBtn');
   if (clearBtn) clearBtn.textContent = t('remove');
+  const saveBtn = document.getElementById('saveResultBtn');
+  if (saveBtn && !lastResultSaved && saveBtn.style.display !== 'none') saveBtn.textContent = t('save_trade');
   document.getElementById('offlineBadgeText').textContent = t('offline_local');
   updatePlanUI();
 
@@ -1096,6 +1110,8 @@ function resetUpload() {
   uploadZone.style.display = 'block'; previewContainer.style.display = 'none';
   analyzeBtn.disabled = true; errorBox.style.display = 'none';
   resultsEl.style.display = 'none';
+  const sb = document.getElementById('saveResultBtn');
+  sb.style.display = 'none'; sb.disabled = false; sb.style.background = 'var(--green)';
   lastResult = null; lastResultSaved = false;
 }
 function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
@@ -1136,14 +1152,8 @@ async function analyze() {
     lastResult = renderResults(parsed);
     lastResultSaved = false;
 
-    // ✅ Auto-save immediately — no manual button needed
+    // Update usage count for logged-in users
     if (currentUser) {
-      try {
-        await saveToHistory(lastResult);
-        lastResultSaved = true;
-        _historyCache = null;
-        showToast(currentLang === 'en' ? '✓ Saved to history' : '✓ تم الحفظ في السجل', 'green');
-      } catch(saveErr) { console.error('Auto-save failed:', saveErr); }
       try {
         usageCount++;
         const now = new Date();
@@ -1152,15 +1162,14 @@ async function analyze() {
           { merge: true });
         updatePlanUI();
       } catch(dbErr) { console.error('Usage update failed:', dbErr); }
-    } else {
-      try {
-        await saveGuestHistory(lastResult);
-        lastResultSaved = true;
-        showToast(currentLang === 'en' ? '✓ Saved locally' : '✓ تم الحفظ محلياً', 'green');
-      } catch(e) { console.warn('Guest save failed:', e); }
     }
 
-    // No manual save button
+    // Show manual save button
+    const sb = document.getElementById('saveResultBtn');
+    sb.style.display = 'block';
+    sb.style.background = 'var(--green)';
+    sb.textContent = t('save_trade');
+    sb.disabled = false;
 
   } catch (err) {
     loadingEl.style.display = 'none'; analyzeBtn.disabled = false;
@@ -1168,7 +1177,41 @@ async function analyze() {
   }
 }
 
-// Auto-save is handled inside analyze()
+window.saveCurrentResult = async function() {
+  if (!lastResult || lastResultSaved) return;
+  const sb = document.getElementById('saveResultBtn');
+  sb.disabled = true;
+  sb.textContent = t('save_trade_saving');
+
+  if (!currentUser) {
+    try {
+      await saveGuestHistory(lastResult);
+      lastResultSaved = true;
+      sb.textContent = t('save_trade_local');
+      sb.style.background = 'var(--muted)';
+      if (currentPage === 'history') renderHistoryPage();
+    } catch(e) {
+      sb.disabled = false;
+      sb.textContent = t('save_trade');
+    }
+    return;
+  }
+
+  try {
+    await saveToHistory(lastResult);
+    lastResultSaved = true;
+    _historyCache = null;
+    sb.textContent = t('save_trade_done');
+    sb.style.background = 'var(--muted)';
+    showToast(t('save_trade_done'), 'green');
+    if (currentPage === 'account') renderAccountPage();
+    if (currentPage === 'history') loadHistory(true);
+  } catch(e) {
+    sb.disabled = false;
+    sb.textContent = t('save_trade');
+    alert(t('save_error') + e.message);
+  }
+};
 
 function renderResults(data) {
   const trades = data.trades || [];

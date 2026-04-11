@@ -47,6 +47,38 @@
   @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
   @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
+  /* LOGIN GATE */
+  .login-gate {
+    position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0; padding: 20px;
+    transition: background .3s;
+  }
+  .login-gate.hidden { display: none; }
+  .login-gate-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 48px 40px; width: 100%; max-width: 420px;
+    text-align: center; box-shadow: var(--shadow);
+    animation: fadeIn .4s ease;
+  }
+  .login-gate-logo { margin-bottom: 32px; display: flex; justify-content: center; }
+  .login-gate-logo img { height: 36px; width: auto; }
+  .login-gate-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .login-gate-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+  .login-gate-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; background: var(--accent); border: none; border-radius: 14px;
+    padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer;
+    font-family: inherit; color: var(--bg); transition: all .2s;
+  }
+  body.light .login-gate-btn { color: #fff4e6; }
+  .login-gate-btn:hover { opacity: .88; transform: translateY(-1px); }
+  .login-gate-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .login-gate-divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .login-gate-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .login-gate-theme { position: absolute; top: 16px; left: 16px; }
+  body.en .login-gate-theme { left: auto; right: 16px; }
+
   /* TOPBAR */
   .topbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 14px 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 200; transition: background .3s; }
   .topbar-left { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
@@ -88,7 +120,8 @@
   body.en .drawer-item { text-align: left; }
   .drawer-item:hover { background: var(--card2); }
   .drawer-item.active { color: var(--accent); font-weight: 700; }
-  .drawer-item-icon { width: 18px; text-align: center; flex-shrink: 0; opacity: .45; }
+  .drawer-item-icon { width: 18px; height: 18px; text-align: center; flex-shrink: 0; opacity: .5; display: flex; align-items: center; justify-content: center; }
+  .drawer-item-icon svg { width: 14px; height: 14px; }
   .drawer-divider { height: 1px; background: var(--border); margin: 4px 0; }
   .drawer-footer { padding: 8px 10px 10px; border-top: 1px solid var(--border); }
   .drawer-user { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -97,9 +130,6 @@
   .drawer-user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .drawer-user-plan { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
-  .login-drawer-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; }
-  .login-drawer-btn:hover { border-color: var(--accent); }
-  .login-drawer-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
   .signout-drawer-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 10px; padding: 9px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .2s; }
   .signout-drawer-btn:hover { color: var(--red); border-color: var(--red); }
 
@@ -107,20 +137,6 @@
   .plan-badge.pro { background: rgba(200,169,110,0.15); color: var(--gold); border: 1px solid rgba(200,169,110,0.3); }
   .plan-badge.max { background: rgba(200,169,110,0.25); color: var(--gold); border: 1px solid var(--gold); }
   .plan-badge.free { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-
-
-  /* Offline indicator */
-  .offline-badge { display: none; align-items: center; gap: 6px; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--gold); font-weight: 600; }
-  .offline-badge.visible { display: flex; }
-
-  /* Guest local history banner */
-  .guest-sync-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between; gap: 10px; animation: slideUp .3s ease; }
-  .guest-sync-bar.visible { display: flex; }
-
-  .login-hint { background: rgba(255,244,230,0.06); border: 1px solid rgba(255,244,230,0.15); border-radius: 12px; padding: 12px 18px; font-size: 13px; color: var(--accent2); text-align: center; margin-bottom: 20px; display: none; align-items: center; justify-content: center; gap: 10px; }
-  body.light .login-hint { background: rgba(75,46,46,0.05); border-color: rgba(75,46,46,0.15); color: var(--accent); }
-  .login-hint button { background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 5px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
-  body.light .login-hint button { color: #fff4e6; }
 
   .limit-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: none; }
   .limit-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
@@ -162,11 +178,6 @@
   .results-actions { display: flex; gap: 8px; }
   .reset-btn { background: var(--card2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .2s; }
   .reset-btn:hover { color: var(--text); border-color: var(--muted); }
-  .save-result-btn { display: flex; align-items: center; gap: 6px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
-  body.light .save-result-btn { color: #fff4e6; }
-  .save-result-btn:hover { opacity: .85; }
-  .save-result-btn.saved { background: var(--green); cursor: default; color: #fff; }
-  .save-result-btn:disabled { opacity: .4; cursor: not-allowed; }
 
   .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 18px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
   .summary-card.profit::before { content: ''; position: absolute; top: 0; right: 0; width: 220px; height: 220px; background: radial-gradient(circle, rgba(109,184,138,0.07) 0%, transparent 70%); pointer-events: none; }
@@ -257,17 +268,6 @@
   .history-loading { text-align: center; padding: 36px; color: var(--muted); font-size: 14px; }
   .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
   .overview-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-  .login-required { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .login-required div { font-size: 48px; margin-bottom: 16px; }
-  .login-required p { font-size: 14px; margin-bottom: 20px; }
-  .login-required button { background: var(--accent); color: var(--bg); border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
-  body.light .login-required button { color: #fff4e6; }
-
-  /* Guest local history section */
-  .local-history-section { background: var(--card); border: 1px dashed var(--border); border-radius: 16px; padding: 18px 22px; margin-bottom: 16px; }
-  .local-history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .local-history-title { font-size: 13px; font-weight: 600; color: var(--gold); display: flex; align-items: center; gap: 6px; }
-  .local-history-note { font-size: 11px; color: var(--muted); }
 
   #pricingPage { display: none; }
   .pricing-header { text-align: center; margin-bottom: 32px; padding-top: 12px; }
@@ -321,11 +321,33 @@
   @media (max-width: 600px) {
     .trade-row { grid-template-columns: 1fr 1fr; }
     .account-stats { grid-template-columns: 1fr 1fr; }
-    .restore-banner { flex-wrap: wrap; }
+    .login-gate-card { padding: 36px 24px; }
   }
 </style>
 </head>
 <body>
+
+<!-- LOGIN GATE -->
+<div class="login-gate" id="loginGate">
+  <button class="icon-btn login-gate-theme" id="themeBtn2" title="تبديل الوضع">
+    <svg id="themeBtnIcon2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+  <div class="login-gate-card">
+    <div class="login-gate-logo">
+      <img src="data:image/png;base64,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" alt="رِبحي">
+    </div>
+    <div class="login-gate-title i18n" data-key="gate_title">مرحباً بك في رِبحي</div>
+    <div class="login-gate-sub i18n" data-key="gate_sub">سجّل دخولك لتحليل صفقاتك واحتساب أرباحك بدقة</div>
+    <button class="login-gate-btn" onclick="doLogin()">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      <span class="i18n" data-key="login_google">دخول بـ Google</span>
+    </button>
+    <div class="login-gate-divider"></div>
+    <div class="login-gate-note i18n" data-key="gate_note">بتسجيل الدخول، أنت توافق على شروط الاستخدام وسياسة الخصوصية</div>
+  </div>
+</div>
 
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 
@@ -347,26 +369,31 @@
 
   <nav class="drawer-nav">
     <button class="drawer-item active" id="dnavAnalyze" onclick="navigateTo('analyze')">
-      <span class="drawer-item-icon">📊</span> <span class="i18n" data-key="nav_analyze">تحليل الصفقة</span>
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </span>
+      <span class="i18n" data-key="nav_analyze">تحليل الصفقة</span>
     </button>
     <button class="drawer-item" id="dnavAccount" onclick="navigateTo('account')">
-      <span class="drawer-item-icon">👤</span> <span class="i18n" data-key="nav_account">حسابي</span>
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </span>
+      <span class="i18n" data-key="nav_account">حسابي</span>
     </button>
     <button class="drawer-item" id="dnavHistory" onclick="navigateTo('history')">
-      <span class="drawer-item-icon">📋</span> <span class="i18n" data-key="nav_history">السجل</span>
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </span>
+      <span class="i18n" data-key="nav_history">السجل</span>
     </button>
     <div class="drawer-divider"></div>
     <button class="drawer-item" id="dnavPricing" onclick="navigateTo('pricing')">
-      <span class="drawer-item-icon">💎</span> <span class="i18n" data-key="nav_pricing">الباقات</span>
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </span>
+      <span class="i18n" data-key="nav_pricing">الباقات</span>
     </button>
   </nav>
-
-  <div id="drawerGuestSection" style="padding:8px 12px 10px; border-top:1px solid var(--border);">
-    <button class="login-drawer-btn" onclick="doLogin(); closeDrawer();">
-      <svg viewBox="0 0 24 24" width="15" height="15"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      <span class="i18n" data-key="login_google">دخول بـ Google</span>
-    </button>
-  </div>
 </div>
 
 <div class="wrapper">
@@ -379,10 +406,6 @@
         </svg>
       </button>
       <button class="lang-btn" id="langBtn" onclick="toggleLang()" title="EN / عر">EN</button>
-      <!-- Offline indicator -->
-      <div class="offline-badge" id="offlineBadge">
-        <span>⚡</span><span id="offlineBadgeText">محلي</span>
-      </div>
     </div>
     <div class="topbar-center">
       <img id="topbarLogoImg" src="data:image/png;base64,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" alt="رِبحي" style="height:28px;width:auto;display:block;">
@@ -399,11 +422,6 @@
 
   <!-- ANALYZE PAGE -->
   <div id="analyzePage">
-    <div class="login-hint" id="loginHint">
-      <span class="i18n" data-key="login_hint">سجّل دخولك لحفظ سجل صفقاتك</span>
-      <button onclick="doLogin()" class="i18n" data-key="login_btn">دخول</button>
-    </div>
-
     <div class="limit-bar" id="limitBar">
       <div class="limit-bar-top">
         <span id="limitLabel" style="font-weight:600;font-size:13px;"></span>
@@ -431,11 +449,11 @@
     </div>
 
     <button class="analyze-btn" id="analyzeBtn" disabled>
-      <span class="i18n" data-key="analyze_btn">📊 تحليل الصورة واحتساب الأرباح</span>
+      <span class="i18n" data-key="analyze_btn">تحليل الصورة واحتساب الأرباح</span>
     </button>
 
     <button id="saveResultBtn" style="display:none; width:100%; padding:15px; background:var(--green); border:none; border-radius:14px; color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:16px; transition:all .3s;" onclick="saveCurrentResult()">
-      💾 حفظ في السجل
+      حفظ في السجل
     </button>
 
     <div class="error-box" id="errorBox"></div>
@@ -463,12 +481,6 @@
 
   <!-- ACCOUNT PAGE -->
   <div id="accountPage">
-    <div id="accountLoginReq" style="display:none;">
-      <div class="login-required"><div>👤</div>
-        <p class="i18n" data-key="login_for_account">سجّل دخولك لعرض ملخص حسابك</p>
-        <button onclick="doLogin()" class="i18n" data-key="login_google">دخول بـ Google</button>
-      </div>
-    </div>
     <div id="accountContent" style="display:none;">
       <div class="account-profile">
         <img class="account-avatar" id="acctAvatar" src="" alt="">
@@ -501,7 +513,7 @@
       <div class="recent-section">
         <div class="recent-header">
           <div class="recent-title i18n" data-key="recent_trades">آخر الصفقات</div>
-          <button class="view-all-btn" onclick="navigateTo('history')" class="i18n" data-key="view_all">عرض الكل ←</button>
+          <button class="view-all-btn" onclick="navigateTo('history')" class="i18n" data-key="view_all">عرض الكل</button>
         </div>
         <div id="recentList"></div>
       </div>
@@ -510,12 +522,6 @@
 
   <!-- HISTORY PAGE -->
   <div id="historyPage">
-    <div id="historyLoginRequired" style="display:none;">
-      <div class="login-required"><div>📋</div>
-        <p class="i18n" data-key="login_for_history">سجّل دخولك لعرض سجل صفقاتك</p>
-        <button onclick="doLogin()" class="i18n" data-key="login_google">دخول بـ Google</button>
-      </div>
-    </div>
     <div id="historyContent" style="display:none;">
       <div class="history-header">
         <div class="section-title i18n" data-key="trade_history">سجل الصفقات</div>
@@ -555,7 +561,7 @@
           <li class="i18n" data-key="feat_support">أولوية في الدعم</li>
         </ul>
         <button class="plan-btn primary" id="proPlanBtn" onclick="openPayment('pro')">—</button>
-        <div class="current-plan-tag" id="proCurrentTag" style="display:none;">✓ <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
+        <div class="current-plan-tag" id="proCurrentTag" style="display:none;"> <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
       </div>
       <div class="plan-card featured">
         <div class="plan-name">Max</div>
@@ -569,7 +575,7 @@
           <li class="i18n" data-key="feat_exclusive">ميزات حصرية قادمة</li>
         </ul>
         <button class="plan-btn primary" id="maxPlanBtn" onclick="openPayment('max')">—</button>
-        <div class="current-plan-tag" id="maxCurrentTag" style="display:none;">✓ <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
+        <div class="current-plan-tag" id="maxCurrentTag" style="display:none;"> <span class="i18n" data-key="current_plan">باقتك الحالية</span></div>
       </div>
     </div>
   </div>
@@ -579,7 +585,9 @@
 <!-- DELETE CONFIRM MODAL -->
 <div class="delete-modal-overlay" id="deleteModal">
   <div class="delete-modal">
-    <div class="delete-modal-icon">🗑️</div>
+    <div class="delete-modal-icon" style="font-size:28px;margin-bottom:12px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" width="36" height="36"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </div>
     <div class="delete-modal-title" id="deleteModalTitle">حذف الصفقة</div>
     <div class="delete-modal-sub" id="deleteModalSub">هذا الإجراء لا يمكن التراجع عنه</div>
     <div class="delete-modal-actions">
@@ -624,20 +632,21 @@ const provider = new GoogleAuthProvider();
 const STRINGS = {
   ar: {
     nav_analyze:'تحليل الصفقة', nav_account:'حسابي', nav_history:'السجل', nav_pricing:'الباقات',
-    login_hint:'سجّل دخولك لحفظ سجل صفقاتك', login_btn:'دخول', login_google:'دخول بـ Google',
+    login_google:'دخول بـ Google',
+    gate_title:'مرحباً بك في رِبحي',
+    gate_sub:'سجّل دخولك لتحليل صفقاتك واحتساب أرباحك بدقة',
+    gate_note:'بتسجيل الدخول، أنت توافق على شروط الاستخدام وسياسة الخصوصية',
     upload_title:'ارفع صورة الصفقة', upload_sub:'اسحب الصورة هنا أو اضغط للاختيار',
-    analyze_btn:'📊 تحليل الصورة واحتساب الأرباح', analyzing:'جاري قراءة الصفقات...',
-    remove:'إزالة', save:'حفظ', saving:'جاري الحفظ...', saved:'تم الحفظ ✓', new_analysis:'تحليل جديد',
+    analyze_btn:'تحليل الصورة واحتساب الأرباح', analyzing:'جاري قراءة الصفقات...',
+    remove:'إزالة', save:'حفظ', saving:'جاري الحفظ...', saved:'تم الحفظ', new_analysis:'تحليل جديد',
     results_title:'نتائج التحليل', total_pl:'إجمالي الربح / الخسارة',
     trade_details:'تفاصيل الصفقات', open_trade:'مفتوحة',
     capital:'رأس المال', trades_count:'الصفقات', return_pct:'العائد', stocks:'الأسهم',
     buy_col:'الشراء', sell_col:'البيع', symbol_col:'الرمز', pl_col:'الربح/الخسارة', pct_col:'النسبة', status_col:'الحالة',
-    login_for_account:'سجّل دخولك لعرض ملخص حسابك',
-    login_for_history:'سجّل دخولك لعرض سجل صفقاتك',
     total_trades:'إجمالي الصفقات', total_profit:'إجمالي الأرباح', win_rate:'نسبة الفوز', month_usage:'استخدام الشهر',
-    monthly_profit:'الأرباح الشهرية', recent_trades:'آخر الصفقات', view_all:'عرض الكل ←',
-    trade_history:'سجل الصفقات', loading:'جاري التحميل...', no_history:'لا يوجد سجل بعد!',
-    no_recent:'لا يوجد صفقات بعد', delete:'حذف', confirm_delete:'تأكيد الحذف؟',
+    monthly_profit:'الأرباح الشهرية', recent_trades:'آخر الصفقات', view_all:'عرض الكل',
+    trade_history:'سجل الصفقات', loading:'جاري التحميل...', no_history:'لا يوجد سجل بعد',
+    no_recent:'لا يوجد صفقات بعد', delete:'حذف',
     choose_plan:'اختر باقتك', plan_sub:'جميع الباقات تشمل تحليل ذكي بالذكاء الاصطناعي',
     plan_free:'مجاني', plan_free_desc:'للتجربة والاستخدام الخفيف',
     plan_pro_desc:'للمتداول النشيط', plan_max_desc:'للمتداول الاحترافي',
@@ -645,48 +654,40 @@ const STRINGS = {
     feat_history:'سجل الصفقات', feat_full_history:'سجل كامل', feat_basic:'إحصائيات أساسية',
     feat_adv:'إحصائيات متقدمة', feat_support:'أولوية في الدعم', feat_priority:'أولوية قصوى', feat_exclusive:'ميزات حصرية قادمة',
     subscribe:'اشترك الآن', current_plan:'باقتك الحالية',
-    complete_sub:'إتمام الاشتراك', most_popular:'الأكثر شعبية',
+    complete_sub:'إتمام الاشتراك',
     edit:'تعديل', cancel:'إلغاء',
     sar_mo:'ريال/شهر', sar:'ريال',
     limit_label:'باقة', signout:'تسجيل الخروج',
     plan_activated:'تم تفعيل باقة',
-    login_first:'سجّل دخولك أولاً',
-    limit_exceeded:'استنفدت حد الباقة. ',upgrade:'ترقّى',
+    limit_exceeded:'استنفدت حد الباقة. ', upgrade:'ترقّى',
     read_error:'تعذّر قراءة البيانات. تأكد أن الصورة واضحة.',
-    error_prefix:'! ',
+    error_prefix:'',
     save_error:'خطأ: ', name_save_error:'خطأ في الحفظ: ',
     total_invest:'إجمالي الاستثمار', overall_return:'العائد الكلي',
-    restore_title:'لديك تحليل سابق', restore_sub_min:'منذ {n} دقيقة', restore_sub_hr:'منذ {n} ساعة',
-    restore_btn:'استعادة', offline_local:'محلي',
-    guest_local_saved:'تم الحفظ محلياً ✓', guest_sync:'تم نقل {n} صفقة إلى حسابك ☁️',
-    local_history_title:'سجل محلي (على هذا الجهاز)',
-    local_history_note:'سيُحفظ تلقائياً عند تسجيل الدخول',
-    guest_history_title:'صفقات محفوظة محلياً',
     save_trade:'حفظ في السجل',
-    save_trade_done:'✓ تم الحفظ في السجل',
-    save_trade_saving:'⏳ جاري الحفظ...',
-    save_trade_local:'✓ تم الحفظ محلياً',
+    save_trade_done:'تم الحفظ في السجل',
+    save_trade_saving:'جاري الحفظ...',
     delete_title:'حذف الصفقة',
     delete_sub:'هذا الإجراء لا يمكن التراجع عنه.',
     delete_confirm:'حذف',
-    cancel:'إلغاء',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
-    login_hint:'Sign in to save your trade history', login_btn:'Sign In', login_google:'Sign in with Google',
+    login_google:'Sign in with Google',
+    gate_title:'Welcome to Ribhi',
+    gate_sub:'Sign in to analyze your trades and calculate profits accurately',
+    gate_note:'By signing in, you agree to our Terms of Service and Privacy Policy',
     upload_title:'Upload Trade Screenshot', upload_sub:'Drag image here or click to select',
-    analyze_btn:'📊 Analyze & Calculate Profit', analyzing:'Reading trades...',
-    remove:'Remove', save:'Save', saving:'Saving...', saved:'Saved ✓', new_analysis:'New Analysis',
+    analyze_btn:'Analyze & Calculate Profit', analyzing:'Reading trades...',
+    remove:'Remove', save:'Save', saving:'Saving...', saved:'Saved', new_analysis:'New Analysis',
     results_title:'Analysis Results', total_pl:'Total Profit / Loss',
     trade_details:'Trade Details', open_trade:'Open',
     capital:'Capital', trades_count:'Trades', return_pct:'Return', stocks:'Stocks',
     buy_col:'Buy', sell_col:'Sell', symbol_col:'Symbol', pl_col:'P&L', pct_col:'%', status_col:'Status',
-    login_for_account:'Sign in to view your account summary',
-    login_for_history:'Sign in to view your trade history',
     total_trades:'Total Trades', total_profit:'Total Profit', win_rate:'Win Rate', month_usage:'Monthly Usage',
-    monthly_profit:'Monthly Profit', recent_trades:'Recent Trades', view_all:'View All →',
-    trade_history:'Trade History', loading:'Loading...', no_history:'No history yet!',
-    no_recent:'No trades yet', delete:'Delete', confirm_delete:'Confirm delete?',
+    monthly_profit:'Monthly Profit', recent_trades:'Recent Trades', view_all:'View All',
+    trade_history:'Trade History', loading:'Loading...', no_history:'No history yet',
+    no_recent:'No trades yet', delete:'Delete',
     choose_plan:'Choose Your Plan', plan_sub:'All plans include AI-powered analysis',
     plan_free:'Free', plan_free_desc:'For trying and light use',
     plan_pro_desc:'For active traders', plan_max_desc:'For professional traders',
@@ -694,31 +695,22 @@ const STRINGS = {
     feat_history:'Trade history', feat_full_history:'Full history', feat_basic:'Basic stats',
     feat_adv:'Advanced stats', feat_support:'Priority support', feat_priority:'Top priority', feat_exclusive:'Exclusive coming features',
     subscribe:'Subscribe Now', current_plan:'Your Current Plan',
-    complete_sub:'Complete Subscription', most_popular:'Most Popular',
+    complete_sub:'Complete Subscription',
     edit:'Edit', cancel:'Cancel',
     sar_mo:'SAR/mo', sar:'SAR',
     limit_label:'Plan', signout:'Sign Out',
     plan_activated:'Plan activated: ',
-    login_first:'Please sign in first',
     limit_exceeded:'Plan limit reached. ', upgrade:'Upgrade',
     read_error:'Could not read data. Make sure the image is clear.',
-    error_prefix:'⚠ ',
+    error_prefix:'',
     save_error:'Error: ', name_save_error:'Save error: ',
     total_invest:'Total Invested', overall_return:'Overall Return',
-    restore_title:'Previous analysis found', restore_sub_min:'{n}m ago', restore_sub_hr:'{n}h ago',
-    restore_btn:'Restore', offline_local:'Local',
-    guest_local_saved:'Saved locally ✓', guest_sync:'{n} trade(s) synced ☁️',
-    local_history_title:'Local history (this device)',
-    local_history_note:'Will sync to your account when you sign in',
-    guest_history_title:'Locally saved trades',
     save_trade:'Save to History',
-    save_trade_done:'✓ Saved to history',
-    save_trade_saving:'⏳ Saving...',
-    save_trade_local:'✓ Saved locally',
+    save_trade_done:'Saved to history',
+    save_trade_saving:'Saving...',
     delete_title:'Delete trade',
     delete_sub:'This action cannot be undone.',
     delete_confirm:'Delete',
-    cancel:'Cancel',
   }
 };
 
@@ -742,9 +734,7 @@ function applyLang() {
   if (clearBtn) clearBtn.textContent = t('remove');
   const saveBtn = document.getElementById('saveResultBtn');
   if (saveBtn && !lastResultSaved && saveBtn.style.display !== 'none') saveBtn.textContent = t('save_trade');
-  document.getElementById('offlineBadgeText').textContent = t('offline_local');
   updatePlanUI();
-
 }
 
 window.toggleLang = function() {
@@ -773,183 +763,6 @@ let lastResult = null, lastResultSaved = false;
 let currentPage = 'analyze';
 let _historyCache = null;
 
-// ════════════════════════════════════════════════════════
-//  LOCAL PERSISTENCE LAYER
-// ════════════════════════════════════════════════════════
-
-const LocalDB = {
-  _db: null,
-
-  async open() {
-    if (this._db) return this._db;
-    return new Promise((res, rej) => {
-      const req = indexedDB.open('ribhi_local', 2);
-      req.onupgradeneeded = e => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains('last_result'))
-          db.createObjectStore('last_result', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('guest_history')) {
-          const s = db.createObjectStore('guest_history', { keyPath: 'id' });
-          s.createIndex('ts', 'timestamp');
-        }
-        if (!db.objectStoreNames.contains('session'))
-          db.createObjectStore('session', { keyPath: 'key' });
-      };
-      req.onsuccess = e => { this._db = e.target.result; res(this._db); };
-      req.onerror = () => rej(req.error);
-    });
-  },
-
-  async set(store, value) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(store, 'readwrite');
-      tx.objectStore(store).put(value);
-      tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
-    });
-  },
-
-  async get(store, key) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(store, 'readonly');
-      const req = tx.objectStore(store).get(key);
-      req.onsuccess = () => res(req.result);
-      req.onerror = () => rej(req.error);
-    });
-  },
-
-  async getAll(store) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(store, 'readonly');
-      const req = tx.objectStore(store).getAll();
-      req.onsuccess = () => res(req.result || []);
-      req.onerror = () => rej(req.error);
-    });
-  },
-
-  async delete(store, key) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(store, 'readwrite');
-      tx.objectStore(store).delete(key);
-      tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
-    });
-  },
-
-  async clear(store) {
-    const db = await this.open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(store, 'readwrite');
-      tx.objectStore(store).clear();
-      tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
-    });
-  }
-};
-
-// ── Save session page state ────────────────────────────
-function saveSessionState(page) {
-  try {
-    localStorage.setItem('ribhi_session', JSON.stringify({
-      page,
-      savedAt: Date.now()
-    }));
-  } catch(e) {}
-}
-
-// ── Restore session page ───────────────────────────────
-function restoreSessionPage() {
-  try {
-    const hash = window.location.hash.replace('#', '');
-    if (hash && ['account','history','pricing'].includes(hash)) {
-      navigateTo(hash);
-      return;
-    }
-    const raw = localStorage.getItem('ribhi_session');
-    if (!raw) return;
-    const s = JSON.parse(raw);
-    if (s.page && (Date.now() - s.savedAt < 3600000) && ['account','history','pricing'].includes(s.page)) {
-      navigateTo(s.page);
-    }
-  } catch(e) {}
-}
-
-// ── Guest local history ────────────────────────────────
-async function saveGuestHistory(result) {
-  await LocalDB.set('guest_history', {
-    id: Date.now(),
-    ...result,
-    timestamp: Date.now()
-  });
-  await updateGuestHistoryBadge();
-}
-
-async function updateGuestHistoryBadge() {
-  try {
-    const all = await LocalDB.getAll('guest_history');
-    const badge = document.getElementById('offlineBadge');
-    if (all.length > 0 && !currentUser) {
-      badge.classList.add('visible');
-    } else {
-      badge.classList.remove('visible');
-    }
-  } catch(e) {}
-}
-
-// ── Sync guest → Firestore on login ───────────────────
-async function syncGuestHistoryToFirestore() {
-  if (!currentUser) return;
-  try {
-    const guestDocs = await LocalDB.getAll('guest_history');
-    if (!guestDocs.length) return;
-
-    let synced = 0;
-    for (const entry of guestDocs) {
-      try {
-        const { id, timestamp, ...data } = entry;
-        await addDoc(collection(db, 'users', currentUser.uid, 'history'), {
-          ...data,
-          timestamp: serverTimestamp(),
-          syncedFromGuest: true
-        });
-        synced++;
-      } catch(e) { console.warn('Sync error:', e); }
-    }
-
-    await LocalDB.clear('guest_history');
-    document.getElementById('offlineBadge').classList.remove('visible');
-    _historyCache = null;
-
-    if (synced > 0) {
-      showToast(t('guest_sync').replace('{n}', synced), 'green');
-    }
-  } catch(e) { console.warn('Guest sync failed:', e); }
-}
-
-// ── Toast notification ─────────────────────────────────
-function showToast(msg, color = 'accent') {
-  const toast = document.createElement('div');
-  const isLight = document.body.classList.contains('light');
-  toast.style.cssText = `
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    background:var(--${color});color:${color==='green'?'#fff':'var(--bg)'};
-    padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;
-    z-index:9999;animation:fadeIn .3s ease;pointer-events:none;
-    box-shadow:0 4px 20px rgba(0,0,0,0.25);white-space:nowrap;
-  `;
-  if (isLight && color === 'accent') toast.style.color = '#fff4e6';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; }, 2000);
-  setTimeout(() => toast.remove(), 2400);
-}
-
-// ════════════════════════════════════════════════════════
-
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('status') === 'paid' && urlParams.get('plan')) {
   window._pendingPlan = urlParams.get('plan');
@@ -957,20 +770,34 @@ if (urlParams.get('status') === 'paid' && urlParams.get('plan')) {
 }
 
 // ── Theme ─────────────────────────────────────────────
-const themeBtn = document.getElementById('themeBtn');
 function updateThemeIcon(isLight) {
-  const icon = document.getElementById('themeBtnIcon');
-  if (!icon) return;
-  icon.innerHTML = isLight
-    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
-    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  ['themeBtnIcon','themeBtnIcon2'].forEach(id => {
+    const icon = document.getElementById(id);
+    if (!icon) return;
+    icon.innerHTML = isLight
+      ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+      : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  });
 }
-if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); updateThemeIcon(true); }
-themeBtn.addEventListener('click', () => {
-  const l = document.body.classList.toggle('light');
-  updateThemeIcon(l);
-  localStorage.setItem('theme', l ? 'light' : 'dark');
-});
+
+function applyTheme(isLight) {
+  document.body.classList.toggle('light', isLight);
+  updateThemeIcon(isLight);
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+if (localStorage.getItem('theme') === 'light') applyTheme(true);
+
+document.getElementById('themeBtn').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
+document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
+
+// ── Login Gate ────────────────────────────────────────
+function showLoginGate() {
+  document.getElementById('loginGate').classList.remove('hidden');
+}
+function hideLoginGate() {
+  document.getElementById('loginGate').classList.add('hidden');
+}
 
 // ── Drawer ────────────────────────────────────────────
 window.toggleDrawer = function() {
@@ -991,7 +818,6 @@ window.closeDrawer = function() {
 // ── Navigation ────────────────────────────────────────
 window.navigateTo = function(page) {
   closeDrawer();
-  saveSessionState(page);
   history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
   ['analyze','account','history','pricing'].forEach(p => {
     document.getElementById(p+'Page').style.display = p === page ? 'block' : 'none';
@@ -1006,34 +832,27 @@ window.navigateTo = function(page) {
 ['account','history','pricing'].forEach(p => document.getElementById(p+'Page').style.display = 'none');
 
 // ── Auth ──────────────────────────────────────────────
-window.doLogin = () => signInWithPopup(auth, provider).catch(e => alert(t('error_prefix') + e.message));
+window.doLogin = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
 window.doSignout = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
   currentUser = user;
   if (user) {
+    hideLoginGate();
     document.getElementById('topbarUserControls').style.display = 'flex';
-    document.getElementById('drawerGuestSection').style.display = 'none';
     document.getElementById('drawerUserSection').style.display = 'block';
     document.getElementById('drawerAvatar').src = user.photoURL || '';
     document.getElementById('drawerUserName').textContent = user.displayName || user.email;
-    document.getElementById('loginHint').style.display = 'none';
-    document.getElementById('offlineBadge').classList.remove('visible');
     await loadUserPlan();
     updatePlanUI();
-    // Sync any offline guest trades
-    await syncGuestHistoryToFirestore();
     if (window._pendingPlan) { await activatePlan(window._pendingPlan, 'redirect'); window._pendingPlan = null; }
   } else {
+    showLoginGate();
     document.getElementById('topbarUserControls').style.display = 'none';
-    document.getElementById('drawerGuestSection').style.display = 'block';
     document.getElementById('drawerUserSection').style.display = 'none';
-    document.getElementById('loginHint').style.display = 'flex';
     userPlan = 'free'; usageCount = 0;
     _historyCache = null;
     updatePlanUI();
-    // Check for local guest history badge
-    await updateGuestHistoryBadge();
   }
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
@@ -1050,21 +869,15 @@ async function loadUserPlan() {
       userPlan = d.plan || 'free';
       if (d.usageMonth !== mk) {
         usageCount = 0;
-        await setDoc(doc(db, 'users', currentUser.uid),
-          { usageCount: 0, usageMonth: mk },
-          { merge: true });
+        await setDoc(doc(db, 'users', currentUser.uid), { usageCount: 0, usageMonth: mk }, { merge: true });
       } else {
         usageCount = d.usageCount || 0;
       }
     } else {
-      userPlan = 'free';
-      usageCount = 0;
+      userPlan = 'free'; usageCount = 0;
       await setDoc(doc(db, 'users', currentUser.uid), {
-        plan: 'free',
-        usageCount: 0,
-        usageMonth: mk,
-        email: currentUser.email || '',
-        displayName: currentUser.displayName || '',
+        plan: 'free', usageCount: 0, usageMonth: mk,
+        email: currentUser.email || '', displayName: currentUser.displayName || '',
         createdAt: serverTimestamp()
       });
     }
@@ -1160,7 +973,7 @@ async function analyze() {
     const lim = PLANS[userPlan].limit;
     if (usageCount >= lim) {
       errorBox.style.display = 'block';
-      errorBox.innerHTML = t('error_prefix') + t('limit_exceeded') +
+      errorBox.innerHTML = t('limit_exceeded') +
         `<a href="#" onclick="navigateTo('pricing');return false;" style="color:var(--accent)">${t('upgrade')}</a>`;
       return;
     }
@@ -1186,7 +999,6 @@ async function analyze() {
     lastResult = renderResults(parsed);
     lastResultSaved = false;
 
-    // Update usage count for logged-in users
     if (currentUser) {
       try {
         usageCount++;
@@ -1198,7 +1010,6 @@ async function analyze() {
       } catch(dbErr) { console.error('Usage update failed:', dbErr); }
     }
 
-    // Show manual save button
     const sb = document.getElementById('saveResultBtn');
     sb.style.display = 'block';
     sb.style.background = 'var(--green)';
@@ -1207,7 +1018,7 @@ async function analyze() {
 
   } catch (err) {
     loadingEl.style.display = 'none'; analyzeBtn.disabled = false;
-    errorBox.style.display = 'block'; errorBox.textContent = t('error_prefix') + (err.message || 'Error');
+    errorBox.style.display = 'block'; errorBox.textContent = err.message || 'Error';
   }
 }
 
@@ -1216,20 +1027,6 @@ window.saveCurrentResult = async function() {
   const sb = document.getElementById('saveResultBtn');
   sb.disabled = true;
   sb.textContent = t('save_trade_saving');
-
-  if (!currentUser) {
-    try {
-      await saveGuestHistory(lastResult);
-      lastResultSaved = true;
-      sb.textContent = t('save_trade_local');
-      sb.style.background = 'var(--muted)';
-      if (currentPage === 'history') renderHistoryPage();
-    } catch(e) {
-      sb.disabled = false;
-      sb.textContent = t('save_trade');
-    }
-    return;
-  }
 
   try {
     await saveToHistory(lastResult);
@@ -1246,6 +1043,18 @@ window.saveCurrentResult = async function() {
     alert(t('save_error') + e.message);
   }
 };
+
+// ── Toast ─────────────────────────────────────────────
+function showToast(msg, color = 'accent') {
+  const toast = document.createElement('div');
+  const isLight = document.body.classList.contains('light');
+  toast.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--${color});color:${color==='green'?'#fff':'var(--bg)'};padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;animation:fadeIn .3s ease;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.25);white-space:nowrap;`;
+  if (isLight && color === 'accent') toast.style.color = '#fff4e6';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; }, 2000);
+  setTimeout(() => toast.remove(), 2400);
+}
 
 function renderResults(data) {
   const trades = data.trades || [];
@@ -1318,8 +1127,7 @@ async function saveToHistory(result) {
     tradesCount: result.trades ? result.trades.length : 0,
     symbols: result.symbols || [],
     rows: (result.rows || []).map(r => ({
-      sym: r.sym || '',
-      name: r.name || '',
+      sym: r.sym || '', name: r.name || '',
       buyTotal: r.buyTotal !== null ? Number(r.buyTotal) : null,
       sellTotal: r.sellTotal !== null ? Number(r.sellTotal) : null,
       profit: r.profit !== null ? Number(r.profit) : null,
@@ -1331,81 +1139,18 @@ async function saveToHistory(result) {
 
 // ── History Page ──────────────────────────────────────
 function renderHistoryPage() {
-  if (!currentUser) {
-    // Show guest local history
-    document.getElementById('historyLoginRequired').style.display = 'block';
-    document.getElementById('historyContent').style.display = 'none';
-    renderGuestHistorySection();
-    return;
-  }
-  document.getElementById('historyLoginRequired').style.display = 'none';
   document.getElementById('historyContent').style.display = 'block';
   loadHistory();
 }
 
-async function renderGuestHistorySection() {
-  try {
-    const guestDocs = await LocalDB.getAll('guest_history');
-    const loginReq = document.getElementById('historyLoginRequired');
-
-    // Remove existing guest section
-    document.getElementById('guestLocalSection')?.remove();
-
-    if (guestDocs.length === 0) return;
-
-    guestDocs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-    const section = document.createElement('div');
-    section.id = 'guestLocalSection';
-    section.className = 'local-history-section';
-    section.innerHTML = `
-      <div class="local-history-header">
-        <div class="local-history-title">⚡ ${t('local_history_title')} (${guestDocs.length})</div>
-        <div class="local-history-note">${t('local_history_note')}</div>
-      </div>
-      ${guestDocs.map(d => {
-        const isP = (d.totalProfit || 0) >= 0;
-        const date = new Date(d.timestamp).toLocaleDateString(currentLang === 'ar' ? 'ar-SA' : 'en-US');
-        const syms = (d.symbols||[]).map(s => `<span class="symbol-chip">${s}</span>`).join('');
-        return `<div class="history-card" style="margin-bottom:8px;">
-          <div class="history-card-top">
-            <div class="history-date">${date}</div>
-            <div><span class="history-pct ${isP?'profit':'loss'}">${(d.overallPct||0)>=0?'+':''}${(d.overallPct||0).toFixed(2)}%</span>
-            <span class="history-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(d.totalProfit||0)} ${t('sar')}</span></div>
-          </div>
-          <div class="history-meta">
-            <div class="history-meta-item">${t('capital')}: <strong>${fmt(d.totalInvested||0)} ${t('sar')}</strong></div>
-            <div class="history-meta-item">${t('trades_count')}: <strong>${d.tradesCount||0}</strong></div>
-          </div>
-          <div class="history-symbols">${syms}</div>
-        </div>`;
-      }).join('')}
-    `;
-
-    loginReq.after(section);
-  } catch(e) { console.warn('Guest history render error:', e); }
-}
-
 // ── Account Page ──────────────────────────────────────
 async function renderAccountPage() {
-  if (!currentUser) {
-    document.getElementById('accountLoginReq').style.display = 'block';
-    document.getElementById('accountContent').style.display = 'none';
-    document.getElementById('accountLoginReq').querySelector('p').textContent = t('login_for_account');
-    document.getElementById('accountLoginReq').querySelector('button').textContent = t('login_google');
-    return;
-  }
-  document.getElementById('accountLoginReq').style.display = 'none';
+  if (!currentUser) return;
   document.getElementById('accountContent').style.display = 'block';
   document.getElementById('acctAvatar').src = currentUser.photoURL || '';
   document.getElementById('acctName').textContent = currentUser.displayName || '—';
   document.getElementById('acctEmail').textContent = currentUser.email || '—';
   document.getElementById('acctUsage').textContent = userPlan === 'max' ? '∞' : `${usageCount}/${PLANS[userPlan].limit}`;
-
-  document.querySelectorAll('#accountPage .account-stat-label').forEach(el => {
-    const key = el.dataset && el.dataset.key;
-    if (key) el.textContent = t(key);
-  });
 
   try {
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
@@ -1478,9 +1223,7 @@ async function loadHistory(forceRefresh = false) {
     return;
   }
 
-  if (!_historyCache) {
-    listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
-  }
+  if (!_historyCache) listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
 
   try {
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
@@ -1512,7 +1255,7 @@ async function loadHistory(forceRefresh = false) {
 
     let listHTML;
     if (docs.length === 0) {
-      listHTML = `<div class="history-empty"><div>📋</div><p>${t('no_history')}</p></div>`;
+      listHTML = `<div class="history-empty"><div style="font-size:44px;margin-bottom:14px;">—</div><p>${t('no_history')}</p></div>`;
     } else {
       listHTML = docs.map(d => {
         const dd = d.data(), isP = (dd.totalProfit||0) >= 0;
@@ -1558,12 +1301,12 @@ window.expandHistory = id => {
   const d = document.getElementById('detail-'+id);
   if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
 };
+
 let _pendingDeleteId = null;
 
 window.deleteHistory = (id, e) => {
   e.stopPropagation();
   _pendingDeleteId = id;
-  // Update modal texts
   document.getElementById('deleteModalTitle').textContent = t('delete_title');
   document.getElementById('deleteModalSub').textContent = t('delete_sub');
   document.getElementById('deleteModalCancel').textContent = t('cancel');
@@ -1588,7 +1331,6 @@ window.confirmDeleteHistory = async () => {
   } catch(e) { console.error('Delete failed:', e); }
 };
 
-// Close modal on overlay click
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
@@ -1612,7 +1354,7 @@ Paddle.Initialize({
 });
 
 window.openPayment = function(plan) {
-  if (!currentUser) { alert(t('login_first')); window.doLogin(); return; }
+  if (!currentUser) { doLogin(); return; }
   const p = PLANS[plan];
   document.getElementById('modalSummary').innerHTML = `
     <h3>${planLabel(plan)}</h3>
@@ -1677,11 +1419,11 @@ window.saveDisplayName = async function() {
 // ── Init ──────────────────────────────────────────────
 applyLang();
 
-// Restore session page (URL hash takes priority)
-restoreSessionPage();
-
-// Check guest history badge
-setTimeout(() => updateGuestHistoryBadge(), 400);
+// Restore hash navigation
+const hash = window.location.hash.replace('#', '');
+if (hash && ['account','history','pricing'].includes(hash)) {
+  navigateTo(hash);
+}
 
 </script>
 </body>

@@ -236,7 +236,7 @@
   .history-count { font-size: 13px; color: var(--muted); background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; }
   .history-empty { text-align: center; padding: 56px 20px; color: var(--muted); }
   .history-empty div { font-size: 44px; margin-bottom: 14px; }
-  .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; margin-bottom: 12px; cursor: pointer; transition: all .2s; position: relative; }
+  .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px 46px; margin-bottom: 12px; cursor: pointer; transition: all .2s; position: relative; }
   .history-card:hover { border-color: var(--accent); }
   .history-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .history-date { font-size: 12px; color: var(--muted); }
@@ -251,9 +251,9 @@
   .history-meta-item strong { color: var(--text); }
   .history-symbols { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .symbol-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 9px; font-size: 11px; font-weight: 600; color: var(--gold); }
-  .delete-btn { position: absolute; top: 12px; left: 12px; background: transparent; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 4px; border-radius: 6px; transition: all .2s; }
+  .delete-btn { position: absolute; bottom: 12px; left: 12px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all .2s; font-family: inherit; }
   body.en .delete-btn { left: auto; right: 12px; }
-  .delete-btn:hover { color: var(--red); }
+  .delete-btn:hover { color: var(--red); border-color: var(--red); background: rgba(212,87,74,0.06); }
   .history-loading { text-align: center; padding: 36px; color: var(--muted); font-size: 14px; }
   .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
   .overview-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
@@ -292,6 +292,19 @@
   .plan-btn:hover:not(:disabled) { opacity: .85; transform: translateY(-1px); }
   .plan-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
   .current-plan-tag { text-align: center; font-size: 12px; color: var(--green); font-weight: 600; margin-top: 8px; }
+
+  /* Delete confirm modal */
+  .delete-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+  .delete-modal-overlay.open { display: flex; animation: fadeIn .15s ease; }
+  .delete-modal { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 28px 24px; width: 100%; max-width: 360px; text-align: center; }
+  .delete-modal-icon { font-size: 36px; margin-bottom: 14px; }
+  .delete-modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .delete-modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+  .delete-modal-actions { display: flex; gap: 10px; }
+  .delete-modal-cancel { flex: 1; padding: 12px; background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; }
+  .delete-modal-cancel:hover { border-color: var(--accent); }
+  .delete-modal-confirm { flex: 1; padding: 12px; background: var(--red); border: none; color: #fff; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
+  .delete-modal-confirm:hover { opacity: .85; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
@@ -563,6 +576,19 @@
 
 </div>
 
+<!-- DELETE CONFIRM MODAL -->
+<div class="delete-modal-overlay" id="deleteModal">
+  <div class="delete-modal">
+    <div class="delete-modal-icon">🗑️</div>
+    <div class="delete-modal-title" id="deleteModalTitle">حذف الصفقة</div>
+    <div class="delete-modal-sub" id="deleteModalSub">هذا الإجراء لا يمكن التراجع عنه</div>
+    <div class="delete-modal-actions">
+      <button class="delete-modal-cancel" id="deleteModalCancel" onclick="closeDeleteModal()">إلغاء</button>
+      <button class="delete-modal-confirm" id="deleteModalConfirm" onclick="confirmDeleteHistory()">حذف</button>
+    </div>
+  </div>
+</div>
+
 <!-- PAYMENT MODAL -->
 <div class="modal-overlay" id="paymentModal">
   <div class="modal">
@@ -640,6 +666,10 @@ const STRINGS = {
     save_trade_done:'✓ تم الحفظ في السجل',
     save_trade_saving:'⏳ جاري الحفظ...',
     save_trade_local:'✓ تم الحفظ محلياً',
+    delete_title:'حذف الصفقة',
+    delete_sub:'هذا الإجراء لا يمكن التراجع عنه.',
+    delete_confirm:'حذف',
+    cancel:'إلغاء',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -685,6 +715,10 @@ const STRINGS = {
     save_trade_done:'✓ Saved to history',
     save_trade_saving:'⏳ Saving...',
     save_trade_local:'✓ Saved locally',
+    delete_title:'Delete trade',
+    delete_sub:'This action cannot be undone.',
+    delete_confirm:'Delete',
+    cancel:'Cancel',
   }
 };
 
@@ -1487,7 +1521,7 @@ async function loadHistory(forceRefresh = false) {
           : '—';
         const syms = (dd.symbols||[]).map(s => `<span class="symbol-chip">${s}</span>`).join('');
         return `<div class="history-card" onclick="expandHistory('${d.id}')">
-          <button class="delete-btn" onclick="deleteHistory('${d.id}',event)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;">${t('delete')}</button>
+          <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>
           <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">
@@ -1524,13 +1558,40 @@ window.expandHistory = id => {
   const d = document.getElementById('detail-'+id);
   if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
 };
-window.deleteHistory = async (id, e) => {
+let _pendingDeleteId = null;
+
+window.deleteHistory = (id, e) => {
   e.stopPropagation();
-  if (!confirm(t('confirm_delete'))) return;
-  await deleteDoc(doc(db, 'users', currentUser.uid, 'history', id));
-  _historyCache = null;
-  loadHistory(true);
+  _pendingDeleteId = id;
+  // Update modal texts
+  document.getElementById('deleteModalTitle').textContent = t('delete_title');
+  document.getElementById('deleteModalSub').textContent = t('delete_sub');
+  document.getElementById('deleteModalCancel').textContent = t('cancel');
+  document.getElementById('deleteModalConfirm').textContent = t('delete_confirm');
+  document.getElementById('deleteModal').classList.add('open');
 };
+
+window.closeDeleteModal = () => {
+  document.getElementById('deleteModal').classList.remove('open');
+  _pendingDeleteId = null;
+};
+
+window.confirmDeleteHistory = async () => {
+  if (!_pendingDeleteId) return;
+  const id = _pendingDeleteId;
+  document.getElementById('deleteModal').classList.remove('open');
+  _pendingDeleteId = null;
+  try {
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'history', id));
+    _historyCache = null;
+    loadHistory(true);
+  } catch(e) { console.error('Delete failed:', e); }
+};
+
+// Close modal on overlay click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
 
 // ── Payment ───────────────────────────────────────────
 const PADDLE_CLIENT_TOKEN = 'live_34de2737245b86fda76960576d9';

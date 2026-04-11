@@ -108,17 +108,6 @@
   .plan-badge.max { background: rgba(200,169,110,0.25); color: var(--gold); border: 1px solid var(--gold); }
   .plan-badge.free { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
-  /* Restore banner */
-  .restore-banner { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; animation: fadeIn .3s ease; }
-  .restore-banner-icon { font-size: 20px; line-height: 1; }
-  .restore-banner-text { flex: 1; }
-  .restore-banner-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .restore-banner-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .restore-banner-actions { display: flex; gap: 8px; }
-  .restore-btn-primary { background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
-  body.light .restore-btn-primary { color: #fff4e6; }
-  .restore-btn-dismiss { background: var(--card2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 10px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all .2s; }
-  .restore-btn-dismiss:hover { color: var(--red); border-color: var(--red); }
 
   /* Offline indicator */
   .offline-badge { display: none; align-items: center; gap: 6px; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--gold); font-weight: 600; }
@@ -397,8 +386,6 @@
 
   <!-- ANALYZE PAGE -->
   <div id="analyzePage">
-    <!-- Restore Banner (injected by JS) -->
-
     <div class="login-hint" id="loginHint">
       <span class="i18n" data-key="login_hint">سجّل دخولك لحفظ سجل صفقاتك</span>
       <button onclick="doLogin()" class="i18n" data-key="login_btn">دخول</button>
@@ -432,10 +419,6 @@
 
     <button class="analyze-btn" id="analyzeBtn" disabled>
       <span class="i18n" data-key="analyze_btn">📊 تحليل الصورة واحتساب الأرباح</span>
-    </button>
-
-    <button id="saveResultBtn" style="display:none; width:100%; padding:14px; background:var(--green); border:none; border-radius:14px; color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:16px; transition:all .3s;" onclick="saveCurrentResult()">
-      💾 حفظ في السجل
     </button>
 
     <div class="error-box" id="errorBox"></div>
@@ -711,18 +694,9 @@ function applyLang() {
   if (resetBtn) resetBtn.textContent = t('new_analysis');
   const clearBtn = document.getElementById('clearBtn');
   if (clearBtn) clearBtn.textContent = t('remove');
-  const saveBtn = document.getElementById('saveResultBtn');
-  if (saveBtn && !saveBtn.classList.contains('saved')) {
-    saveBtn.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
-  }
   document.getElementById('offlineBadgeText').textContent = t('offline_local');
   updatePlanUI();
 
-  // Re-render restore banner in correct language
-  if (window._storedResultData) {
-    document.getElementById('restoreBanner')?.remove();
-    showRestoreBanner(window._storedResultData);
-  }
 }
 
 window.toggleLang = function() {
@@ -830,102 +804,15 @@ const LocalDB = {
 };
 
 // ── Save last result locally ───────────────────────────
-async function saveLastResultLocally(result, imagePreviewUrl) {
-  try {
-    await LocalDB.set('last_result', {
-      id: 'current',
-      result,
-      imagePreviewUrl: imagePreviewUrl || null,
-      savedAt: Date.now()
-    });
-  } catch(e) { console.warn('LocalDB save failed:', e); }
 }
 
-// ── Restore last result on page load ──────────────────
-async function restoreLastResult() {
-  try {
-    const stored = await LocalDB.get('last_result', 'current');
-    if (!stored) return;
-    // No expiry — keep forever until user saves or dismisses
-    showRestoreBanner(stored);
-  } catch(e) { console.warn('LocalDB restore failed:', e); }
 }
 
-function showRestoreBanner(stored) {
-  const existing = document.getElementById('restoreBanner');
-  if (existing) existing.remove();
-
-  const minutes = Math.round((Date.now() - (stored.savedAt || 0)) / 60000);
-  let timeLabel;
-  if (!stored.savedAt || minutes < 1) {
-    timeLabel = currentLang === 'ar' ? 'للتو' : 'just now';
-  } else if (minutes < 60) {
-    timeLabel = t('restore_sub_min').replace('{n}', minutes);
-  } else if (minutes < 1440) {
-    timeLabel = t('restore_sub_hr').replace('{n}', Math.round(minutes / 60));
-  } else if (minutes < 10080) {
-    const days = Math.round(minutes / 1440);
-    timeLabel = currentLang === 'ar' ? `منذ ${days} يوم` : `${days}d ago`;
-  } else if (minutes < 43200) {
-    const weeks = Math.round(minutes / 10080);
-    timeLabel = currentLang === 'ar' ? `منذ ${weeks} أسبوع` : `${weeks}w ago`;
-  } else {
-    const months = Math.round(minutes / 43200);
-    timeLabel = currentLang === 'ar' ? `منذ ${months} شهر` : `${months}mo ago`;
-  }
-
-  const banner = document.createElement('div');
-  banner.id = 'restoreBanner';
-  banner.className = 'restore-banner';
-  banner.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;flex:1;">
-      <span class="restore-banner-icon">🔄</span>
-      <div class="restore-banner-text">
-        <div class="restore-banner-title">${t('restore_title')}</div>
-        <div class="restore-banner-sub">${timeLabel}</div>
-      </div>
-    </div>
-    <div class="restore-banner-actions">
-      <button class="restore-btn-primary" onclick="applyRestoredResult()">${t('restore_btn')}</button>
-      <button class="restore-btn-dismiss" onclick="dismissRestore()">✕</button>
-    </div>
-  `;
-
-  const analyzePage = document.getElementById('analyzePage');
-  const loginHint = document.getElementById('loginHint');
-  analyzePage.insertBefore(banner, loginHint);
-  window._storedResultData = stored;
+window._storedResultData = stored;
 }
 
-window.applyRestoredResult = function() {
-  const stored = window._storedResultData;
-  if (!stored) return;
-
-  if (stored.imagePreviewUrl) {
-    previewImg.src = stored.imagePreviewUrl;
-    uploadZone.style.display = 'none';
-    previewContainer.style.display = 'block';
-    analyzeBtn.disabled = false;
-  }
-
-  lastResult = renderResults(stored.result);
-  lastResultSaved = false;
-
-  const sb = document.getElementById('saveResultBtn');
-  sb.style.display = 'block';
-  sb.style.background = 'var(--green)';
-  sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
-  sb.disabled = false;
-
-  document.getElementById('restoreBanner')?.remove();
-  document.getElementById('errorBox').style.display = 'none';
-  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-window.dismissRestore = async function() {
-  document.getElementById('restoreBanner')?.remove();
-  await LocalDB.delete('last_result', 'current');
-  window._storedResultData = null;
 };
 
 // ── Save session page state ────────────────────────────
@@ -1101,7 +988,6 @@ onAuthStateChanged(auth, async user => {
     // Sync any offline guest trades
     await syncGuestHistoryToFirestore();
     if (window._pendingPlan) { await activatePlan(window._pendingPlan, 'redirect'); window._pendingPlan = null; }
-    if (lastResult && !lastResultSaved) document.getElementById('saveResultBtn').style.display = 'flex';
   } else {
     document.getElementById('topbarUserControls').style.display = 'none';
     document.getElementById('drawerGuestSection').style.display = 'block';
@@ -1189,8 +1075,6 @@ const analyzeBtn = document.getElementById('analyzeBtn');
 const loadingEl = document.getElementById('loading');
 const resultsEl = document.getElementById('results');
 const errorBox = document.getElementById('errorBox');
-const saveResultBtn = document.getElementById('saveResultBtn');
-
 let imageBase64 = null, imageMime = 'image/png';
 
 uploadZone.addEventListener('click', () => fileInput.click());
@@ -1214,10 +1098,7 @@ function loadFile(file) {
     uploadZone.style.display = 'none'; previewContainer.style.display = 'block';
     analyzeBtn.disabled = false; errorBox.style.display = 'none';
     resultsEl.style.display = 'none';
-    document.getElementById('saveResultBtn').style.display = 'none';
     lastResult = null; lastResultSaved = false;
-    // Clear restore banner since user loaded a new image
-    document.getElementById('restoreBanner')?.remove();
   };
   reader.readAsDataURL(file);
 }
@@ -1227,8 +1108,6 @@ function resetUpload() {
   uploadZone.style.display = 'block'; previewContainer.style.display = 'none';
   analyzeBtn.disabled = true; errorBox.style.display = 'none';
   resultsEl.style.display = 'none';
-  const sb = document.getElementById('saveResultBtn');
-  sb.style.display = 'none'; sb.disabled = false;
   lastResult = null; lastResultSaved = false;
 }
 function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
@@ -1250,7 +1129,7 @@ async function analyze() {
   }
 
   errorBox.style.display = 'none'; resultsEl.style.display = 'none';
-  saveResultBtn.style.display = 'none'; loadingEl.style.display = 'block';
+  loadingEl.style.display = 'block';
   analyzeBtn.disabled = true; lastResult = null; lastResultSaved = false;
 
   try {
@@ -1269,18 +1148,14 @@ async function analyze() {
     lastResult = renderResults(parsed);
     lastResultSaved = false;
 
-    // ✅ Save locally immediately for session restore
-    await saveLastResultLocally(lastResult, previewImg.src || null);
-
-    // Show save button
-    const sb = document.getElementById('saveResultBtn');
-    sb.style.display = 'block';
-    sb.style.background = 'var(--green)';
-    sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
-    sb.disabled = false;
-
-    // Update usage count
+    // ✅ Auto-save immediately — no manual button needed
     if (currentUser) {
+      try {
+        await saveToHistory(lastResult);
+        lastResultSaved = true;
+        _historyCache = null;
+        showToast(currentLang === 'en' ? '✓ Saved to history' : '✓ تم الحفظ في السجل', 'green');
+      } catch(saveErr) { console.error('Auto-save failed:', saveErr); }
       try {
         usageCount++;
         const now = new Date();
@@ -1289,7 +1164,15 @@ async function analyze() {
           { merge: true });
         updatePlanUI();
       } catch(dbErr) { console.error('Usage update failed:', dbErr); }
+    } else {
+      try {
+        await saveGuestHistory(lastResult);
+        lastResultSaved = true;
+        showToast(currentLang === 'en' ? '✓ Saved locally' : '✓ تم الحفظ محلياً', 'green');
+      } catch(e) { console.warn('Guest save failed:', e); }
     }
+
+    // No manual save button
 
   } catch (err) {
     loadingEl.style.display = 'none'; analyzeBtn.disabled = false;
@@ -1297,49 +1180,7 @@ async function analyze() {
   }
 }
 
-window.saveCurrentResult = async function() {
-  if (!lastResult || lastResultSaved) return;
-
-  // Guest: save to local history
-  if (!currentUser) {
-    const sb = document.getElementById('saveResultBtn');
-    sb.disabled = true;
-    sb.textContent = currentLang === 'en' ? '⏳ Saving...' : '⏳ جاري الحفظ...';
-    try {
-      await saveGuestHistory(lastResult);
-      lastResultSaved = true;
-      sb.textContent = currentLang === 'en' ? '✓ Saved locally!' : '✓ تم الحفظ محلياً!';
-      sb.style.background = 'var(--muted)';
-      if (currentPage === 'history') renderHistoryPage();
-    } catch(e) {
-      sb.disabled = false;
-      sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
-    }
-    return;
-  }
-
-  // Logged in: save to Firestore
-  const sb = document.getElementById('saveResultBtn');
-  sb.disabled = true;
-  sb.textContent = currentLang === 'en' ? '⏳ Saving...' : '⏳ جاري الحفظ...';
-  try {
-    await saveToHistory(lastResult);
-    lastResultSaved = true;
-    // Clear local cache after cloud save
-    await LocalDB.delete('last_result', 'current');
-    window._storedResultData = null;
-    sb.textContent = currentLang === 'en' ? '✓ Saved!' : '✓ تم الحفظ!';
-    sb.style.background = 'var(--muted)';
-    sb.disabled = true;
-    _historyCache = null;
-    if (currentPage === 'account') renderAccountPage();
-    if (currentPage === 'history') loadHistory(true);
-  } catch(e) {
-    sb.disabled = false;
-    sb.textContent = currentLang === 'en' ? '💾 Save to History' : '💾 حفظ في السجل';
-    alert(t('save_error') + e.message);
-  }
-};
+// Auto-save is handled inside analyze()
 
 function renderResults(data) {
   const trades = data.trades || [];
@@ -1747,11 +1588,8 @@ applyLang();
 // Restore session page (URL hash takes priority)
 restoreSessionPage();
 
-// After short delay, check for restoreable last result
-setTimeout(() => restoreLastResult(), 400);
-
 // Check guest history badge
-setTimeout(() => updateGuestHistoryBadge(), 500);
+setTimeout(() => updateGuestHistoryBadge(), 400);
 
 </script>
 </body>

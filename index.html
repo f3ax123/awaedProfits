@@ -846,11 +846,7 @@ async function restoreLastResult() {
   try {
     const stored = await LocalDB.get('last_result', 'current');
     if (!stored) return;
-    const age = Date.now() - (stored.savedAt || 0);
-    if (age > 24 * 60 * 60 * 1000) {
-      await LocalDB.delete('last_result', 'current');
-      return;
-    }
+    // No expiry — keep forever until user saves or dismisses
     showRestoreBanner(stored);
   } catch(e) { console.warn('LocalDB restore failed:', e); }
 }
@@ -859,12 +855,23 @@ function showRestoreBanner(stored) {
   const existing = document.getElementById('restoreBanner');
   if (existing) existing.remove();
 
-  const minutes = Math.round((Date.now() - stored.savedAt) / 60000);
+  const minutes = Math.round((Date.now() - (stored.savedAt || 0)) / 60000);
   let timeLabel;
-  if (minutes < 60) {
-    timeLabel = t('restore_sub_min').replace('{n}', minutes || 1);
-  } else {
+  if (!stored.savedAt || minutes < 1) {
+    timeLabel = currentLang === 'ar' ? 'للتو' : 'just now';
+  } else if (minutes < 60) {
+    timeLabel = t('restore_sub_min').replace('{n}', minutes);
+  } else if (minutes < 1440) {
     timeLabel = t('restore_sub_hr').replace('{n}', Math.round(minutes / 60));
+  } else if (minutes < 10080) {
+    const days = Math.round(minutes / 1440);
+    timeLabel = currentLang === 'ar' ? `منذ ${days} يوم` : `${days}d ago`;
+  } else if (minutes < 43200) {
+    const weeks = Math.round(minutes / 10080);
+    timeLabel = currentLang === 'ar' ? `منذ ${weeks} أسبوع` : `${weeks}w ago`;
+  } else {
+    const months = Math.round(minutes / 43200);
+    timeLabel = currentLang === 'ar' ? `منذ ${months} شهر` : `${months}mo ago`;
   }
 
   const banner = document.createElement('div');

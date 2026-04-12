@@ -82,10 +82,18 @@ export default async function handler(req, res) {
   // ── 4. جلب بيانات المستخدم من Firestore ─────────────
   const userRef  = adminDb.collection('users').doc(uid);
   const userSnap = await userRef.get();
+// إذا ما عنده document — أنشئه تلقائياً كـ free
+if (!userSnap.exists) {
+  await userRef.set({
+    plan: 'free',
+    usageCount: 0,
+    usageMonth: `${now.getFullYear()}-${now.getMonth()}`,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+}
 
-  if (!userSnap.exists) {
-    return res.status(403).json({ error: 'User profile not found' });
-  }
+const userData = userSnap.exists ? userSnap.data() : { plan: 'free', usageCount: 0 };
+const plan     = userData.plan || 'free';
 
   const userData = userSnap.data();
   const plan     = userData.plan || 'free';

@@ -288,6 +288,19 @@
     .account-stats { grid-template-columns: 1fr 1fr; }
     .login-gate-card { padding: 36px 24px; }
   }
+  /* Share Card Modal */
+.share-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px); }
+.share-modal-overlay.open { display:flex;animation:fadeIn .2s ease; }
+.share-modal { background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:520px;text-align:center; }
+.share-modal-title { font-size:16px;font-weight:700;margin-bottom:16px; }
+.share-canvas-wrap { border-radius:12px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border); }
+.share-canvas-wrap canvas { width:100%;height:auto;display:block; }
+.share-actions { display:flex;gap:10px;justify-content:center; }
+.share-dl-btn { flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s; }
+body.light .share-dl-btn { color:#fff4e6; }
+.share-dl-btn:hover { opacity:.85; }
+.share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
+.share-close-btn:hover { color:var(--text); }
 </style>
 </head>
 <script src="/shareCard.js"></script>

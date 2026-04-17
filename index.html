@@ -533,6 +533,21 @@ body.light .share-dl-btn { color:#fff4e6; }
     <div class="modal-plan-summary" id="modalSummary"></div>
     <div id="paddleCheckoutContainer"></div>
   </div>
+  <!-- SHARE CARD MODAL -->
+    <div class="share-modal-overlay" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+      <div class="share-modal">
+        <div class="share-modal-title">🖼️ مشاركة الصفقة</div>
+        <div class="share-canvas-wrap"><canvas id="shareCanvas"></canvas></div>
+        <div class="share-actions">
+          <button class="share-dl-btn" onclick="downloadShareCard()">⬇️ تحميل PNG</button>
+          <button class="share-close-btn" onclick="closeShareModal()">✕</button>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<script type="module">
 </div>
 
 <script type="module">
@@ -1005,7 +1020,17 @@ function renderResults(data) {
       ${ph}</div>`;
   }).join('');
 
-  resultsEl.style.display = 'block'; analyzeBtn.disabled = false;
+// Share button
+document.getElementById('shareCardBtn')?.remove();
+const shareBtn = document.createElement('button');
+shareBtn.id = 'shareCardBtn';
+shareBtn.className = 'analyze-btn';
+shareBtn.style.cssText = 'background:var(--card2);border:1px solid var(--border);color:var(--text);margin-top:8px;';
+shareBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ${currentLang === 'ar' ? 'مشاركة الصفقة' : 'Share Trade'}`;
+shareBtn.onclick = () => showShareCard(lastResult);
+document.getElementById('results').appendChild(shareBtn);
+
+resultsEl.style.display = 'block'; analyzeBtn.disabled = false;
   resultsEl.scrollIntoView({ behavior:'smooth', block:'start' });
   return { trades, rows, totalProfit:tp, totalInvested:ti, overallPct:op, symbols:Object.keys(grouped) };
 }

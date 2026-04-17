@@ -1,6 +1,6 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
 // ── تهيئة Firebase Admin (مرة واحدة فقط) ──────────────
 if (!getApps().length) {
@@ -16,10 +16,8 @@ if (!getApps().length) {
 const adminAuth = getAuth();
 const adminDb   = getFirestore();
 
-// ── حدود الخطط ────────────────────────────────────────
 const PLAN_LIMITS = { free: 5, pro: 100, max: Infinity };
 
-// ── Rate limiting في الذاكرة ──────────────────────────
 const ipRateMap  = new Map();
 const uidRateMap = new Map();
 
@@ -32,8 +30,7 @@ function checkRateLimit(key, map, maxRequests = 10, windowMs = 60_000) {
   return entry.count <= maxRequests;
 }
 
-// ── Handler الرئيسي ───────────────────────────────────
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin',  process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -41,7 +38,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'Method not allowed' });
 
-  // ── 1. Rate limit — مستوى IP ────────────────────────
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
            || req.socket?.remoteAddress
            || 'unknown';
@@ -51,7 +47,6 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Try again later.' });
   }
 
-  // ── 2. التحقق من Firebase ID Token ──────────────────
   const authHeader = req.headers['authorization'] || '';
   if (!authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing authorization token' });
@@ -72,17 +67,14 @@ export default async function handler(req, res) {
 
   const uid = decodedToken.uid;
 
-  // ── 3. Rate limit — مستوى المستخدم ──────────────────
   if (!checkRateLimit(uid, uidRateMap, 5, 60_000)) {
     await logSecurityEvent('USER_RATE_LIMIT', { uid, ip });
     return res.status(429).json({ error: 'Too many requests per user. Slow down.' });
   }
 
-  // ── 4. جلب بيانات المستخدم من Firestore ─────────────
   const userRef  = adminDb.collection('users').doc(uid);
   const userSnap = await userRef.get();
 
-  // إذا المستخدم جديد، أنشئ له ملف تلقائياً
   if (!userSnap.exists) {
     await userRef.set({
       plan:       'free',
@@ -92,24 +84,21 @@ export default async function handler(req, res) {
     });
   }
 
-  const snapData  = userSnap.exists ? userSnap.data() : { plan: 'free', usageCount: 0 };
-  const plan      = snapData.plan || 'free';
-  const limit     = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
+  const snapData = userSnap.exists ? userSnap.data() : { plan: 'free', usageCount: 0 };
+  const plan     = snapData.plan || 'free';
+  const limit    = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
-  // ── 5. فحص وتجديد عداد الشهر ────────────────────────
   const now      = new Date();
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
   let usageCount = snapData.usageCount || 0;
 
   if (snapData.usageMonth !== monthKey) usageCount = 0;
 
-  // ── 6. التحقق من حد الخطة ───────────────────────────
   if (plan !== 'max' && usageCount >= limit) {
     await logSecurityEvent('LIMIT_EXCEEDED', { uid, plan, usageCount, limit });
     return res.status(403).json({ error: 'Plan limit reached', plan, usageCount, limit });
   }
 
-  // ── 7. التحقق من صحة البيانات المُرسَلة ─────────────
   const { imageBase64, imageMime } = req.body || {};
 
   if (!imageBase64 || typeof imageBase64 !== 'string') {
@@ -126,7 +115,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Image too large (max 10MB)' });
   }
 
-  // ── 8. استدعاء Claude API ────────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Server configuration error' });
 
@@ -181,7 +169,6 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'Analysis service unavailable' });
   }
 
-  // ── 9. تحديث usageCount عبر Firestore Transaction ──
   let newUsageCount = usageCount;
   try {
     await adminDb.runTransaction(async (tx) => {
@@ -209,15 +196,13 @@ export default async function handler(req, res) {
     console.error('Firestore transaction error:', err);
   }
 
-  // ── 10. الرد على الـ Client ──────────────────────────
   return res.status(200).json({
     rawText,
     usageCount: newUsageCount,
     usageMonth: monthKey,
   });
-}
+};
 
-// ── تسجيل أحداث الأمان ──────────────────────────────
 async function logSecurityEvent(type, data) {
   try {
     await adminDb.collection('security_logs').add({

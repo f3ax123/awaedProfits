@@ -1,7 +1,15 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-
+export default async function handler(req, res) {
+  // أول شيء — تأكد إن الـ function تشتغل
+  console.log('ENV CHECK:', {
+    hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+    hasFirebaseProject: !!process.env.FIREBASE_PROJECT_ID,
+    hasFirebaseEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+    hasFirebaseKey: !!process.env.FIREBASE_PRIVATE_KEY,
+  });
+  // ... باقي الكود
 // ── تهيئة Firebase Admin (مرة واحدة فقط) ──────────────
 if (!getApps().length) {
   initializeApp({

@@ -1,12 +1,10 @@
 {
   "functions": {
     "api/analyze.js": {
-      "maxDuration": 30,
-      "runtime": "nodejs20.x"
+      "maxDuration": 30
     },
     "api/activate-plan.js": {
-      "maxDuration": 15,
-      "runtime": "nodejs20.x"
+      "maxDuration": 15
     }
   },
   "headers": [

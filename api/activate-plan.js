@@ -1,14 +1,14 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import crypto from 'crypto';
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const crypto = require('crypto');
 
 if (!getApps().length) {
   initializeApp({
     credential: cert({
       projectId:   process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/^"|"$/g, ''),
     }),
   });
 }
@@ -23,7 +23,7 @@ const PADDLE_PRICES = {
   'pri_01knfr0vh8p01bc73jvxa98cq0': 'max',
 };
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin',  process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Paddle-Signature');
@@ -31,13 +31,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'Method not allowed' });
 
-  // ── مسار 1: Paddle Webhook (المصدر الموثوق الوحيد) ──
   const paddleSignature = req.headers['paddle-signature'];
   if (paddleSignature) {
     return handlePaddleWebhook(req, res, paddleSignature);
   }
 
-  // ── مسار 2: Client يُبلّغ بعد إتمام الدفع (احتياطي) ─
   const authHeader = req.headers['authorization'] || '';
   if (!authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing authorization' });
@@ -56,14 +54,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  // منع إعادة استخدام نفس الـ transactionId
   const txRef  = adminDb.collection('payment_transactions').doc(transactionId);
   const txSnap = await txRef.get();
   if (txSnap.exists) {
     return res.status(200).json({ success: true, message: 'Already activated' });
   }
 
-  // تحقق من Paddle مباشرة — لا تثق بالـ Client أبداً
   const isValid = await verifyPaddleTransaction(transactionId, plan);
   if (!isValid) {
     await logSecurityEvent('FAKE_PAYMENT_ATTEMPT', {
@@ -76,20 +72,17 @@ export default async function handler(req, res) {
 
   await activatePlanInDB(decodedToken.uid, plan, transactionId);
   return res.status(200).json({ success: true, plan });
-}
+};
 
-// ── معالجة Paddle Webhook ─────────────────────────────
 async function handlePaddleWebhook(req, res, signature) {
   const rawBody = JSON.stringify(req.body);
 
-  // التحقق من HMAC-SHA256
   const parts = signature.split(';');
   const ts = parts[0]?.replace('ts=', '');
   const h1 = parts[1]?.replace('h1=', '');
 
   if (!ts || !h1) return res.status(400).json({ error: 'Invalid signature format' });
 
-  // منع Replay Attacks — رفض إذا مرّ أكثر من 5 دقائق
   const age = Date.now() - parseInt(ts, 10) * 1000;
   if (age > 5 * 60 * 1000) {
     return res.status(400).json({ error: 'Webhook too old (possible replay attack)' });
@@ -101,7 +94,6 @@ async function handlePaddleWebhook(req, res, signature) {
     .update(payload)
     .digest('hex');
 
-  // timingSafeEqual يمنع Timing Attacks
   const hBuf = Buffer.from(h1,       'hex');
   const eBuf = Buffer.from(expected, 'hex');
   if (hBuf.length !== eBuf.length || !crypto.timingSafeEqual(hBuf, eBuf)) {
@@ -121,7 +113,6 @@ async function handlePaddleWebhook(req, res, signature) {
       return res.status(400).json({ error: 'Missing required fields in webhook' });
     }
 
-    // منع تكرار المعالجة (idempotency)
     const txRef  = adminDb.collection('payment_transactions').doc(txId);
     const txSnap = await txRef.get();
     if (!txSnap.exists) {
@@ -132,7 +123,6 @@ async function handlePaddleWebhook(req, res, signature) {
   return res.status(200).json({ received: true });
 }
 
-// ── تفعيل الخطة في Firestore (Atomic Batch) ──────────
 async function activatePlanInDB(uid, plan, transactionId) {
   const now   = new Date();
   const batch = adminDb.batch();
@@ -154,7 +144,6 @@ async function activatePlanInDB(uid, plan, transactionId) {
   await batch.commit();
 }
 
-// ── التحقق من Paddle API مباشرة ──────────────────────
 async function verifyPaddleTransaction(transactionId, expectedPlan) {
   try {
     const r = await fetch(

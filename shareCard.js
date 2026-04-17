@@ -1,28 +1,46 @@
-// ── Share Card ────────────────────────────────────────
+// ── Share Card — Canva-style vertical dark card ──────────────────────────────
 window.closeShareModal = () => document.getElementById('shareModal').classList.remove('open');
 
 window.downloadShareCard = function () {
   const canvas = document.getElementById('shareCanvas');
-  const link = document.createElement('a');
+  const link   = document.createElement('a');
   link.download = 'ribhi-trade-' + Date.now() + '.png';
-  link.href = canvas.toDataURL('image/png');
+  link.href     = canvas.toDataURL('image/png');
   link.click();
 };
 
-function roundRect(ctx, x, y, w, h, r) {
+// ── Wave helper (draws one sine wave path) ───────────────────────────────────
+function drawWave(ctx, W, H, offsetY, amplitude, frequency, phase, alpha, lineWidth = 0.7) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.arcTo(x + w, y, x + w, y + r, r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-  ctx.lineTo(x + r, y + h);
-  ctx.arcTo(x, y + h, x, y + h - r, r);
-  ctx.lineTo(x, y + r);
-  ctx.arcTo(x, y, x + r, y, r);
-  ctx.closePath();
+  ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+  ctx.lineWidth   = lineWidth;
+  for (let x = 0; x <= W; x += 2) {
+    const y = offsetY + Math.sin((x / W) * Math.PI * 2 * frequency + phase) * amplitude;
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
 }
 
+// ── Draw the full wave mesh (like Canva background) ──────────────────────────
+function drawWaveMesh(ctx, W, H) {
+  // Top-right wave cluster
+  for (let i = 0; i < 28; i++) {
+    const baseY = -60 + i * 11;
+    drawWave(ctx, W, H, baseY, 38 + i * 1.5, 1.4, i * 0.22, 0.055 + i * 0.003);
+  }
+  // Middle main wave cluster
+  for (let i = 0; i < 40; i++) {
+    const baseY = H * 0.28 + i * 10;
+    drawWave(ctx, W, H, baseY, 55 + Math.sin(i * 0.4) * 30, 1.2, i * 0.18, 0.07 + i * 0.002);
+  }
+  // Bottom-left wave cluster
+  for (let i = 0; i < 24; i++) {
+    const baseY = H * 0.83 + i * 13;
+    drawWave(ctx, W, H, baseY, 32 + i * 2, 1.6, i * 0.25, 0.045 + i * 0.003);
+  }
+}
+
+// ── Main render function ──────────────────────────────────────────────────────
 window.showShareCard = function (result) {
   if (!result) return;
 
@@ -30,182 +48,139 @@ window.showShareCard = function (result) {
   const canvas = document.getElementById('shareCanvas');
   modal.classList.add('open');
 
-  const W = 1620, H = 1080;
+  // A4 portrait (794 × 1123 pt @ 2x)
+  const W = 794, H = 1123;
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const isLight  = document.body.classList.contains('light');
-  const isProfit = (result.totalProfit || 0) >= 0;
+  // ── Build display data ────────────────────────────────────────────────────
+  const isProfit  = (result.totalProfit || 0) >= 0;
+  const pct       = result.overallPct || 0;
+  const pctStr    = (pct >= 0 ? '+' : '') + Math.abs(pct).toFixed(2) + '%';
+  const profitStr = (isProfit ? '+' : '') +
+    Number(result.totalProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+    ' ريال';
+  const symbolsStr = (result.symbols || []).slice(0, 4).join('  ·  ');
+  const today      = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'numeric', day: 'numeric' });
 
-  // ── Palette ──────────────────────────────────────────
-  const BG     = isLight ? '#fff4e6' : '#1a1210';
-  const CARD   = isLight ? '#fffaf3' : '#231816';
-  const CARD2  = isLight ? '#f5ece0' : '#2c201d';
-  const BORDER = isLight ? '#e0d0bc' : '#3a2820';
-  const TEXT   = isLight ? '#2a1a1a' : '#fff4e6';
-  const MUTED  = '#8a6e62';
-  const GREEN  = '#6db88a';
-  const RED    = '#d4574a';
-  const GOLD   = '#c8a96e';
+  const GOLD  = '#C8A84B';
+  const GREEN = '#5DBE80';
+  const RED   = '#D9504A';
   const ACCENT = isProfit ? GREEN : RED;
 
-  // ── Background ───────────────────────────────────────
-  ctx.fillStyle = BG;
+  // ── 1. Background — pure black ────────────────────────────────────────────
+  ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
 
-  // Grid
-  ctx.strokeStyle = isLight ? 'rgba(75,46,46,0.04)' : 'rgba(255,244,230,0.025)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  // ── 2. Wave mesh ──────────────────────────────────────────────────────────
+  drawWaveMesh(ctx, W, H);
 
-  // Radial glow
-  const glow = ctx.createRadialGradient(W * 0.72, H * 0.28, 0, W * 0.72, H * 0.28, 560);
-  glow.addColorStop(0, isProfit ? 'rgba(109,184,138,0.09)' : 'rgba(212,87,74,0.09)');
+  // ── 3. Subtle color glow in wave area ────────────────────────────────────
+  const glow = ctx.createRadialGradient(W * 0.5, H * 0.48, 0, W * 0.5, H * 0.48, W * 0.55);
+  glow.addColorStop(0, isProfit ? 'rgba(93,190,128,0.07)' : 'rgba(217,80,74,0.07)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Left accent bar ───────────────────────────────────
-  ctx.fillStyle = ACCENT;
-  roundRect(ctx, 60, 80, 7, H - 160, 4);
+  // ── 4. Brand name — top center ────────────────────────────────────────────
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = '500 22px serif';
+  ctx.fillStyle    = 'rgba(255,255,255,0.88)';
+  ctx.fillText('رِبـحـي', W / 2, 68);
+  ctx.restore();
+
+  // ── 5. Thin separator below brand ────────────────────────────────────────
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth   = 0.5;
+  ctx.beginPath(); ctx.moveTo(W * 0.35, 86); ctx.lineTo(W * 0.65, 86); ctx.stroke();
+
+  // ── 6. Big percentage — center of card ────────────────────────────────────
+  // Backdrop pill behind number
+  const pillW = 320, pillH = 120, pillX = (W - pillW) / 2, pillY = H * 0.34;
+  ctx.save();
+  ctx.shadowBlur  = 60;
+  ctx.shadowColor = isProfit ? 'rgba(93,190,128,0.35)' : 'rgba(217,80,74,0.35)';
+  ctx.fillStyle   = 'rgba(0,0,0,0.45)';
+  ctx.beginPath();
+  ctx.roundRect(pillX, pillY - 10, pillW, pillH, 20);
   ctx.fill();
+  ctx.restore();
 
-  // ── Brand ─────────────────────────────────────────────
-  ctx.fillStyle = GOLD;
-  ctx.font = 'bold 32px serif';
-  ctx.textAlign = 'right';
-  ctx.fillText('رِبحي', W - 80, 136);
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = `bold ${pct.toFixed(0).length >= 3 ? '88' : '108'}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+  ctx.fillStyle    = GOLD;
+  ctx.shadowBlur   = 0;
+  ctx.fillText(pctStr, W / 2, pillY + pillH / 2 + 6);
+  ctx.restore();
 
-  ctx.fillStyle = MUTED;
-  ctx.font = '18px sans-serif';
-  ctx.fillText('ribhi.app', W - 80, 165);
+  // ── 7. Profit/loss amount — below percentage ──────────────────────────────
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = '400 20px "Helvetica Neue", Helvetica, Arial, sans-serif';
+  ctx.fillStyle    = isProfit ? 'rgba(93,190,128,0.85)' : 'rgba(217,80,74,0.85)';
+  ctx.fillText(profitStr, W / 2, pillY + pillH + 34);
+  ctx.restore();
 
-  // ── P&L Label ─────────────────────────────────────────
-  ctx.fillStyle = MUTED;
-  ctx.font = '24px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('إجمالي الربح / الخسارة', 100, 166);
+  // ── 8. Divider strip ─────────────────────────────────────────────────────
+  const divY = H * 0.72;
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth   = 0.5;
+  ctx.beginPath(); ctx.moveTo(60, divY); ctx.lineTo(W - 60, divY); ctx.stroke();
 
-  // ── Big number ────────────────────────────────────────
-  const profitStr =
-    (isProfit ? '+' : '') +
-    Number(result.totalProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-    ' ريال';
+  // ── 9. Symbol(s) — below divider ─────────────────────────────────────────
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = `500 ${symbolsStr.length > 10 ? '22' : '28'}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+  ctx.fillStyle    = 'rgba(255,255,255,0.75)';
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText(symbolsStr || '—', W / 2, divY + 56);
+  ctx.restore();
 
-  ctx.fillStyle = ACCENT;
-  ctx.font = 'bold 100px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(profitStr, 100, 310);
-
-  // ── Percent pill ──────────────────────────────────────
-  const pct    = result.overallPct || 0;
-  const pctStr = (pct >= 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(2) + '%';
-
-  ctx.font = 'bold 28px sans-serif';
-  const pctW = ctx.measureText(pctStr).width + 48;
-  ctx.fillStyle = isProfit ? 'rgba(109,184,138,0.15)' : 'rgba(212,87,74,0.15)';
-  roundRect(ctx, 100, 338, pctW, 54, 27);
-  ctx.fill();
-  ctx.fillStyle = ACCENT;
-  ctx.fillText(pctStr, 124, 374);
-
-  // ── Divider ───────────────────────────────────────────
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(100, 442); ctx.lineTo(W - 100, 442); ctx.stroke();
-
-  // ── Stats cards ───────────────────────────────────────
-  const stats = [
-    { label: 'رأس المال',  value: Number(result.totalInvested).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ريال', color: GOLD },
-    { label: 'الصفقات',   value: String((result.trades || []).length),   color: TEXT },
-    { label: 'الأسهم',    value: String((result.symbols || []).length),   color: TEXT },
-    { label: 'العائد',    value: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%', color: ACCENT },
+  // Stats row — capital & trades count
+  const statsY = divY + 110;
+  const statItems = [
+    { label: 'رأس المال', value: Number(result.totalInvested || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' ﷼' },
+    { label: 'الصفقات',  value: String((result.trades || []).length) },
+    { label: 'الأسهم',   value: String((result.symbols || []).length) },
   ];
-
-  const colW = (W - 200) / stats.length;
-
-  stats.forEach((s, i) => {
-    const cx = 100 + i * colW;
-    ctx.fillStyle = CARD;
-    roundRect(ctx, cx + 10, 462, colW - 20, 148, 16);
-    ctx.fill();
-    ctx.strokeStyle = BORDER; ctx.lineWidth = 1;
-    roundRect(ctx, cx + 10, 462, colW - 20, 148, 16);
-    ctx.stroke();
-
-    ctx.fillStyle = MUTED;
-    ctx.font = '20px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(s.label, cx + colW / 2, 516);
-
-    ctx.fillStyle = s.color;
-    ctx.font = 'bold 30px sans-serif';
-    ctx.fillText(s.value, cx + colW / 2, 566);
+  const colW = W / statItems.length;
+  statItems.forEach((s, i) => {
+    const cx = colW * i + colW / 2;
+    ctx.save();
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = 'bold 18px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.fillStyle    = 'rgba(255,255,255,0.85)';
+    ctx.fillText(s.value, cx, statsY);
+    ctx.font         = '400 12px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.fillStyle    = 'rgba(255,255,255,0.35)';
+    ctx.fillText(s.label, cx, statsY + 24);
+    ctx.restore();
   });
 
-  // ── Trade rows ────────────────────────────────────────
-  const rows = (result.rows || []).filter(r => r.profit !== null).slice(0, 4);
-  const ROW_Y0 = 666;
-  const ROW_H  = 82;
-  const COL_X  = [100, 400, 680, 980, 1360];
-  const HEADS  = ['الرمز', 'الشراء (ريال)', 'البيع (ريال)', 'الربح / الخسارة', 'النسبة'];
+  // ── 10. Date — bottom ────────────────────────────────────────────────────
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = '300 13px "Helvetica Neue", Helvetica, Arial, sans-serif';
+  ctx.fillStyle    = 'rgba(255,255,255,0.28)';
+  ctx.letterSpacing = '0.12em';
+  ctx.fillText(today, W / 2, H - 52);
+  ctx.restore();
 
-  // Header row
-  ctx.fillStyle = MUTED;
-  ctx.font = '19px sans-serif';
-  ctx.textAlign = 'left';
-  HEADS.forEach((h, i) => ctx.fillText(h, COL_X[i], ROW_Y0 - 12));
-
-  // Separator
-  ctx.strokeStyle = BORDER; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(100, ROW_Y0); ctx.lineTo(W - 100, ROW_Y0); ctx.stroke();
-
-  rows.forEach((r, idx) => {
-    const y = ROW_Y0 + idx * ROW_H;
-
-    // Zebra stripe
-    if (idx % 2 === 0) {
-      ctx.fillStyle = isLight ? 'rgba(75,46,46,0.025)' : 'rgba(255,244,230,0.018)';
-      ctx.fillRect(92, y + 4, W - 184, ROW_H - 4);
-    }
-
-    const ip  = (r.profit || 0) >= 0;
-    const fmt = v => Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    // Symbol + name
-    ctx.fillStyle = TEXT;
-    ctx.font = 'bold 22px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(r.sym, COL_X[0], y + 44);
-    ctx.fillStyle = MUTED;
-    ctx.font = '17px sans-serif';
-    ctx.fillText(r.name || '', COL_X[0], y + 66);
-
-    // Buy
-    ctx.fillStyle = TEXT;
-    ctx.font = '20px sans-serif';
-    ctx.fillText(r.buyTotal != null ? fmt(r.buyTotal) : '—', COL_X[1], y + 52);
-
-    // Sell
-    ctx.fillText(r.sellTotal != null ? fmt(r.sellTotal) : '—', COL_X[2], y + 52);
-
-    // P&L
-    ctx.fillStyle = ip ? GREEN : RED;
-    ctx.font = 'bold 21px sans-serif';
-    ctx.fillText((ip ? '+' : '') + fmt(r.profit), COL_X[3], y + 52);
-
-    // Pct
-    ctx.fillText((r.pct >= 0 ? '+' : '') + r.pct.toFixed(2) + '%', COL_X[4], y + 52);
-  });
-
-  // ── Footer ────────────────────────────────────────────
-  ctx.fillStyle = BORDER;
-  ctx.fillRect(0, H - 64, W, 1);
-
-  ctx.fillStyle = MUTED;
-  ctx.font = '19px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('ribhi.app  •  تحليل الصفقات بالذكاء الاصطناعي', W / 2, H - 22);
+  // ── 11. Bottom watermark ─────────────────────────────────────────────────
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = '300 11px "Helvetica Neue", Helvetica, Arial, sans-serif';
+  ctx.fillStyle    = 'rgba(255,255,255,0.15)';
+  ctx.fillText('ribhi.app', W / 2, H - 28);
+  ctx.restore();
 };

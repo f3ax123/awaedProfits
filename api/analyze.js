@@ -1,22 +1,14 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-export default async function handler(req, res) {
-  // أول شيء — تأكد إن الـ function تشتغل
-  console.log('ENV CHECK:', {
-    hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-    hasFirebaseProject: !!process.env.FIREBASE_PROJECT_ID,
-    hasFirebaseEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
-    hasFirebaseKey: !!process.env.FIREBASE_PRIVATE_KEY,
-  });
-  // ... باقي الكود
+
 // ── تهيئة Firebase Admin (مرة واحدة فقط) ──────────────
 if (!getApps().length) {
   initializeApp({
     credential: cert({
       projectId:   process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/^"|"$/g, ''),
     }),
   });
 }
@@ -27,7 +19,7 @@ const adminDb   = getFirestore();
 // ── حدود الخطط ────────────────────────────────────────
 const PLAN_LIMITS = { free: 5, pro: 100, max: Infinity };
 
-// ── Rate limiting في الذاكرة (استبدل بـ Redis في الإنتاج) ──
+// ── Rate limiting في الذاكرة ──────────────────────────
 const ipRateMap  = new Map();
 const uidRateMap = new Map();
 
@@ -69,8 +61,7 @@ export default async function handler(req, res) {
   let decodedToken;
 
   try {
-    // verifyIdToken يتحقق من: التوقيع، الانتهاء، المشروع، والإلغاء
-    decodedToken = await adminAuth.verifyIdToken(idToken, /* checkRevoked */ true);
+    decodedToken = await adminAuth.verifyIdToken(idToken, true);
   } catch (err) {
     await logSecurityEvent('INVALID_TOKEN', { ip, errorCode: err.code });
     const msg = err.code === 'auth/id-token-revoked'
@@ -90,29 +81,27 @@ export default async function handler(req, res) {
   // ── 4. جلب بيانات المستخدم من Firestore ─────────────
   const userRef  = adminDb.collection('users').doc(uid);
   const userSnap = await userRef.get();
-// إذا ما عنده document — أنشئه تلقائياً كـ free
-if (!userSnap.exists) {
-  await userRef.set({
-    plan: 'free',
-    usageCount: 0,
-    usageMonth: `${now.getFullYear()}-${now.getMonth()}`,
-    createdAt: FieldValue.serverTimestamp(),
-  });
-}
 
-const userData = userSnap.exists ? userSnap.data() : { plan: 'free', usageCount: 0 };
-const plan     = userData.plan || 'free';
+  // إذا المستخدم جديد، أنشئ له ملف تلقائياً
+  if (!userSnap.exists) {
+    await userRef.set({
+      plan:       'free',
+      usageCount: 0,
+      usageMonth: '',
+      createdAt:  FieldValue.serverTimestamp(),
+    });
+  }
 
-  const userData = userSnap.data();
-  const plan     = userData.plan || 'free';
-  const limit    = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
+  const snapData  = userSnap.exists ? userSnap.data() : { plan: 'free', usageCount: 0 };
+  const plan      = snapData.plan || 'free';
+  const limit     = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
   // ── 5. فحص وتجديد عداد الشهر ────────────────────────
   const now      = new Date();
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
-  let usageCount = userData.usageCount || 0;
+  let usageCount = snapData.usageCount || 0;
 
-  if (userData.usageMonth !== monthKey) usageCount = 0;
+  if (snapData.usageMonth !== monthKey) usageCount = 0;
 
   // ── 6. التحقق من حد الخطة ───────────────────────────
   if (plan !== 'max' && usageCount >= limit) {
@@ -132,7 +121,6 @@ const plan     = userData.plan || 'free';
     return res.status(400).json({ error: 'Invalid image type' });
   }
 
-  // فحص حجم الصورة (10MB max)
   const approxBytes = (imageBase64.length * 3) / 4;
   if (approxBytes > 10 * 1024 * 1024) {
     return res.status(400).json({ error: 'Image too large (max 10MB)' });
@@ -184,9 +172,9 @@ const plan     = userData.plan || 'free';
       }),
     });
 
-    const data = await claudeRes.json();
-    if (data.error) throw new Error(data.error.message);
-    rawText = data.content?.[0]?.text || '';
+    const claudeData = await claudeRes.json();
+    if (claudeData.error) throw new Error(claudeData.error.message);
+    rawText = claudeData.content?.[0]?.text || '';
 
   } catch (err) {
     console.error('Claude API error:', err);
@@ -194,28 +182,25 @@ const plan     = userData.plan || 'free';
   }
 
   // ── 9. تحديث usageCount عبر Firestore Transaction ──
-  // يمنع Race Conditions تماماً حتى مع طلبات متزامنة
   let newUsageCount = usageCount;
   try {
     await adminDb.runTransaction(async (tx) => {
       const freshSnap = await tx.get(userRef);
-      const freshData = freshSnap.data() || {};
+      const freshData = freshSnap.exists ? freshSnap.data() : { plan: 'free', usageCount: 0 };
       let freshCount  = freshData.usageCount || 0;
 
-      // إعادة تعيين إذا تغيّر الشهر
       if (freshData.usageMonth !== monthKey) freshCount = 0;
 
-      // تحقق مزدوج داخل الـ transaction
       if (plan !== 'max' && freshCount >= limit) {
         throw new Error('LIMIT_EXCEEDED_IN_TRANSACTION');
       }
 
       newUsageCount = freshCount + 1;
-      tx.update(userRef, {
+      tx.set(userRef, {
         usageCount:     newUsageCount,
         usageMonth:     monthKey,
         lastAnalysisAt: FieldValue.serverTimestamp(),
-      });
+      }, { merge: true });
     });
   } catch (err) {
     if (err.message === 'LIMIT_EXCEEDED_IN_TRANSACTION') {
@@ -227,7 +212,7 @@ const plan     = userData.plan || 'free';
   // ── 10. الرد على الـ Client ──────────────────────────
   return res.status(200).json({
     rawText,
-    usageCount: newUsageCount, // العداد المحدَّث — للواجهة فقط
+    usageCount: newUsageCount,
     usageMonth: monthKey,
   });
 }

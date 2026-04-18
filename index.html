@@ -234,9 +234,7 @@ body.en .card-actions { left: auto; right: 12px; }
 .delete-btn:hover { background: rgba(212,87,74,0.25); border-color: var(--red); }
 .share-hist-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all .2s; font-family: inherit; }
 .share-hist-btn:hover { color: var(--text); border-color: var(--accent); }
-  .share-history-btn { position: absolute; bottom: 12px; left: 160px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all .2s; font-family: inherit; }
-.share-history-btn:hover { color: var(--gold); border-color: var(--gold); }
-body.en .share-history-btn { left: auto; right: 90px; }
+
   .history-loading { text-align: center; padding: 36px; color: var(--muted); font-size: 14px; }
   .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
   .overview-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
@@ -1196,11 +1194,11 @@ async function loadHistory(forceRefresh = false) {
     } else {
       window._histMap = {};
       listHTML = docs.map(d => {
-        const dd=d.data(), isP=window._histMap[d.id] = dd;(dd.totalProfit||0)>=0;
+        const dd=d.data(); _historyDataMap[d.id] = dd; const isP=(dd.totalProfit||0)>=0;
         const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString(currentLang==='ar'?'ar-SA':'en-US'):'—';
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
         return `<div class="history-card" onclick="expandHistory('${d.id}')">
-<div class="card-actions"><button class="delete-btn" onclick="event.stopPropagation();deleteHistory('${d.id}',event)">${t('delete')}</button><button class="share-hist-btn" onclick="event.stopPropagation();shareFromHistory('${d.id}')">${currentLang==='ar'?'🔗 مشاركة':'🔗 Share'}</button></div><button class="share-history-btn" onclick="event.stopPropagation();window._shareData='${d.id}';showShareCardFromHistory(window._histMap['${d.id}'])">${currentLang==='ar'?'مشاركة':'Share'}</button>          <div class="history-card-top">
+<div class="card-actions"><button class="delete-btn" onclick="event.stopPropagation();deleteHistory('${d.id}',event)">${t('delete')}</button><button class="share-hist-btn" onclick="event.stopPropagation();shareFromHistory('${d.id}')">${currentLang==='ar'?'🔗 مشاركة':'🔗 Share'}</button></div>          <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="history-pct ${isP?'profit':'loss'}">${(dd.overallPct||0)>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>

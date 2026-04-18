@@ -1193,6 +1193,7 @@ async function loadHistory(forceRefresh = false) {
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
         return `<div class="history-card" onclick="expandHistory('${d.id}')">
           <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>
+          <button class="delete-btn" style="right:80px;" onclick="event.stopPropagation();showShareCardFromHistory(${JSON.stringify(dd).replace(/</g,'\\u003c')})">🔗 ${currentLang==='ar'?'مشاركة':'Share'}</button>
           <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">

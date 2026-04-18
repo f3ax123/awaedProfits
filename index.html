@@ -1133,7 +1133,7 @@ async function renderAccountPage() {
     document.getElementById('monthlyBars').innerHTML = entries.map(([label, val]) => {
       const h = Math.max((Math.abs(val)/maxV)*100, 4), isP = val >= 0;
       return `<div class="monthly-bar-wrap">
-        <div class="monthly-bar-val" style="color:${isP?'var(--green)':'var(--red)}">${isP?'+':''}${Math.abs(val)>=1000?(val/1000).toFixed(1)+'k':val.toFixed(0)}</div>
+        <div class="monthly-bar-val" style="color:${isP?'var(--green)':'var(--red)'}"> ${isP?'+':''}">${isP?'+':''}${Math.abs(val)>=1000?(val/1000).toFixed(1)+'k':val.toFixed(0)}</div>
         <div class="monthly-bar ${isP?'profit-bar':'loss-bar'}" style="height:${h}%"></div>
         <div class="monthly-bar-label">${label}</div>
       </div>`;

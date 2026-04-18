@@ -228,9 +228,12 @@
   .history-meta-item strong { color: var(--text); }
   .history-symbols { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .symbol-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 9px; font-size: 11px; font-weight: 600; color: var(--gold); }
-  .delete-btn { position: absolute; bottom: 12px; left: 12px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all .2s; font-family: inherit; }
-  body.en .delete-btn { left: auto; right: 12px; }
-  .delete-btn:hover { color: var(--red); border-color: var(--red); background: rgba(212,87,74,0.06); }
+  .card-actions { position: absolute; bottom: 12px; left: 12px; display: flex; gap: 8px; }
+body.en .card-actions { left: auto; right: 12px; }
+.delete-btn { background: rgba(212,87,74,0.12); border: 1px solid rgba(212,87,74,0.35); color: var(--red); font-size: 11px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all .2s; font-family: inherit; }
+.delete-btn:hover { background: rgba(212,87,74,0.25); border-color: var(--red); }
+.share-hist-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all .2s; font-family: inherit; }
+.share-hist-btn:hover { color: var(--text); border-color: var(--accent); }
   .share-history-btn { position: absolute; bottom: 12px; left: 160px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all .2s; font-family: inherit; }
 .share-history-btn:hover { color: var(--gold); border-color: var(--gold); }
 body.en .share-history-btn { left: auto; right: 90px; }
@@ -1196,7 +1199,7 @@ async function loadHistory(forceRefresh = false) {
         const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString(currentLang==='ar'?'ar-SA':'en-US'):'—';
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
         return `<div class="history-card" onclick="expandHistory('${d.id}')">
-          <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>
+          <div class="card-actions">   <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>   <button class="share-hist-btn" onclick="event.stopPropagation();window.showShareCardFromHistory(${JSON.stringify({totalProfit:dd.totalProfit||0,totalInvested:dd.totalInvested||0,overallPct:dd.overallPct||0,symbols:dd.symbols||[],rows:dd.rows||[],tradesCount:dd.tradesCount||0}).replace(/</g,'\u003c')})">🔗 ${currentLang==='ar'?'مشاركة':'Share'}</button> </div>
 <button class="share-history-btn" onclick="event.stopPropagation();window._shareData='${d.id}';showShareCardFromHistory(window._histMap['${d.id}'])">${currentLang==='ar'?'مشاركة':'Share'}</button>          <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">

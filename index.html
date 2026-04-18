@@ -689,6 +689,7 @@ let lastResult = null, lastResultSaved = false;
 window.__lastResult = null;
 let currentPage = 'analyze';
 let _historyCache = null;
+  const _historyDataMap = {};
 
 // ══════════════════════════════════════════════════════
 // Theme
@@ -1199,8 +1200,7 @@ async function loadHistory(forceRefresh = false) {
         const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString(currentLang==='ar'?'ar-SA':'en-US'):'—';
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
         return `<div class="history-card" onclick="expandHistory('${d.id}')">
-          <div class="card-actions">   <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>   <button class="share-hist-btn" onclick="event.stopPropagation();window.showShareCardFromHistory(${JSON.stringify({totalProfit:dd.totalProfit||0,totalInvested:dd.totalInvested||0,overallPct:dd.overallPct||0,symbols:dd.symbols||[],rows:dd.rows||[],tradesCount:dd.tradesCount||0}).replace(/</g,'\u003c')})">🔗 ${currentLang==='ar'?'مشاركة':'Share'}</button> </div>
-<button class="share-history-btn" onclick="event.stopPropagation();window._shareData='${d.id}';showShareCardFromHistory(window._histMap['${d.id}'])">${currentLang==='ar'?'مشاركة':'Share'}</button>          <div class="history-card-top">
+<div class="card-actions"><button class="delete-btn" onclick="event.stopPropagation();deleteHistory('${d.id}',event)">${t('delete')}</button><button class="share-hist-btn" onclick="event.stopPropagation();shareFromHistory('${d.id}')">${currentLang==='ar'?'🔗 مشاركة':'🔗 Share'}</button></div><button class="share-history-btn" onclick="event.stopPropagation();window._shareData='${d.id}';showShareCardFromHistory(window._histMap['${d.id}'])">${currentLang==='ar'?'مشاركة':'Share'}</button>          <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="history-pct ${isP?'profit':'loss'}">${(dd.overallPct||0)>=0?'+':''}${(dd.overallPct||0).toFixed(2)}%</span>
@@ -1229,7 +1229,11 @@ async function loadHistory(forceRefresh = false) {
     _historyCache = { count:countText, overview:overviewHTML, html:listHTML };
   } catch(e) { listEl.innerHTML = `<div class="history-loading">Error: ${e.message}</div>`; }
 }
-
+window.shareFromHistory = function(id) {
+  const dd = _historyDataMap[id];
+  if (!dd) return;
+  window.showShareCardFromHistory(dd);
+};
 window.expandHistory = id => { const d=document.getElementById('detail-'+id); if(d) d.style.display=d.style.display==='none'?'block':'none'; };
 
 let _pendingDeleteId = null;

@@ -294,8 +294,14 @@
 .share-modal-overlay.open { display:flex;animation:fadeIn .2s ease; }
 .share-modal { background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:520px;text-align:center; }
 .share-modal-title { font-size:16px;font-weight:700;margin-bottom:16px; }
-.share-canvas-wrap { border-radius:12px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border); }
-.share-canvas-wrap canvas { width:100%;height:auto;display:block; }
+.share-canvas-wrap { 
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:16px;
+  border:1px solid var(--border);
+  direction: ltr;  /* ← هذا هو الحل */
+}
+.share-canvas-wrap canvas {    width: 100%;    height: auto;    display: block;   direction: ltr; }
 .share-actions { display:flex;gap:10px;justify-content:center; }
 .share-dl-btn { flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s; }
 body.light .share-dl-btn { color:#fff4e6; }

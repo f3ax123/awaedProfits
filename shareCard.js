@@ -1,5 +1,4 @@
 // ── Share Card — مطابق لتصميم كانفا بالضبط ──────────────────────────────────
-// الخطوط: Foda Naskh (ربحي) | Poppins Bold (النسبة) | Kanao Sans Serif (السهم) | Open Sans (التاريخ)
 
 window.closeShareModal = () => document.getElementById('shareModal').classList.remove('open');
 
@@ -11,24 +10,51 @@ window.downloadShareCard = function () {
   link.click();
 };
 
-// ── تحميل الخطوط من Google Fonts ─────────────────────────────────────────────
-function loadFonts() {
-  return new Promise((resolve) => {
-    // Poppins و Open Sans متاحة من Google Fonts
-    // Foda Naskh و Kanao — نستخدم بديل مقبول إذا لم تكن متاحة
-    const fontsToLoad = [
-      new FontFace('Poppins', 'url(https://fonts.gstatic.com/s/poppins/v21/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2)', { weight: '700' }),
-      new FontFace('Open Sans', 'url(https://fonts.gstatic.com/s/opensans/v40/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4n.woff2)', { weight: '400' }),
-    ];
+// ── تحميل الخطوط ─────────────────────────────────────────────────────────────
+let fontsLoaded = false;
 
-    Promise.all(fontsToLoad.map(f => f.load().then(loaded => {
-      document.fonts.add(loaded);
-      return loaded;
-    }))).then(() => resolve()).catch(() => resolve()); // resolve حتى لو فشل التحميل
-  });
+async function ensureFonts() {
+  if (fontsLoaded) return;
+  try {
+    const fodaFace = new FontFace(
+      'FodaNaskh',
+      'url(/fonts/foda-free-font.ttf) format("truetype")'
+    );
+    const kenaoFace = new FontFace(
+      'Kenao',
+      'url(/fonts/Kenao.otf) format("opentype")'
+    );
+    const poppinsFace = new FontFace(
+      'Poppins',
+      'url(https://fonts.gstatic.com/s/poppins/v21/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2) format("woff2")',
+      { weight: '700' }
+    );
+    const openSansFace = new FontFace(
+      'OpenSans',
+      'url(https://fonts.gstatic.com/s/opensans/v40/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2) format("woff2")',
+      { weight: '400' }
+    );
+
+    const loaded = await Promise.allSettled([
+      fodaFace.load(),
+      kenaoFace.load(),
+      poppinsFace.load(),
+      openSansFace.load(),
+    ]);
+
+    loaded.forEach(r => {
+      if (r.status === 'fulfilled') document.fonts.add(r.value);
+    });
+
+    await document.fonts.ready;
+    fontsLoaded = true;
+  } catch (e) {
+    console.warn('Font load warning:', e);
+    fontsLoaded = true;
+  }
 }
 
-// ── Wave helper ───────────────────────────────────────────────────────────────
+// ── موجة واحدة ───────────────────────────────────────────────────────────────
 function drawWave(ctx, W, H, offsetY, amplitude, frequency, phase, alpha, lineWidth = 0.7) {
   ctx.beginPath();
   ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
@@ -40,22 +66,19 @@ function drawWave(ctx, W, H, offsetY, amplitude, frequency, phase, alpha, lineWi
   ctx.stroke();
 }
 
-// ── موجات الخلفية — مطابقة لكانفا ────────────────────────────────────────────
+// ── شبكة الموجات — مطابقة لكانفا ────────────────────────────────────────────
 function drawWaveMesh(ctx, W, H) {
-  // Top-right cluster
+  // أعلى اليمين
   for (let i = 0; i < 28; i++) {
-    const baseY = -60 + i * 11;
-    drawWave(ctx, W, H, baseY, 38 + i * 1.5, 1.4, i * 0.22, 0.055 + i * 0.003);
+    drawWave(ctx, W, H, -60 + i * 11, 38 + i * 1.5, 1.4, i * 0.22, 0.055 + i * 0.003);
   }
-  // Middle main cluster
+  // الوسط الرئيسي
   for (let i = 0; i < 40; i++) {
-    const baseY = H * 0.28 + i * 10;
-    drawWave(ctx, W, H, baseY, 55 + Math.sin(i * 0.4) * 30, 1.2, i * 0.18, 0.07 + i * 0.002);
+    drawWave(ctx, W, H, H * 0.28 + i * 10, 55 + Math.sin(i * 0.4) * 30, 1.2, i * 0.18, 0.07 + i * 0.002);
   }
-  // Bottom-left cluster
+  // أسفل اليسار
   for (let i = 0; i < 24; i++) {
-    const baseY = H * 0.83 + i * 13;
-    drawWave(ctx, W, H, baseY, 32 + i * 2, 1.6, i * 0.25, 0.045 + i * 0.003);
+    drawWave(ctx, W, H, H * 0.83 + i * 13, 32 + i * 2, 1.6, i * 0.25, 0.045 + i * 0.003);
   }
 }
 
@@ -63,26 +86,26 @@ function drawWaveMesh(ctx, W, H) {
 window.showShareCard = async function (result) {
   if (!result) return;
 
-  // تحميل الخطوط أولاً
-  await loadFonts();
+  await ensureFonts();
 
   const modal  = document.getElementById('shareModal');
   const canvas = document.getElementById('shareCanvas');
   modal.classList.add('open');
 
-  // أبعاد كانفا: 794 × 1123
+  // أبعاد كانفا الأصلية: 794 × 1123
   const W = 794, H = 1123;
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
   // ── البيانات ──────────────────────────────────────────────────────────────
-  const pct    = result.overallPct || 0;
-  const pctStr = (pct >= 0 ? '+' : '') + Math.abs(pct).toFixed(2) + '%';
+  const pct       = result.overallPct || 0;
+  const pctStr    = (pct >= 0 ? '+' : '') + Math.abs(pct).toFixed(2) + '%';
   const symbolsStr = (result.symbols || []).slice(0, 4).join('  ·  ') || '—';
-  const today  = new Date().toLocaleDateString('en-US', {
-    year: 'numeric', month: 'numeric', day: 'numeric'
-  });
+
+  // التاريخ بنفس تنسيق كانفا: YYYY/M/D
+  const now   = new Date();
+  const today = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
 
   const GOLD = '#C8A84B';
 
@@ -90,46 +113,50 @@ window.showShareCard = async function (result) {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, W, H);
 
-  // ── 2. موجات الخلفية ──────────────────────────────────────────────────────
+  // ── 2. شبكة الموجات ───────────────────────────────────────────────────────
   drawWaveMesh(ctx, W, H);
 
-  // ── 3. اسم التطبيق "ربحي" — أعلى المنتصف ────────────────────────────────
-  // Foda Naskh حجم 20 — نستخدم serif كـ fallback لو الخط ما اتحمّل
+  // ── 3. "رِبـحـي" — أعلى المنتصف ─────────────────────────────────────────
+  // Foda Naskh | حجم 20 | أبيض
+  // الموضع من كانفا: top ≈ 63px من المنتصف العلوي
   ctx.save();
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font         = '400 20px "Foda Naskh", "Amiri", "Scheherazade New", serif';
-  ctx.fillStyle    = 'rgba(255,255,255,0.88)';
+  ctx.font         = '400 20px "FodaNaskh", serif';
+  ctx.fillStyle    = '#FFFFFF';
   ctx.fillText('رِبـحـي', W / 2, 63);
   ctx.restore();
 
-  // ── 4. نسبة الربح — وسط البطاقة ──────────────────────────────────────────
-  // Poppins Bold حجم 83.4 — مركز عمودي تقريباً H*0.45
+  // ── 4. نسبة الربح — وسط الموجات ─────────────────────────────────────────
+  // Poppins Bold | حجم 83.4 | ذهبي
+  // الموضع من كانفا: top ≈ 467px → مركز النص ≈ 467 + (ارتفاع الخط/2) ≈ 515px
   ctx.save();
   ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font         = '700 83.4px "Poppins", "Helvetica Neue", Helvetica, sans-serif';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font         = '700 83.4px "Poppins", sans-serif';
   ctx.fillStyle    = GOLD;
-  ctx.fillText(pctStr, W / 2, H * 0.458);
+  ctx.fillText(pctStr, W / 2, 550);
   ctx.restore();
 
-  // ── 5. رمز السهم — أسفل النسبة ───────────────────────────────────────────
-  // Kanao Sans Serif حجم 26 — fallback: sans-serif
+  // ── 5. رمز السهم — تحت الموجات ──────────────────────────────────────────
+  // Kenao | حجم 26 | أبيض
+  // الموضع من كانفا: top ≈ 882px → مركز ≈ 903px
   ctx.save();
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font         = '400 26px "Kanao", "Kanao Sans Serif", "Tenor Sans", "Cormorant Garamond", serif';
-  ctx.fillStyle    = 'rgba(255,255,255,0.88)';
-  ctx.fillText(symbolsStr, W / 2, H * 0.788);
+  ctx.font         = '400 26px "Kenao", serif';
+  ctx.fillStyle    = '#FFFFFF';
+  ctx.fillText(symbolsStr, W / 2, 903);
   ctx.restore();
 
   // ── 6. التاريخ — أسفل البطاقة ────────────────────────────────────────────
-  // Open Sans حجم 12.9 opacity 50%
+  // Open Sans | حجم 12.9 | أبيض opacity 50%
+  // الموضع من كانفا: top ≈ 1033px → مركز ≈ 1040px
   ctx.save();
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font         = '400 12.9px "Open Sans", sans-serif';
-  ctx.fillStyle    = 'rgba(255,255,255,0.50)';
-  ctx.fillText(today, W / 2, H * 0.926);
+  ctx.font         = '400 12.9px "OpenSans", sans-serif';
+  ctx.fillStyle    = 'rgba(255,255,255,0.5)';
+  ctx.fillText(today, W / 2, 1040);
   ctx.restore();
 };

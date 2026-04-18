@@ -991,7 +991,7 @@ function renderResults(data) {
   document.getElementById('tradesBody').innerHTML = rows.map(r => {
     const ph = r.profit !== null
       ? `<div><div class="col-label">${t('pl_col')}</div><div class="col-value"><span class="badge ${r.profit>=0?'profit':'loss'}">${r.profit>=0?'+':''}${fmt(r.profit)} ${t('sar')}</span></div></div>
-         <div><div class="col-label">${t('pct_col')}</div><div class="col-value" style="color:${r.pct>=0?'var(--green)':'var(--red)}">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div></div>`
+         <div><div class="col-label">${t('pct_col')}</div><div class="col-value" style="color:${r.pct>=0?'var(--green)':'var(--red)'}">  ${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</div></div>`
       : `<div><div class="col-label">${t('status_col')}</div><div class="col-value"><span class="badge buy">${t('open_trade')}</span></div></div><div></div>`;
     return `<div class="trade-row">
       <div><div class="col-label">${t('symbol_col')}</div><div class="col-value">${r.sym}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${r.name}</div></div>

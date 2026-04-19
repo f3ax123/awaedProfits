@@ -793,8 +793,12 @@ function updateThemeIcon(isLight) {
       : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   });
 }
-function applyTheme(isLight) { document.body.classList.toggle('light', isLight); updateThemeIcon(isLight); localStorage.setItem('theme', isLight ? 'light' : 'dark'); }
-if (localStorage.getItem('theme') === 'light') applyTheme(true);
+function applyTheme(isLight) { 
+  document.body.classList.toggle('light', isLight); 
+  updateThemeIcon(isLight); 
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  updateLogos(); // ← هذا السطر الجديد فقط
+}if (localStorage.getItem('theme') === 'light') applyTheme(true); // ← أضف هذين السطرين window.addEventListener('load', updateLogos);
 document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
 

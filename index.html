@@ -379,7 +379,7 @@
   .share-close-btn:hover { color:var(--text); }
 </style>
 </head>
-<script src="/shareCard.js"></script> <script src="/logo.js"></script>
+<script src="/shareCard.js"></script> 
 <body>
 
 <!-- ── Auth Loading Overlay (يُخفى بعد التحقق من الجلسة) ── -->
@@ -798,7 +798,18 @@ function applyTheme(isLight) {
   updateThemeIcon(isLight); 
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
   updateLogos(); // ← هذا السطر الجديد فقط
-}if (localStorage.getItem('theme') === 'light') applyTheme(true); // ← أضف هذين السطرين window.addEventListener('load', updateLogos);
+}if (localStorage.getItem('theme') === 'light') applyTheme(true);
+
+// تحديث اللوجو
+function updateLogos() {
+  const isLight = document.body.classList.contains('light');
+  const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;
+  const src = `data:image/jpeg;base64,${b64}`;
+  document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {
+    img.src = src;
+  });
+}
+window.addEventListener('load', updateLogos); // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos);  // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos); // ← أضف هذين السطرين window.addEventListener('load', updateLogos);
 document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
 

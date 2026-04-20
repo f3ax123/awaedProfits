@@ -801,7 +801,7 @@ function applyTheme(isLight) { document.body.classList.toggle('light', isLight);
 
 // تحديث اللوجو
 
-}
+
 window.addEventListener('load', updateLogos); // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos);  // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos); // ← أضف هذين السطرين window.addEventListener('load', updateLogos);
 document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));

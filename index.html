@@ -794,7 +794,9 @@ function updateThemeIcon(isLight) {
 }
 function updateLogos() {
   const isLight = document.body.classList.contains('light');
-  const src = `data:image/jpeg;base64,${isLight ? window._LOGO_LIGHT_B64 : window._LOGO_DARK_B64}`;
+  const b64 = isLight ? window._LOGO_LIGHT_B64 : window._LOGO_DARK_B64;
+  if (!b64) return;
+  const src = `data:image/jpeg;base64,${b64}`;
   document.querySelectorAll('img[data-logo]').forEach(img => { img.src = src; });
 }
 function applyTheme(isLight) { document.body.classList.toggle('light', isLight); updateThemeIcon(isLight); localStorage.setItem('theme', isLight ? 'light' : 'dark'); updateLogos(); }if (localStorage.getItem('theme') === 'light') applyTheme(true);
@@ -802,8 +804,7 @@ function applyTheme(isLight) { document.body.classList.toggle('light', isLight);
 // تحديث اللوجو
 
 
-window.addEventListener('load', updateLogos); // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos);  // تحديث اللوجو function updateLogos() {   const isLight = document.body.classList.contains('light');   const b64 = isLight ? _LOGO_LIGHT_B64 : _LOGO_DARK_B64;   const src = `data:image/jpeg;base64,${b64}`;   document.querySelectorAll('img[alt="رِبحي"]').forEach(img => {     img.src = src;   }); } window.addEventListener('load', updateLogos); // ← أضف هذين السطرين window.addEventListener('load', updateLogos);
-document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
+window.addEventListener('load', () => setTimeout(updateLogos, 0));document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
 
 // ══════════════════════════════════════════════════════

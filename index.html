@@ -48,20 +48,85 @@
   @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
   @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-  /* ── Logo: dark mode = logo_dark.png, light mode = logo_light.png ── */
-  .app-logo { height: 30px; width: auto; display: block; content: url('/logo_dark.png'); }
-  body.light .app-logo { content: url('/logo_light.png'); }
+  /* ── Auth Loading Overlay ──────────────────────────────── */
+  .auth-loading {
+    position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .35s ease;
+  }
+  .auth-loading.fade-out { opacity: 0; pointer-events: none; }
 
-  .app-logo-sm { height: 22px; width: auto; display: block; content: url('/logo_dark.png'); }
-  body.light .app-logo-sm { content: url('/logo_light.png'); }
+  /* ── Confetti Animation ────────────────────────────────── */
+  @keyframes confettiFall {
+    0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
 
-  .app-logo-gate { height: 36px; width: auto; content: url('/logo_dark.png'); }
-  body.light .app-logo-gate { content: url('/logo_light.png'); }
+  /* ── Skeleton Shimmer ──────────────────────────────────── */
+  @keyframes shimmer {
+    0%, 100% { opacity: .45; }
+    50%       { opacity: .9;  }
+  }
+  .skeleton-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 12px;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  .skeleton-line {
+    background: var(--border); border-radius: 6px; margin-bottom: 10px;
+  }
+
+  /* ── Page Enter Animation ──────────────────────────────── */
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  .page-enter { animation: pageEnter .22s ease forwards; }
+
+  /* ── History Search ────────────────────────────────────── */
+  .history-search {
+    width: 100%; padding: 11px 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: inherit; font-size: 14px;
+    margin-bottom: 16px; outline: none;
+    transition: border-color .2s; box-sizing: border-box;
+  }
+  .history-search:focus { border-color: var(--accent); }
+  .history-search::placeholder { color: var(--muted); }
+
+  /* ── Copy Result Button ────────────────────────────────── */
+  .copy-result-btn {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 8px 14px;
+    font-size: 13px; cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .copy-result-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── Trend Badge ───────────────────────────────────────── */
+  .trend-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; margin-top: 6px;
+  }
+  .trend-badge.up   { background: rgba(109,184,138,.12); color: var(--green); }
+  .trend-badge.down { background: rgba(212,87,74,.12);   color: var(--red);   }
+  .trend-badge.flat { background: rgba(138,110,98,.12);  color: var(--muted); }
+
+  /* ── Best Trade Badge ──────────────────────────────────── */
+  .best-trade-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    background: rgba(200,169,110,.15); color: var(--gold);
+    border: 1px solid rgba(200,169,110,.3); margin-bottom: 4px;
+  }
 
   .login-gate { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0; padding: 20px; transition: background .3s; }
   .login-gate.hidden { display: none; }
   .login-gate-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 48px 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow); animation: fadeIn .4s ease; }
   .login-gate-logo { margin-bottom: 32px; display: flex; justify-content: center; }
+  .login-gate-logo img { height: 36px; width: auto; }
   .login-gate-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
   .login-gate-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
   .login-gate-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: var(--accent); border: none; border-radius: 14px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; color: var(--bg); transition: all .2s; }
@@ -77,6 +142,7 @@
   .topbar-left { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
   .topbar-center { display: flex; align-items: center; justify-content: center; }
   .topbar-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+  .topbar-logo img { height: 30px; width: auto; display: block; }
 
   .icon-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
   .icon-btn:hover { color: var(--text); border-color: var(--accent); }
@@ -311,104 +377,15 @@
   .share-dl-btn:hover { opacity:.85; }
   .share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
   .share-close-btn:hover { color:var(--text); }
-
-  /* ── Tooltip ── */
-  .tooltip-wrap { position:relative; display:inline-flex; }
-  .tooltip-wrap .tooltip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--text); color:var(--bg); font-size:11px; font-weight:600; padding:4px 10px; border-radius:7px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; z-index:99; }
-  .tooltip-wrap:hover .tooltip { opacity:1; }
-
-  /* ── Empty state illustration ── */
-  .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:64px 24px; gap:14px; text-align:center; }
-  .empty-state-icon { width:72px; height:72px; border-radius:18px; background:var(--card2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
-  .empty-state-icon svg { width:32px; height:32px; opacity:.4; }
-  .empty-state-title { font-size:16px; font-weight:700; }
-  .empty-state-sub { font-size:13px; color:var(--muted); max-width:280px; line-height:1.6; }
-
-  /* ── Skeleton loader ── */
-  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-  .skeleton { background: linear-gradient(90deg, var(--card2) 25%, var(--border) 50%, var(--card2) 75%); background-size: 800px 100%; animation: shimmer 1.4s infinite; border-radius:8px; }
-  .skeleton-line { height:14px; margin-bottom:8px; }
-  .skeleton-line.short { width:40%; }
-  .skeleton-line.medium { width:70%; }
-  .skeleton-line.full { width:100%; }
-
-  /* ── Floating action feedback ── */
-  .fab-feedback { position:fixed; bottom:80px; right:20px; z-index:500; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
-  body.en .fab-feedback { right:auto; left:20px; }
-
-  /* ── Stat delta indicator ── */
-  .delta { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; padding:2px 7px; border-radius:5px; }
-  .delta.up { background:rgba(109,184,138,0.12); color:var(--green); }
-  .delta.down { background:rgba(212,87,74,0.12); color:var(--red); }
-  .delta.neutral { background:var(--card2); color:var(--muted); }
-
-  /* ── Card hover lift ── */
-  .lift { transition: transform .2s, box-shadow .2s; }
-  .lift:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.18); }
-
-  /* ── Separator ── */
-  .sep { height:1px; background:var(--border); margin:20px 0; }
-
-  /* ── Tag chips ── */
-  .tag { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--card2); border:1px solid var(--border); color:var(--muted); }
-  .tag.green { background:rgba(109,184,138,0.1); border-color:rgba(109,184,138,0.25); color:var(--green); }
-  .tag.red { background:rgba(212,87,74,0.1); border-color:rgba(212,87,74,0.25); color:var(--red); }
-  .tag.gold { background:rgba(200,169,110,0.1); border-color:rgba(200,169,110,0.25); color:var(--gold); }
-
-  /* ── Input style ── */
-  .input-field { width:100%; background:var(--card2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:10px 14px; font-size:14px; font-family:inherit; outline:none; transition:border-color .2s; }
-  .input-field:focus { border-color:var(--accent); }
-  .input-field::placeholder { color:var(--muted); }
-
-  /* ── Progress ring ── */
-  .progress-ring-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; }
-  .progress-ring-label { position:absolute; font-size:13px; font-weight:700; }
-
-  /* ── Notification dot ── */
-  .notif-dot { width:8px; height:8px; border-radius:50%; background:var(--red); position:absolute; top:4px; left:4px; border:2px solid var(--bg); }
-  body.en .notif-dot { left:auto; right:4px; }
-
-  /* ── Table header label ── */
-  .tbl-header { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr 1fr; gap:10px; padding:10px 22px; border-bottom:1px solid var(--border); }
-  .tbl-header span { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
-
-  /* ── Responsive helpers ── */
-  @media (max-width:480px) {
-    .stats-grid { grid-template-columns:1fr 1fr; }
-    .plans-grid { grid-template-columns:1fr; }
-    .overview-grid { grid-template-columns:1fr 1fr; }
-    .summary-amount { font-size:clamp(24px,8vw,40px); }
-    .topbar { padding:10px 0; margin-bottom:20px; }
-    .wrapper { padding:0 12px 48px; }
-    .upload-zone { padding:32px 20px; }
-    .tbl-header { display:none; }
-  }
-  @media (min-width:860px) {
-    .account-stats { grid-template-columns:repeat(4,1fr); }
-  }
-
-  /* ── Scrollbar styling ── */
-  ::-webkit-scrollbar { width:6px; height:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--muted); }
-
-  /* ── Selection color ── */
-  ::selection { background:rgba(200,169,110,0.25); color:var(--text); }
-
-  /* ── Focus visible ── */
-  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
-
-  /* ── Print ── */
-  @media print {
-    .topbar, .hamburger-btn, .lang-btn, .icon-btn, #saveResultBtn, #shareCardBtn, .analyze-btn { display:none !important; }
-    body { background:#fff; color:#000; }
-    .wrapper { max-width:100%; }
-  }
 </style>
 </head>
 <script src="/shareCard.js"></script>
 <body>
+
+<!-- ── Auth Loading Overlay (يُخفى بعد التحقق من الجلسة) ── -->
+<div class="auth-loading" id="authLoading">
+  <div class="spinner" style="width:36px;height:36px;border-width:2.5px;margin:0;"></div>
+</div>
 
 <div class="login-gate" id="loginGate">
   <button class="icon-btn login-gate-theme" id="themeBtn2" title="تبديل الوضع">
@@ -417,9 +394,7 @@
     </svg>
   </button>
   <div class="login-gate-card">
-    <div class="login-gate-logo">
-      <img class="app-logo-gate" alt="رِبحي">
-    </div>
+    <div class="login-gate-logo"><img src="https://i.imgur.com/placeholder.png" alt="رِبحي"></div>
     <div class="login-gate-title i18n" data-key="gate_title">مرحباً بك في رِبحي</div>
     <div class="login-gate-sub i18n" data-key="gate_sub">سجّل دخولك لتحليل صفقاتك واحتساب أرباحك بدقة</div>
     <button class="login-gate-btn" onclick="doLogin()">
@@ -434,7 +409,7 @@
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div style="padding:14px 14px 8px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
-    <img class="app-logo-sm" alt="رِبحي">
+    <img src="https://i.imgur.com/placeholder.png" alt="رِبحي" style="height:22px;width:auto;display:block;">
   </div>
   <div id="drawerUserSection" style="display:none; padding:10px 14px 8px; border-bottom:1px solid var(--border);">
     <div class="drawer-user">
@@ -473,9 +448,7 @@
       <button class="icon-btn" id="themeBtn"><svg id="themeBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
       <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
     </div>
-    <div class="topbar-center">
-      <img class="app-logo" alt="رِبحي">
-    </div>
+    <div class="topbar-center"><img src="https://i.imgur.com/placeholder.png" alt="رِبحي" style="height:28px;width:auto;display:block;"></div>
     <div class="topbar-right">
       <div id="topbarUserControls" style="display:none; align-items:center; gap:8px;"><span id="topbarPlanBadge" class="plan-badge free"></span></div>
       <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
@@ -508,7 +481,9 @@
     <div id="results">
       <div class="results-header">
         <div class="results-title i18n" data-key="results_title">نتائج التحليل</div>
-        <div class="results-actions"><button class="reset-btn" id="resetBtn">—</button></div>
+        <div class="results-actions">
+          <button class="reset-btn" id="resetBtn">—</button>
+        </div>
       </div>
       <div class="summary-card" id="summaryCard">
         <div class="summary-label i18n" data-key="total_pl">إجمالي الربح / الخسارة</div>
@@ -549,8 +524,17 @@
         <div class="account-stat"><div class="account-stat-value green" id="acctTotalProfit">—</div><div class="account-stat-label i18n" data-key="total_profit">إجمالي الأرباح</div></div>
         <div class="account-stat"><div class="account-stat-value" id="acctWinRate">—</div><div class="account-stat-label i18n" data-key="win_rate">نسبة الفوز</div></div>
         <div class="account-stat"><div class="account-stat-value gold" id="acctUsage">—</div><div class="account-stat-label i18n" data-key="month_usage">استخدام الشهر</div></div>
+        <!-- بطاقة أفضل صفقة — تظهر فقط إن وُجدت بيانات -->
+        <div class="account-stat" id="acctBestTrade" style="display:none;">
+          <div class="best-trade-badge" id="acctBestBadge">أفضل صفقة</div>
+          <div class="account-stat-value green" id="acctBestProfit">—</div>
+          <div class="account-stat-label" id="acctBestLabel">—</div>
+        </div>
       </div>
-      <div class="monthly-section"><div class="monthly-title i18n" data-key="monthly_profit">الأرباح الشهرية</div><div class="monthly-bars" id="monthlyBars"></div></div>
+      <div class="monthly-section">
+        <div class="monthly-title i18n" data-key="monthly_profit">الأرباح الشهرية</div>
+        <div class="monthly-bars" id="monthlyBars"></div>
+      </div>
       <div class="recent-section">
         <div class="recent-header"><div class="recent-title i18n" data-key="recent_trades">آخر الصفقات</div><button class="view-all-btn" onclick="navigateTo('history')" class="i18n" data-key="view_all">عرض الكل</button></div>
         <div id="recentList"></div>
@@ -565,6 +549,9 @@
         <div class="section-title i18n" data-key="trade_history">سجل الصفقات</div>
         <span class="history-count" id="historyCount"></span>
       </div>
+      <!-- حقل البحث في التاريخ -->
+      <input class="history-search" id="historySearch" dir="auto"
+        placeholder="ابحث برمز السهم أو التاريخ..." />
       <div class="overview-grid" id="overviewGrid"></div>
       <div id="historyList"><div class="history-loading i18n" data-key="loading">جاري التحميل...</div></div>
     </div>
@@ -709,6 +696,9 @@ const STRINGS = {
     delete_title:'حذف الصفقة', delete_sub:'هذا الإجراء لا يمكن التراجع عنه.', delete_confirm:'حذف',
     new_analysis:'تحليل جديد', rate_limit:'طلبات كثيرة جداً، انتظر قليلاً',
     payment_fail:'فشل تفعيل الخطة. تواصل مع الدعم.',
+    copy_result:'نسخ النتيجة', copied:'تم النسخ ✓',
+    best_trade:'أفضل صفقة', search_history:'ابحث برمز السهم أو التاريخ...',
+    vs_last_month:'مقارنة بالشهر الماضي',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -740,6 +730,9 @@ const STRINGS = {
     delete_title:'Delete trade', delete_sub:'This action cannot be undone.', delete_confirm:'Delete',
     new_analysis:'New Analysis', rate_limit:'Too many requests. Please wait.',
     payment_fail:'Plan activation failed. Please contact support.',
+    copy_result:'Copy Result', copied:'Copied ✓',
+    best_trade:'Best Trade', search_history:'Search by symbol or date...',
+    vs_last_month:'vs last month',
   }
 };
 
@@ -755,6 +748,12 @@ function applyLang() {
   const signoutBtn = document.getElementById('signoutBtn'); if (signoutBtn) signoutBtn.textContent = t('signout');
   const resetBtn   = document.getElementById('resetBtn');   if (resetBtn)   resetBtn.textContent   = t('new_analysis');
   const clearBtn   = document.getElementById('clearBtn');   if (clearBtn)   clearBtn.textContent   = t('remove');
+  // تحديث placeholder البحث
+  const searchEl = document.getElementById('historySearch');
+  if (searchEl) searchEl.placeholder = t('search_history');
+  // تحديث badge أفضل صفقة
+  const bestBadge = document.getElementById('acctBestBadge');
+  if (bestBadge) bestBadge.textContent = t('best_trade');
   updatePlanUI();
 }
 
@@ -808,6 +807,14 @@ window.doSignout = () => signOut(auth);
 function showLoginGate() { document.getElementById('loginGate').classList.remove('hidden'); }
 function hideLoginGate() { document.getElementById('loginGate').classList.add('hidden'); }
 
+// ── إخفاء الـ Auth Loader بعد تحديد حالة المصادقة ────────────────
+function _hideAuthLoader() {
+  const loader = document.getElementById('authLoading');
+  if (!loader) return;
+  loader.classList.add('fade-out');
+  setTimeout(() => { loader.style.display = 'none'; }, 380);
+}
+
 onAuthStateChanged(auth, async user => {
   currentUser = user;
   if (user) {
@@ -833,6 +840,10 @@ onAuthStateChanged(auth, async user => {
     userPlan = 'free'; usageCount = 0; _historyCache = null;
     updatePlanUI();
   }
+
+  // أخفِ الـ loading overlay بعد معرفة حالة المصادقة
+  _hideAuthLoader();
+
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
 });
@@ -902,14 +913,29 @@ window.closeDrawer = function() {
   document.getElementById('hamburgerBtn').classList.remove('open');
 };
 
+// ── navigateTo مع انتقال سلس بين الصفحات ──────────────────────────
 window.navigateTo = function(page) {
   closeDrawer();
+  if (currentPage === page) return;
   history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
+
   ['analyze','account','history','pricing'].forEach(p => {
-    document.getElementById(p + 'Page').style.display = p === page ? 'block' : 'none';
+    const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (p === page) {
+      el.style.display = 'block';
+      // trigger reflow لضمان عمل الـ animation
+      void el.offsetWidth;
+      el.classList.remove('page-enter');
+      void el.offsetWidth;
+      el.classList.add('page-enter');
+    } else {
+      el.style.display = 'none';
+      el.classList.remove('page-enter');
+    }
     if (btn) btn.classList.toggle('active', p === page);
   });
+
   currentPage = page;
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
@@ -963,11 +989,36 @@ function resetUpload() {
   const sb = document.getElementById('saveResultBtn');
   sb.style.display = 'none'; sb.disabled = false; sb.style.background = 'var(--green)';
   lastResult = null; lastResultSaved = false;
+  // أزل زر النسخ إن وُجد
+  const cb = document.getElementById('copyResultBtn');
+  if (cb) cb.remove();
 }
 function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
 
 // ══════════════════════════════════════════════════════
-// ★★ ANALYZE
+// Confetti 🎉
+// ══════════════════════════════════════════════════════
+function launchConfetti() {
+  const colors = ['#C8A96E','#6DB88A','#fff4e6','#e8d5b7','#5DBE80','#f0c060'];
+  for (let i = 0; i < 72; i++) {
+    const el   = document.createElement('div');
+    const size = 6 + Math.random() * 9;
+    el.style.cssText = `
+      position:fixed; top:-14px;
+      left:${Math.random() * 100}vw;
+      width:${size}px; height:${size}px;
+      background:${colors[i % colors.length]};
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      animation: confettiFall ${1.1 + Math.random() * 1.9}s ease ${Math.random() * 0.7}s forwards;
+      z-index:9999; pointer-events:none;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3800);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ★★ ANALYZE ★★
 // ══════════════════════════════════════════════════════
 analyzeBtn.addEventListener('click', analyze);
 
@@ -1125,7 +1176,7 @@ function renderResults(data) {
       ${ph}</div>`;
   }).join('');
 
-  // Share button
+  // ── زر مشاركة الصفقة ──────────────────────────────
   document.getElementById('shareCardBtn')?.remove();
   const shareBtn = document.createElement('button');
   shareBtn.id = 'shareCardBtn';
@@ -1135,8 +1186,35 @@ function renderResults(data) {
   shareBtn.onclick = () => window.showShareCard(window.__lastResult);
   document.getElementById('results').appendChild(shareBtn);
 
+  // ── زر نسخ النتيجة ────────────────────────────────
+  let copyBtn = document.getElementById('copyResultBtn');
+  if (!copyBtn) {
+    copyBtn = document.createElement('button');
+    copyBtn.id = 'copyResultBtn';
+    copyBtn.className = 'copy-result-btn';
+    document.querySelector('.results-actions').appendChild(copyBtn);
+  }
+  copyBtn.textContent = t('copy_result');
+  const profitStr = (ip ? '+' : '') + fmt(tp) + ' ' + t('sar');
+  copyBtn.onclick = () => {
+    const lines = rows
+      .filter(r => r.profit !== null)
+      .map(r => `${r.sym}: ${r.profit >= 0 ? '+' : ''}${fmt(r.profit)} ${t('sar')} (${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}%)`);
+    lines.push('──────────────');
+    lines.push(`${t('total_pl')}: ${profitStr}`);
+    lines.push(`${t('return_pct')}: ${op >= 0 ? '+' : ''}${op.toFixed(2)}%`);
+    lines.push(`${t('capital')}: ${fmt(ti)} ${t('sar')}`);
+    navigator.clipboard.writeText(lines.join('\n'))
+      .then(() => showToast(t('copied'), 'green'))
+      .catch(() => showToast(t('copied'), 'green'));
+  };
+
   resultsEl.style.display = 'block'; analyzeBtn.disabled = false;
   resultsEl.scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // 🎉 كونفيتي عند الربح
+  if (tp > 0) launchConfetti();
+
   return { trades, rows, totalProfit:tp, totalInvested:ti, overallPct:op, symbols:Object.keys(grouped) };
 }
 
@@ -1254,17 +1332,26 @@ async function renderAccountPage() {
     const docs = snap.docs;
     let tp = 0, ti = 0, wins = 0;
     const monthly = {};
+
+    // لتحديد أفضل صفقة
+    let bestProfit = -Infinity, bestDoc = null;
+
     docs.forEach(d => {
       const dd = d.data();
       const profit = dd.totalProfit || 0; const invested = dd.totalInvested || 0;
       tp += profit; ti += invested;
       if (profit > 0) wins++;
+
+      // تتبع أفضل صفقة
+      if (profit > bestProfit) { bestProfit = profit; bestDoc = dd; }
+
       if (dd.timestamp?.toDate) {
         const dt = dd.timestamp.toDate();
         const k  = `${dt.getMonth()+1}/${dt.getFullYear().toString().slice(2)}`;
         if (!monthly[k]) monthly[k] = 0; monthly[k] += profit;
       }
     });
+
     const wr = docs.length > 0 ? (wins/docs.length*100) : 0, ip = tp >= 0;
     document.getElementById('acctTotalTrades').textContent = docs.length;
     const tpEl = document.getElementById('acctTotalProfit');
@@ -1272,8 +1359,45 @@ async function renderAccountPage() {
     tpEl.className = 'account-stat-value ' + (ip?'green':'red');
     document.getElementById('acctWinRate').textContent = wr.toFixed(0) + '%';
 
+    // ── عرض أفضل صفقة ────────────────────────────────
+    const bestCard = document.getElementById('acctBestTrade');
+    if (bestCard && bestDoc && bestProfit > 0) {
+      bestCard.style.display = 'block';
+      document.getElementById('acctBestProfit').textContent = '+' + fmt(bestProfit) + ' ' + t('sar');
+      const syms = (bestDoc.symbols || []).slice(0, 3).join(', ');
+      document.getElementById('acctBestLabel').textContent = syms || t('total_profit');
+      document.getElementById('acctBestBadge').textContent = t('best_trade');
+    } else if (bestCard) {
+      bestCard.style.display = 'none';
+    }
+
+    // ── مؤشر الاتجاه الشهري (trend) ──────────────────
     const entries = Object.entries(monthly).slice(-6);
     const maxV    = Math.max(...entries.map(e => Math.abs(e[1])), 1);
+
+    // احسب الاتجاه بين الشهر الحالي والسابق
+    let trendHTML = '';
+    if (entries.length >= 2) {
+      const thisMonthVal = entries[entries.length - 1][1];
+      const lastMonthVal = entries[entries.length - 2][1];
+      const diff = thisMonthVal - lastMonthVal;
+      const absDiff = Math.abs(diff);
+      const diffPct = lastMonthVal !== 0
+        ? (absDiff / Math.abs(lastMonthVal) * 100).toFixed(1)
+        : (absDiff > 0 ? '∞' : '0');
+      const trendClass = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+      const trendIcon  = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+      const trendLabel = currentLang === 'ar'
+        ? `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`
+        : `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`;
+      trendHTML = `<span class="trend-badge ${trendClass}" style="margin-right:8px;">${trendLabel}</span>`;
+    }
+
+    const monthTitleEl = document.querySelector('.monthly-title');
+    if (monthTitleEl) {
+      monthTitleEl.innerHTML = t('monthly_profit') + (trendHTML ? '<br><span style="font-size:11px;font-weight:400;">' + trendHTML + '</span>' : '');
+    }
+
     document.getElementById('monthlyBars').innerHTML = entries.map(([label, val]) => {
       const h = Math.max((Math.abs(val)/maxV)*100, 4), isP = val >= 0;
       return `<div class="monthly-bar-wrap">
@@ -1296,14 +1420,48 @@ async function renderAccountPage() {
     document.getElementById('recentList').innerHTML = recentHTML;
     document.querySelector('.recent-title').textContent = t('recent_trades');
     document.querySelector('.view-all-btn').textContent = t('view_all');
-    document.querySelector('.monthly-title').textContent = t('monthly_profit');
   } catch(e) { console.error(e); }
+}
+
+// ══════════════════════════════════════════════════════
+// History Skeleton
+// ══════════════════════════════════════════════════════
+function showHistorySkeleton() {
+  return Array(4).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+        <div class="skeleton-line" style="height:12px;width:32%;"></div>
+        <div class="skeleton-line" style="height:20px;width:26%;margin-bottom:0;"></div>
+      </div>
+      <div class="skeleton-line" style="height:11px;width:58%;"></div>
+      <div class="skeleton-line" style="height:11px;width:42%;"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <div class="skeleton-line" style="height:22px;width:52px;border-radius:6px;margin-bottom:0;"></div>
+        <div class="skeleton-line" style="height:22px;width:52px;border-radius:6px;margin-bottom:0;"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
 // ══════════════════════════════════════════════════════
 // History Page
 // ══════════════════════════════════════════════════════
-function renderHistoryPage() { document.getElementById('historyContent').style.display = 'block'; loadHistory(); }
+function renderHistoryPage() {
+  document.getElementById('historyContent').style.display = 'block';
+  // تحديث placeholder البحث حسب اللغة
+  const searchEl = document.getElementById('historySearch');
+  if (searchEl) searchEl.placeholder = t('search_history');
+  loadHistory();
+  // ربط حدث البحث
+  if (searchEl) {
+    searchEl.oninput = (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('#historyList .history-card').forEach(card => {
+        card.style.display = (!q || card.innerText.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    };
+  }
+}
 
 async function loadHistory(forceRefresh = false) {
   if (!currentUser) return;
@@ -1313,7 +1471,8 @@ async function loadHistory(forceRefresh = false) {
     document.getElementById('overviewGrid').innerHTML = _historyCache.overview;
     listEl.innerHTML = _historyCache.html; return;
   }
-  if (!_historyCache) listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
+  // عرض الـ skeleton أثناء التحميل
+  if (!_historyCache) listEl.innerHTML = showHistorySkeleton();
   try {
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
     const docs = snap.docs.sort((a,b) => (b.data().timestamp?.toMillis?.()||0) - (a.data().timestamp?.toMillis?.()||0));
@@ -1409,205 +1568,6 @@ window.saveDisplayName = async function() {
     document.getElementById('editNameForm').style.display = 'none';
   } catch(e) { alert(t('name_save_error') + e.message); }
 };
-
-// ══════════════════════════════════════════════════════
-// Utility helpers
-// ══════════════════════════════════════════════════════
-
-/**
- * تنسيق الأرقام الكبيرة بشكل مختصر
- * @param {number} n - الرقم المراد تنسيقه
- * @returns {string} - الرقم المنسق
- */
-function fmtCompact(n) {
-  const abs = Math.abs(n);
-  if (abs >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
-  if (abs >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
-  return fmt(n);
-}
-
-/**
- * حساب نسبة التغيير بين قيمتين
- * @param {number} current - القيمة الحالية
- * @param {number} previous - القيمة السابقة
- * @returns {number} - النسبة المئوية للتغيير
- */
-function calcChangePct(current, previous) {
-  if (!previous || previous === 0) return 0;
-  return ((current - previous) / Math.abs(previous)) * 100;
-}
-
-/**
- * تحويل timestamp فايربيس إلى نص تاريخ منسق
- * @param {object} ts - Firestore Timestamp
- * @param {string} lang - اللغة الحالية
- * @returns {string} - التاريخ المنسق
- */
-function formatTimestamp(ts, lang) {
-  if (!ts?.toDate) return '—';
-  return ts.toDate().toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
-    year: 'numeric', month: 'short', day: 'numeric'
-  });
-}
-
-/**
- * تحديد لون الربح/الخسارة
- * @param {number} value - القيمة
- * @returns {string} - اسم الكلاس CSS
- */
-function plClass(value) {
-  if (value > 0) return 'green';
-  if (value < 0) return 'red';
-  return '';
-}
-
-/**
- * تأخير تنفيذ دالة (debounce)
- * @param {Function} fn - الدالة المراد تأخيرها
- * @param {number} delay - مدة التأخير بالمللي ثانية
- * @returns {Function} - الدالة المغلفة
- */
-function debounce(fn, delay = 300) {
-  let timer;
-  return function(...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
-
-/**
- * نسخ نص إلى الحافظة
- * @param {string} text - النص المراد نسخه
- * @returns {Promise<boolean>} - نجاح أو فشل العملية
- */
-async function copyToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const el = document.createElement('textarea');
-    el.value = text;
-    el.style.position = 'fixed';
-    el.style.opacity  = '0';
-    document.body.appendChild(el);
-    el.select();
-    const ok = document.execCommand('copy');
-    el.remove();
-    return ok;
-  }
-}
-
-/**
- * تحقق من صحة base64 string
- * @param {string} str - النص المراد فحصه
- * @returns {boolean}
- */
-function isValidBase64(str) {
-  if (!str || typeof str !== 'string') return false;
-  const len = str.replace(/=/g, '').length;
-  return len > 0 && len % 4 !== 1;
-}
-
-/**
- * استخراج بادئة الشهر من التاريخ الحالي
- * @returns {string} - مفتاح الشهر بصيغة YYYY-M
- */
-function currentMonthKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${now.getMonth()}`;
-}
-
-/**
- * حساب إجمالي الربح من مصفوفة الصفوف
- * @param {Array} rows - مصفوفة الصفقات المعالجة
- * @returns {number} - إجمالي الربح
- */
-function sumProfit(rows) {
-  return (rows || []).reduce((acc, r) => acc + (r.profit || 0), 0);
-}
-
-/**
- * حساب إجمالي الاستثمار من مصفوفة الصفوف
- * @param {Array} rows - مصفوفة الصفقات المعالجة
- * @returns {number} - إجمالي الاستثمار
- */
-function sumInvested(rows) {
-  return (rows || []).reduce((acc, r) => acc + (r.buyTotal || 0), 0);
-}
-
-/**
- * ترتيب مصفوفة من objects حسب حقل معين
- * @param {Array} arr - المصفوفة المراد ترتيبها
- * @param {string} key - اسم الحقل
- * @param {boolean} asc - ترتيب تصاعدي أم تنازلي
- * @returns {Array} - المصفوفة المرتبة
- */
-function sortBy(arr, key, asc = true) {
-  return [...arr].sort((a, b) => {
-    const va = a[key] ?? 0;
-    const vb = b[key] ?? 0;
-    return asc ? va - vb : vb - va;
-  });
-}
-
-/**
- * تحقق من أن المتصفح يدعم canvas
- * @returns {boolean}
- */
-function supportsCanvas() {
-  const c = document.createElement('canvas');
-  return !!(c.getContext && c.getContext('2d'));
-}
-
-/**
- * الحصول على حجم الملف بصيغة مقروءة
- * @param {number} bytes - الحجم بالبايت
- * @returns {string}
- */
-function formatFileSize(bytes) {
-  if (bytes < 1024)       return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
-/**
- * توليد معرف عشوائي قصير
- * @returns {string}
- */
-function shortId() {
-  return Math.random().toString(36).slice(2, 9);
-}
-
-/**
- * التحقق من وجود اتصال بالإنترنت
- * @returns {boolean}
- */
-function isOnline() {
-  return navigator.onLine;
-}
-
-// مراقبة حالة الاتصال بالإنترنت
-window.addEventListener('online',  () => showToast(currentLang === 'ar' ? 'تم استعادة الاتصال' : 'Back online', 'green'));
-window.addEventListener('offline', () => showToast(currentLang === 'ar' ? 'لا يوجد اتصال بالإنترنت' : 'No internet connection', 'red'));
-
-// ── منع إغلاق النافذة عند وجود تحليل غير محفوظ ─────────────────────────────
-window.addEventListener('beforeunload', (e) => {
-  if (lastResult && !lastResultSaved) {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-});
-
-// ── اختصارات لوحة المفاتيح ──────────────────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  // Escape: إغلاق أي modal مفتوح
-  if (e.key === 'Escape') {
-    if (document.getElementById('shareModal').classList.contains('open'))  closeShareModal();
-    if (document.getElementById('deleteModal').classList.contains('open')) closeDeleteModal();
-    if (document.getElementById('paymentModal').classList.contains('open')) closePayment();
-    if (document.getElementById('drawer').classList.contains('open'))      closeDrawer();
-  }
-});
 
 // ══════════════════════════════════════════════════════
 // Init

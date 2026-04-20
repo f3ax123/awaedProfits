@@ -48,6 +48,80 @@
   @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
   @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
+  /* ── Auth Loading Overlay ──────────────────────────────── */
+  .auth-loading {
+    position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .35s ease;
+  }
+  .auth-loading.fade-out { opacity: 0; pointer-events: none; }
+
+  /* ── Confetti Animation ────────────────────────────────── */
+  @keyframes confettiFall {
+    0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Skeleton Shimmer ──────────────────────────────────── */
+  @keyframes shimmer {
+    0%, 100% { opacity: .45; }
+    50%       { opacity: .9;  }
+  }
+  .skeleton-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 12px;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  .skeleton-line {
+    background: var(--border); border-radius: 6px; margin-bottom: 10px;
+  }
+
+  /* ── Page Enter Animation ──────────────────────────────── */
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  .page-enter { animation: pageEnter .22s ease forwards; }
+
+  /* ── History Search ────────────────────────────────────── */
+  .history-search {
+    width: 100%; padding: 11px 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: inherit; font-size: 14px;
+    margin-bottom: 16px; outline: none;
+    transition: border-color .2s; box-sizing: border-box;
+  }
+  .history-search:focus { border-color: var(--accent); }
+  .history-search::placeholder { color: var(--muted); }
+
+  /* ── Copy Result Button ────────────────────────────────── */
+  .copy-result-btn {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 8px 14px;
+    font-size: 13px; cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .copy-result-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── Trend Badge ───────────────────────────────────────── */
+  .trend-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; margin-top: 6px;
+  }
+  .trend-badge.up   { background: rgba(109,184,138,.12); color: var(--green); }
+  .trend-badge.down { background: rgba(212,87,74,.12);   color: var(--red);   }
+  .trend-badge.flat { background: rgba(138,110,98,.12);  color: var(--muted); }
+
+  /* ── Best Trade Badge ──────────────────────────────────── */
+  .best-trade-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    background: rgba(200,169,110,.15); color: var(--gold);
+    border: 1px solid rgba(200,169,110,.3); margin-bottom: 4px;
+  }
+
   .login-gate { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0; padding: 20px; transition: background .3s; }
   .login-gate.hidden { display: none; }
   .login-gate-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 48px 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow); animation: fadeIn .4s ease; }
@@ -289,29 +363,29 @@
     .account-stats { grid-template-columns: 1fr 1fr; }
     .login-gate-card { padding: 36px 24px; }
   }
+
   /* Share Card Modal */
-.share-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px); }
-.share-modal-overlay.open { display:flex;animation:fadeIn .2s ease; }
-.share-modal {   background: var(--card);   border: 1px solid var(--border);   border-radius: 20px;   padding: 24px;   width: 100%;   max-width: 400px;   max-height: 92vh;   overflow-y: auto;   text-align: center; }  .share-canvas-wrap {   border-radius: 12px;   overflow: hidden;   margin-bottom: 16px;   border: 1px solid var(--border);   direction: ltr;   max-height: 65vh;   display: flex;   align-items: center;   justify-content: center; }  .share-canvas-wrap canvas {   width: 100% !important;   height: auto !important;   display: block;   direction: ltr;   max-height: 65vh;   object-fit: contain; }
-.share-modal-title { font-size:16px;font-weight:700;margin-bottom:16px; }
-.share-canvas-wrap { 
-  border-radius:12px;
-  overflow:hidden;
-  margin-bottom:16px;
-  border:1px solid var(--border);
-  direction: ltr;  /* ← هذا هو الحل */
-}
-.share-canvas-wrap canvas {    width: 100%;    height: auto;    display: block;   direction: ltr; }
-.share-actions { display:flex;gap:10px;justify-content:center; }
-.share-dl-btn { flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s; }
-body.light .share-dl-btn { color:#fff4e6; }
-.share-dl-btn:hover { opacity:.85; }
-.share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
-.share-close-btn:hover { color:var(--text); }
+  .share-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px); }
+  .share-modal-overlay.open { display:flex;animation:fadeIn .2s ease; }
+  .share-modal { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; max-height: 92vh; overflow-y: auto; text-align: center; }
+  .share-canvas-wrap { border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); direction: ltr; max-height: 65vh; display: flex; align-items: center; justify-content: center; }
+  .share-canvas-wrap canvas { width: 100% !important; height: auto !important; display: block; direction: ltr; max-height: 65vh; object-fit: contain; }
+  .share-modal-title { font-size:16px;font-weight:700;margin-bottom:16px; }
+  .share-actions { display:flex;gap:10px;justify-content:center; }
+  .share-dl-btn { flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s; }
+  body.light .share-dl-btn { color:#fff4e6; }
+  .share-dl-btn:hover { opacity:.85; }
+  .share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
+  .share-close-btn:hover { color:var(--text); }
 </style>
 </head>
 <script src="/shareCard.js"></script>
 <body>
+
+<!-- ── Auth Loading Overlay (يُخفى بعد التحقق من الجلسة) ── -->
+<div class="auth-loading" id="authLoading">
+  <div class="spinner" style="width:36px;height:36px;border-width:2.5px;margin:0;"></div>
+</div>
 
 <div class="login-gate" id="loginGate">
   <button class="icon-btn login-gate-theme" id="themeBtn2" title="تبديل الوضع">
@@ -407,7 +481,9 @@ body.light .share-dl-btn { color:#fff4e6; }
     <div id="results">
       <div class="results-header">
         <div class="results-title i18n" data-key="results_title">نتائج التحليل</div>
-        <div class="results-actions"><button class="reset-btn" id="resetBtn">—</button></div>
+        <div class="results-actions">
+          <button class="reset-btn" id="resetBtn">—</button>
+        </div>
       </div>
       <div class="summary-card" id="summaryCard">
         <div class="summary-label i18n" data-key="total_pl">إجمالي الربح / الخسارة</div>
@@ -448,8 +524,17 @@ body.light .share-dl-btn { color:#fff4e6; }
         <div class="account-stat"><div class="account-stat-value green" id="acctTotalProfit">—</div><div class="account-stat-label i18n" data-key="total_profit">إجمالي الأرباح</div></div>
         <div class="account-stat"><div class="account-stat-value" id="acctWinRate">—</div><div class="account-stat-label i18n" data-key="win_rate">نسبة الفوز</div></div>
         <div class="account-stat"><div class="account-stat-value gold" id="acctUsage">—</div><div class="account-stat-label i18n" data-key="month_usage">استخدام الشهر</div></div>
+        <!-- بطاقة أفضل صفقة — تظهر فقط إن وُجدت بيانات -->
+        <div class="account-stat" id="acctBestTrade" style="display:none;">
+          <div class="best-trade-badge" id="acctBestBadge">أفضل صفقة</div>
+          <div class="account-stat-value green" id="acctBestProfit">—</div>
+          <div class="account-stat-label" id="acctBestLabel">—</div>
+        </div>
       </div>
-      <div class="monthly-section"><div class="monthly-title i18n" data-key="monthly_profit">الأرباح الشهرية</div><div class="monthly-bars" id="monthlyBars"></div></div>
+      <div class="monthly-section">
+        <div class="monthly-title i18n" data-key="monthly_profit">الأرباح الشهرية</div>
+        <div class="monthly-bars" id="monthlyBars"></div>
+      </div>
       <div class="recent-section">
         <div class="recent-header"><div class="recent-title i18n" data-key="recent_trades">آخر الصفقات</div><button class="view-all-btn" onclick="navigateTo('history')" class="i18n" data-key="view_all">عرض الكل</button></div>
         <div id="recentList"></div>
@@ -464,6 +549,9 @@ body.light .share-dl-btn { color:#fff4e6; }
         <div class="section-title i18n" data-key="trade_history">سجل الصفقات</div>
         <span class="history-count" id="historyCount"></span>
       </div>
+      <!-- حقل البحث في التاريخ -->
+      <input class="history-search" id="historySearch" dir="auto"
+        placeholder="ابحث برمز السهم أو التاريخ..." />
       <div class="overview-grid" id="overviewGrid"></div>
       <div id="historyList"><div class="history-loading i18n" data-key="loading">جاري التحميل...</div></div>
     </div>
@@ -541,17 +629,19 @@ body.light .share-dl-btn { color:#fff4e6; }
     <div id="paddleCheckoutContainer"></div>
   </div>
 </div>
-  <!-- SHARE CARD MODAL -->
-    <div class="share-modal-overlay" id="shareModal" onclick="if(event.target===this)closeShareModal()">
-      <div class="share-modal">
-        <div class="share-modal-title">🖼️ مشاركة الصفقة</div>
-        <div class="share-canvas-wrap"><canvas id="shareCanvas"></canvas></div>
-        <div class="share-actions">
-          <button class="share-dl-btn" onclick="downloadShareCard()">⬇️ تحميل PNG</button>
-          <button class="share-close-btn" onclick="closeShareModal()">✕</button>
-        </div>
-      </div>
+
+<!-- SHARE CARD MODAL -->
+<div class="share-modal-overlay" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+  <div class="share-modal">
+    <div class="share-modal-title">🖼️ مشاركة الصفقة</div>
+    <div class="share-canvas-wrap"><canvas id="shareCanvas"></canvas></div>
+    <div class="share-actions">
+      <button class="share-dl-btn" onclick="downloadShareCard()">⬇️ تحميل PNG</button>
+      <button class="share-close-btn" onclick="closeShareModal()">✕</button>
     </div>
+  </div>
+</div>
+
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -606,6 +696,9 @@ const STRINGS = {
     delete_title:'حذف الصفقة', delete_sub:'هذا الإجراء لا يمكن التراجع عنه.', delete_confirm:'حذف',
     new_analysis:'تحليل جديد', rate_limit:'طلبات كثيرة جداً، انتظر قليلاً',
     payment_fail:'فشل تفعيل الخطة. تواصل مع الدعم.',
+    copy_result:'نسخ النتيجة', copied:'تم النسخ ✓',
+    best_trade:'أفضل صفقة', search_history:'ابحث برمز السهم أو التاريخ...',
+    vs_last_month:'مقارنة بالشهر الماضي',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -637,6 +730,9 @@ const STRINGS = {
     delete_title:'Delete trade', delete_sub:'This action cannot be undone.', delete_confirm:'Delete',
     new_analysis:'New Analysis', rate_limit:'Too many requests. Please wait.',
     payment_fail:'Plan activation failed. Please contact support.',
+    copy_result:'Copy Result', copied:'Copied ✓',
+    best_trade:'Best Trade', search_history:'Search by symbol or date...',
+    vs_last_month:'vs last month',
   }
 };
 
@@ -652,6 +748,12 @@ function applyLang() {
   const signoutBtn = document.getElementById('signoutBtn'); if (signoutBtn) signoutBtn.textContent = t('signout');
   const resetBtn   = document.getElementById('resetBtn');   if (resetBtn)   resetBtn.textContent   = t('new_analysis');
   const clearBtn   = document.getElementById('clearBtn');   if (clearBtn)   clearBtn.textContent   = t('remove');
+  // تحديث placeholder البحث
+  const searchEl = document.getElementById('historySearch');
+  if (searchEl) searchEl.placeholder = t('search_history');
+  // تحديث badge أفضل صفقة
+  const bestBadge = document.getElementById('acctBestBadge');
+  if (bestBadge) bestBadge.textContent = t('best_trade');
   updatePlanUI();
 }
 
@@ -691,7 +793,7 @@ function updateThemeIcon(isLight) {
       : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   });
 }
-function applyTheme(isLight) { document.body.classList.toggle('light', isLight); updateThemeIcon(isLight); localStorage.setItem('theme', isLight ? 'light' : 'dark'); updateLogoTheme(isLight); }
+function applyTheme(isLight) { document.body.classList.toggle('light', isLight); updateThemeIcon(isLight); localStorage.setItem('theme', isLight ? 'light' : 'dark'); }
 if (localStorage.getItem('theme') === 'light') applyTheme(true);
 document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
@@ -704,6 +806,14 @@ window.doSignout = () => signOut(auth);
 
 function showLoginGate() { document.getElementById('loginGate').classList.remove('hidden'); }
 function hideLoginGate() { document.getElementById('loginGate').classList.add('hidden'); }
+
+// ── إخفاء الـ Auth Loader بعد تحديد حالة المصادقة ────────────────
+function _hideAuthLoader() {
+  const loader = document.getElementById('authLoading');
+  if (!loader) return;
+  loader.classList.add('fade-out');
+  setTimeout(() => { loader.style.display = 'none'; }, 380);
+}
 
 onAuthStateChanged(auth, async user => {
   currentUser = user;
@@ -730,6 +840,10 @@ onAuthStateChanged(auth, async user => {
     userPlan = 'free'; usageCount = 0; _historyCache = null;
     updatePlanUI();
   }
+
+  // أخفِ الـ loading overlay بعد معرفة حالة المصادقة
+  _hideAuthLoader();
+
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
 });
@@ -799,14 +913,29 @@ window.closeDrawer = function() {
   document.getElementById('hamburgerBtn').classList.remove('open');
 };
 
+// ── navigateTo مع انتقال سلس بين الصفحات ──────────────────────────
 window.navigateTo = function(page) {
   closeDrawer();
+  if (currentPage === page) return;
   history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
+
   ['analyze','account','history','pricing'].forEach(p => {
-    document.getElementById(p + 'Page').style.display = p === page ? 'block' : 'none';
+    const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (p === page) {
+      el.style.display = 'block';
+      // trigger reflow لضمان عمل الـ animation
+      void el.offsetWidth;
+      el.classList.remove('page-enter');
+      void el.offsetWidth;
+      el.classList.add('page-enter');
+    } else {
+      el.style.display = 'none';
+      el.classList.remove('page-enter');
+    }
     if (btn) btn.classList.toggle('active', p === page);
   });
+
   currentPage = page;
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
@@ -860,11 +989,36 @@ function resetUpload() {
   const sb = document.getElementById('saveResultBtn');
   sb.style.display = 'none'; sb.disabled = false; sb.style.background = 'var(--green)';
   lastResult = null; lastResultSaved = false;
+  // أزل زر النسخ إن وُجد
+  const cb = document.getElementById('copyResultBtn');
+  if (cb) cb.remove();
 }
 function fullReset() { resetUpload(); loadingEl.style.display = 'none'; }
 
 // ══════════════════════════════════════════════════════
-// ★★ ANALYZE — الكود الأمني الجديد ★★
+// Confetti 🎉
+// ══════════════════════════════════════════════════════
+function launchConfetti() {
+  const colors = ['#C8A96E','#6DB88A','#fff4e6','#e8d5b7','#5DBE80','#f0c060'];
+  for (let i = 0; i < 72; i++) {
+    const el   = document.createElement('div');
+    const size = 6 + Math.random() * 9;
+    el.style.cssText = `
+      position:fixed; top:-14px;
+      left:${Math.random() * 100}vw;
+      width:${size}px; height:${size}px;
+      background:${colors[i % colors.length]};
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      animation: confettiFall ${1.1 + Math.random() * 1.9}s ease ${Math.random() * 0.7}s forwards;
+      z-index:9999; pointer-events:none;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3800);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ★★ ANALYZE ★★
 // ══════════════════════════════════════════════════════
 analyzeBtn.addEventListener('click', analyze);
 
@@ -879,14 +1033,13 @@ async function analyze() {
   lastResult = null; lastResultSaved = false;
 
   try {
-    // ★ احصل على ID Token جديد (forceRefresh يضمن توكناً حديثاً)
-    const idToken = await currentUser.getIdToken(/* forceRefresh */ true);
+    const idToken = await currentUser.getIdToken(true);
 
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: {
         'Content-Type':  'application/json',
-        'Authorization': `Bearer ${idToken}`,  // ★ التحقق الحقيقي
+        'Authorization': `Bearer ${idToken}`,
       },
       body: JSON.stringify({ imageBase64, imageMime }),
     });
@@ -894,7 +1047,6 @@ async function analyze() {
     const data = await res.json();
 
     if (!res.ok) {
-      // السيرفر هو المصدر الموثوق لأسباب الرفض
       if (res.status === 403 && data.error === 'Plan limit reached') {
         errorBox.innerHTML = t('limit_exceeded') +
           `<a href="#" onclick="navigateTo('pricing');return false;" style="color:var(--accent)">${t('upgrade')}</a>`;
@@ -920,10 +1072,9 @@ async function analyze() {
 
     loadingEl.style.display = 'none';
     lastResult = renderResults(parsed);
-lastResultSaved = false;
-window.__lastResult = lastResult;
+    lastResultSaved = false;
+    window.__lastResult = lastResult;
 
-    // ★ السيرفر يُرجع العداد المحدَّث — نحدّث الواجهة فقط، لا نكتب لـ Firestore
     if (data.usageCount !== undefined) {
       usageCount = data.usageCount;
       updatePlanUI();
@@ -1025,18 +1176,45 @@ function renderResults(data) {
       ${ph}</div>`;
   }).join('');
 
-// Share button
-document.getElementById('shareCardBtn')?.remove();
-const shareBtn = document.createElement('button');
-shareBtn.id = 'shareCardBtn';
-shareBtn.className = 'analyze-btn';
-shareBtn.style.cssText = 'background:var(--card2);border:1px solid var(--border);color:var(--text);margin-top:8px;';
-shareBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ${currentLang === 'ar' ? 'مشاركة الصفقة' : 'Share Trade'}`;
-shareBtn.onclick = () => window.showShareCard(window.__lastResult);
-document.getElementById('results').appendChild(shareBtn);
+  // ── زر مشاركة الصفقة ──────────────────────────────
+  document.getElementById('shareCardBtn')?.remove();
+  const shareBtn = document.createElement('button');
+  shareBtn.id = 'shareCardBtn';
+  shareBtn.className = 'analyze-btn';
+  shareBtn.style.cssText = 'background:var(--card2);border:1px solid var(--border);color:var(--text);margin-top:8px;';
+  shareBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ${currentLang === 'ar' ? 'مشاركة الصفقة' : 'Share Trade'}`;
+  shareBtn.onclick = () => window.showShareCard(window.__lastResult);
+  document.getElementById('results').appendChild(shareBtn);
 
-resultsEl.style.display = 'block'; analyzeBtn.disabled = false;
+  // ── زر نسخ النتيجة ────────────────────────────────
+  let copyBtn = document.getElementById('copyResultBtn');
+  if (!copyBtn) {
+    copyBtn = document.createElement('button');
+    copyBtn.id = 'copyResultBtn';
+    copyBtn.className = 'copy-result-btn';
+    document.querySelector('.results-actions').appendChild(copyBtn);
+  }
+  copyBtn.textContent = t('copy_result');
+  const profitStr = (ip ? '+' : '') + fmt(tp) + ' ' + t('sar');
+  copyBtn.onclick = () => {
+    const lines = rows
+      .filter(r => r.profit !== null)
+      .map(r => `${r.sym}: ${r.profit >= 0 ? '+' : ''}${fmt(r.profit)} ${t('sar')} (${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}%)`);
+    lines.push('──────────────');
+    lines.push(`${t('total_pl')}: ${profitStr}`);
+    lines.push(`${t('return_pct')}: ${op >= 0 ? '+' : ''}${op.toFixed(2)}%`);
+    lines.push(`${t('capital')}: ${fmt(ti)} ${t('sar')}`);
+    navigator.clipboard.writeText(lines.join('\n'))
+      .then(() => showToast(t('copied'), 'green'))
+      .catch(() => showToast(t('copied'), 'green'));
+  };
+
+  resultsEl.style.display = 'block'; analyzeBtn.disabled = false;
   resultsEl.scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // 🎉 كونفيتي عند الربح
+  if (tp > 0) launchConfetti();
+
   return { trades, rows, totalProfit:tp, totalInvested:ti, overallPct:op, symbols:Object.keys(grouped) };
 }
 
@@ -1061,7 +1239,7 @@ async function saveToHistory(result) {
 }
 
 // ══════════════════════════════════════════════════════
-// Payment — ★ الكود الأمني الجديد ★
+// Payment
 // ══════════════════════════════════════════════════════
 const PADDLE_CLIENT_TOKEN = 'live_34de2737245b86fda76960576d9';
 const PADDLE_PRICES = {
@@ -1108,7 +1286,6 @@ window.closePayment = function() {
   try { Paddle.Checkout.close(); } catch(e) {}
 };
 
-// ★ activatePlan يرسل للسيرفر ويتحقق من الدفع — لا كتابة مباشرة لـ Firestore
 async function activatePlan(plan, transactionId) {
   if (!currentUser) return;
   try {
@@ -1129,7 +1306,6 @@ async function activatePlan(plan, transactionId) {
       return;
     }
 
-    // أعد تحميل البيانات من السيرفر
     await loadUserPlan();
     updatePlanUI();
     alert(t('plan_activated') + ' ' + planLabel(plan) + '!');
@@ -1156,17 +1332,26 @@ async function renderAccountPage() {
     const docs = snap.docs;
     let tp = 0, ti = 0, wins = 0;
     const monthly = {};
+
+    // لتحديد أفضل صفقة
+    let bestProfit = -Infinity, bestDoc = null;
+
     docs.forEach(d => {
       const dd = d.data();
       const profit = dd.totalProfit || 0; const invested = dd.totalInvested || 0;
       tp += profit; ti += invested;
       if (profit > 0) wins++;
+
+      // تتبع أفضل صفقة
+      if (profit > bestProfit) { bestProfit = profit; bestDoc = dd; }
+
       if (dd.timestamp?.toDate) {
         const dt = dd.timestamp.toDate();
         const k  = `${dt.getMonth()+1}/${dt.getFullYear().toString().slice(2)}`;
         if (!monthly[k]) monthly[k] = 0; monthly[k] += profit;
       }
     });
+
     const wr = docs.length > 0 ? (wins/docs.length*100) : 0, ip = tp >= 0;
     document.getElementById('acctTotalTrades').textContent = docs.length;
     const tpEl = document.getElementById('acctTotalProfit');
@@ -1174,8 +1359,45 @@ async function renderAccountPage() {
     tpEl.className = 'account-stat-value ' + (ip?'green':'red');
     document.getElementById('acctWinRate').textContent = wr.toFixed(0) + '%';
 
+    // ── عرض أفضل صفقة ────────────────────────────────
+    const bestCard = document.getElementById('acctBestTrade');
+    if (bestCard && bestDoc && bestProfit > 0) {
+      bestCard.style.display = 'block';
+      document.getElementById('acctBestProfit').textContent = '+' + fmt(bestProfit) + ' ' + t('sar');
+      const syms = (bestDoc.symbols || []).slice(0, 3).join(', ');
+      document.getElementById('acctBestLabel').textContent = syms || t('total_profit');
+      document.getElementById('acctBestBadge').textContent = t('best_trade');
+    } else if (bestCard) {
+      bestCard.style.display = 'none';
+    }
+
+    // ── مؤشر الاتجاه الشهري (trend) ──────────────────
     const entries = Object.entries(monthly).slice(-6);
     const maxV    = Math.max(...entries.map(e => Math.abs(e[1])), 1);
+
+    // احسب الاتجاه بين الشهر الحالي والسابق
+    let trendHTML = '';
+    if (entries.length >= 2) {
+      const thisMonthVal = entries[entries.length - 1][1];
+      const lastMonthVal = entries[entries.length - 2][1];
+      const diff = thisMonthVal - lastMonthVal;
+      const absDiff = Math.abs(diff);
+      const diffPct = lastMonthVal !== 0
+        ? (absDiff / Math.abs(lastMonthVal) * 100).toFixed(1)
+        : (absDiff > 0 ? '∞' : '0');
+      const trendClass = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+      const trendIcon  = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+      const trendLabel = currentLang === 'ar'
+        ? `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`
+        : `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`;
+      trendHTML = `<span class="trend-badge ${trendClass}" style="margin-right:8px;">${trendLabel}</span>`;
+    }
+
+    const monthTitleEl = document.querySelector('.monthly-title');
+    if (monthTitleEl) {
+      monthTitleEl.innerHTML = t('monthly_profit') + (trendHTML ? '<br><span style="font-size:11px;font-weight:400;">' + trendHTML + '</span>' : '');
+    }
+
     document.getElementById('monthlyBars').innerHTML = entries.map(([label, val]) => {
       const h = Math.max((Math.abs(val)/maxV)*100, 4), isP = val >= 0;
       return `<div class="monthly-bar-wrap">
@@ -1198,14 +1420,48 @@ async function renderAccountPage() {
     document.getElementById('recentList').innerHTML = recentHTML;
     document.querySelector('.recent-title').textContent = t('recent_trades');
     document.querySelector('.view-all-btn').textContent = t('view_all');
-    document.querySelector('.monthly-title').textContent = t('monthly_profit');
   } catch(e) { console.error(e); }
+}
+
+// ══════════════════════════════════════════════════════
+// History Skeleton
+// ══════════════════════════════════════════════════════
+function showHistorySkeleton() {
+  return Array(4).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+        <div class="skeleton-line" style="height:12px;width:32%;"></div>
+        <div class="skeleton-line" style="height:20px;width:26%;margin-bottom:0;"></div>
+      </div>
+      <div class="skeleton-line" style="height:11px;width:58%;"></div>
+      <div class="skeleton-line" style="height:11px;width:42%;"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <div class="skeleton-line" style="height:22px;width:52px;border-radius:6px;margin-bottom:0;"></div>
+        <div class="skeleton-line" style="height:22px;width:52px;border-radius:6px;margin-bottom:0;"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
 // ══════════════════════════════════════════════════════
 // History Page
 // ══════════════════════════════════════════════════════
-function renderHistoryPage() { document.getElementById('historyContent').style.display = 'block'; loadHistory(); }
+function renderHistoryPage() {
+  document.getElementById('historyContent').style.display = 'block';
+  // تحديث placeholder البحث حسب اللغة
+  const searchEl = document.getElementById('historySearch');
+  if (searchEl) searchEl.placeholder = t('search_history');
+  loadHistory();
+  // ربط حدث البحث
+  if (searchEl) {
+    searchEl.oninput = (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('#historyList .history-card').forEach(card => {
+        card.style.display = (!q || card.innerText.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    };
+  }
+}
 
 async function loadHistory(forceRefresh = false) {
   if (!currentUser) return;
@@ -1215,7 +1471,8 @@ async function loadHistory(forceRefresh = false) {
     document.getElementById('overviewGrid').innerHTML = _historyCache.overview;
     listEl.innerHTML = _historyCache.html; return;
   }
-  if (!_historyCache) listEl.innerHTML = `<div class="history-loading">${t('loading')}</div>`;
+  // عرض الـ skeleton أثناء التحميل
+  if (!_historyCache) listEl.innerHTML = showHistorySkeleton();
   try {
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
     const docs = snap.docs.sort((a,b) => (b.data().timestamp?.toMillis?.()||0) - (a.data().timestamp?.toMillis?.()||0));
@@ -1305,7 +1562,6 @@ window.saveDisplayName = async function() {
   if (!newName || !currentUser) return;
   try {
     await updateProfile(currentUser, { displayName: newName });
-    // ★ تحديث الاسم فقط — هذا الحقل مسموح في Firestore Rules
     await updateDoc(doc(db, 'users', currentUser.uid), { displayName: newName });
     document.getElementById('acctName').textContent = newName;
     document.getElementById('drawerUserName').textContent = newName;
@@ -1314,20 +1570,9 @@ window.saveDisplayName = async function() {
 };
 
 // ══════════════════════════════════════════════════════
-// Logo Theme Switching
-// ══════════════════════════════════════════════════════
-const _LOGO_DARK_URI  = "DARK_URI_PLACEHOLDER";
-const _LOGO_LIGHT_URI = "LIGHT_URI_PLACEHOLDER";
-function updateLogoTheme(isLight) {
-  const src = isLight ? _LOGO_LIGHT_URI : _LOGO_DARK_URI;
-  document.querySelectorAll('img.app-logo').forEach(el => el.src = src);
-}
-
-// ══════════════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════════════
 applyLang();
-updateLogoTheme(document.body.classList.contains('light'));
 const hash = window.location.hash.replace('#','');
 if (hash && ['account','history','pricing'].includes(hash)) navigateTo(hash);
 </script>

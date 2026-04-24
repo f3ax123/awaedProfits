@@ -544,9 +544,12 @@
   <!-- HISTORY PAGE -->
   <div id="historyPage">
     <div id="historyContent" style="display:none;">
-      <div class="history-header">
+<div class="history-header">
         <div class="section-title i18n" data-key="trade_history">سجل الصفقات</div>
-        <span class="history-count" id="historyCount"></span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="history-count" id="historyCount"></span>
+          <button id="clearAllBtn" onclick="clearAllHistory()" style="display:none;background:transparent;border:1px solid rgba(212,87,74,0.4);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;padding:4px 12px;border-radius:6px;transition:all .2s;font-family:inherit;">🗑️ حذف الكل</button>
+        </div>
       </div>
       <!-- حقل البحث في التاريخ -->
       <input class="history-search" id="historySearch" dir="auto"
@@ -1473,8 +1476,9 @@ async function loadHistory(forceRefresh = false) {
   // عرض الـ skeleton أثناء التحميل
   if (!_historyCache) listEl.innerHTML = showHistorySkeleton();
   try {
-    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
+const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
     const docs = snap.docs.sort((a,b) => (b.data().timestamp?.toMillis?.()||0) - (a.data().timestamp?.toMillis?.()||0));
+    docs.forEach(d => { _historyDataMap[d.id] = d.data(); });
     const countText = docs.length + (currentLang==='ar' ? ' صفقة' : ' trades');
     document.getElementById('historyCount').textContent = countText;
     let tpa=0,tia=0,wins=0;
@@ -1494,8 +1498,9 @@ async function loadHistory(forceRefresh = false) {
         const dd=d.data(), isP=(dd.totalProfit||0)>=0;
         const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString(currentLang==='ar'?'ar-SA':'en-US'):'—';
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
-        return `<div class="history-card" onclick="expandHistory('${d.id}')">
+return `<div class="history-card" onclick="expandHistory('${d.id}')">
           <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>
+          <button onclick="shareHistoryCard('${d.id}',event)" style="position:absolute;bottom:12px;${currentLang==='ar'?'right:70px':'left:70px'};background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:6px;transition:all .2s;font-family:inherit;">🖼️</button>
           <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">
@@ -1521,14 +1526,16 @@ async function loadHistory(forceRefresh = false) {
         </div>`;
       }).join('');
     }
-    listEl.innerHTML = listHTML;
+listEl.innerHTML = listHTML;
     _historyCache = { count:countText, overview:overviewHTML, html:listHTML };
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    if (clearAllBtn) clearAllBtn.style.display = docs.length > 0 ? 'block' : 'none';
   } catch(e) { listEl.innerHTML = `<div class="history-loading">Error: ${e.message}</div>`; }
 }
 
-window.expandHistory = id => { const d=document.getElementById('detail-'+id); if(d) d.style.display=d.style.display==='none'?'block':'none'; };
+window.expandHistory = id => { const d=document.getElementById('detail-'+id); if(d) d.style.display=d.style.display==='none'?'block':'none'; };  window.shareHistoryCard = function(id, e) {   e.stopPropagation();   const data = _historyDataMap[id];   if (data) window.showShareCardFromHistory(data); };
 
-let _pendingDeleteId = null;
+let _pendingDeleteId = null; let _historyDataMap = {};
 window.deleteHistory = (id, e) => {
   e.stopPropagation(); _pendingDeleteId = id;
   document.getElementById('deleteModalTitle').textContent   = t('delete_title');
@@ -1538,12 +1545,32 @@ window.deleteHistory = (id, e) => {
   document.getElementById('deleteModal').classList.add('open');
 };
 window.closeDeleteModal = () => { document.getElementById('deleteModal').classList.remove('open'); _pendingDeleteId=null; };
+
+window.clearAllHistory = function() {
+  document.getElementById('deleteModalTitle').textContent   = currentLang==='ar' ? 'حذف جميع الصفقات' : 'Delete All Trades';
+  document.getElementById('deleteModalSub').textContent     = currentLang==='ar' ? 'سيتم حذف كامل السجل. هذا الإجراء لا يمكن التراجع عنه.' : 'All history will be deleted. This cannot be undone.';
+  document.getElementById('deleteModalCancel').textContent  = t('cancel');
+  document.getElementById('deleteModalConfirm').textContent = t('delete_confirm');
+  document.getElementById('deleteModal').classList.add('open');
+  _pendingDeleteId = '__ALL__';
+};
+
 window.confirmDeleteHistory = async () => {
   if (!_pendingDeleteId) return;
   const id = _pendingDeleteId;
-  document.getElementById('deleteModal').classList.remove('open'); _pendingDeleteId=null;
-  try { await deleteDoc(doc(db,'users',currentUser.uid,'history',id)); _historyCache=null; loadHistory(true); }
-  catch(e) { console.error('Delete failed:',e); }
+  document.getElementById('deleteModal').classList.remove('open'); _pendingDeleteId = null;
+  try {
+    if (id === '__ALL__') {
+      const snap = await getDocs(collection(db,'users',currentUser.uid,'history'));
+      await Promise.all(snap.docs.map(d => deleteDoc(doc(db,'users',currentUser.uid,'history',d.id))));
+      _historyDataMap = {};
+    } else {
+      await deleteDoc(doc(db,'users',currentUser.uid,'history',id));
+      delete _historyDataMap[id];
+    }
+    _historyCache = null;
+    loadHistory(true);
+  } catch(e) { console.error('Delete failed:',e); }
 };
 document.getElementById('deleteModal').addEventListener('click', function(e) { if(e.target===this) closeDeleteModal(); });
 

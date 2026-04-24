@@ -762,6 +762,7 @@ function applyLang() {
 window.toggleLang = function() {
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
   localStorage.setItem('lang', currentLang);
+  _historyCache = null;   // ← أضف هذا السطر
   applyLang();
   if (currentPage === 'account') renderAccountPage();
   if (currentPage === 'history') renderHistoryPage();
@@ -1450,6 +1451,11 @@ function showHistorySkeleton() {
 // ══════════════════════════════════════════════════════
 function renderHistoryPage() {
   document.getElementById('historyContent').style.display = 'block';
+  // تحديث النصوص الثابتة في الصفحة
+  const titleEl = document.querySelector('#historyPage .section-title');
+  if (titleEl) titleEl.textContent = t('trade_history');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  if (clearAllBtn) clearAllBtn.innerHTML = `🗑️ ${t('delete')} ${currentLang === 'ar' ? 'الكل' : 'All'}`;
   // تحديث placeholder البحث حسب اللغة
   const searchEl = document.getElementById('historySearch');
   if (searchEl) searchEl.placeholder = t('search_history');

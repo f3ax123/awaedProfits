@@ -138,3 +138,14 @@ window.showShareCard = async function (result) {
   ctx.fillText(today, W / 2, 1040);
   ctx.restore();
 };
+window.showShareCardFromHistory = function(historyData) {
+  const result = {
+    overallPct:    historyData.overallPct    || 0,
+    symbols:       historyData.symbols       || [],
+    totalProfit:   historyData.totalProfit   || 0,
+    totalInvested: historyData.totalInvested || 0,
+    rows:          historyData.rows          || [],
+    trades:        historyData.rows          || [],
+  };
+  window.showShareCard(result);
+};

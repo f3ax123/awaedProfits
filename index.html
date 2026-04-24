@@ -1679,15 +1679,16 @@ window.saveDisplayName = async function() {
 // Manual Entry Page
 // ══════════════════════════════════════════════════════
 function updateManualPreview() {
-  const buy   = parseFloat(document.getElementById('mBuy')?.value)  || 0;
-  const sell  = parseFloat(document.getElementById('mSell')?.value) || 0;
-  const prev  = document.getElementById('manualPreview');
-  const amtEl = document.getElementById('manualPreviewAmount');
-  const pctEl = document.getElementById('manualPreviewPct');
+  const buy    = parseFloat(document.getElementById('mBuy')?.value)    || 0;
+  const sell   = parseFloat(document.getElementById('mSell')?.value)   || 0;
+  const shares = parseFloat(document.getElementById('mShares')?.value) || 0;
+  const prev   = document.getElementById('manualPreview');
+  const amtEl  = document.getElementById('manualPreviewAmount');
+  const pctEl  = document.getElementById('manualPreviewPct');
   if (!prev) return;
-  if (buy > 0 && sell > 0) {
-    const profit = sell - buy;
-    const pct    = (profit / buy) * 100;
+  if (buy > 0 && sell > 0 && shares > 0) {
+const profit   = (sell - buy) * shares;
+    const pct      = ((sell - buy) / buy) * 100;
     const isP    = profit >= 0;
     prev.style.display = 'block';
     amtEl.textContent  = (isP ? '+' : '') + fmt(profit) + ' ' + t('sar');
@@ -1699,7 +1700,7 @@ function updateManualPreview() {
   }
 }
 
-['mBuy','mSell'].forEach(id => {
+['mBuy','mSell','mShares'].forEach(id => {
   document.getElementById(id)?.addEventListener('input', updateManualPreview);
 });
 

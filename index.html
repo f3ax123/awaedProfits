@@ -377,6 +377,28 @@
   .share-dl-btn:hover { opacity:.85; }
   .share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
   .share-close-btn:hover { color:var(--text); }
+
+  /* ── Manual Entry Page ─────────────────────────────────── */
+#manualPage { display: none; }
+.manual-form { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 20px; }
+.manual-form-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; padding: 13px 16px; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: inherit; font-size: 15px; outline: none; transition: border-color .2s; box-sizing: border-box; }
+.form-input:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--muted); }
+.form-input.error { border-color: var(--red); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.manual-preview { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; display: none; }
+.manual-preview-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.manual-preview-amount { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+.manual-preview-pct { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.manual-save-btn { width: 100%; padding: 16px; background: var(--accent); border: none; border-radius: 14px; color: var(--bg); font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .3s; }
+body.light .manual-save-btn { color: #fff4e6; }
+.manual-save-btn:disabled { opacity: .35; cursor: not-allowed; }
+.manual-save-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,244,230,0.15); }
+
+  
 </style>
 </head>
 <script src="/shareCard.js"></script>
@@ -429,9 +451,13 @@
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span class="i18n" data-key="nav_account">حسابي</span>
     </button>
-    <button class="drawer-item" id="dnavHistory" onclick="navigateTo('history')">
+<button class="drawer-item" id="dnavHistory" onclick="navigateTo('history')">
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
       <span class="i18n" data-key="nav_history">السجل</span>
+    </button>
+    <button class="drawer-item" id="dnavManual" onclick="navigateTo('manual')">
+      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+      <span class="i18n" data-key="nav_manual">إدخال يدوي</span>
     </button>
     <div class="drawer-divider"></div>
     <button class="drawer-item" id="dnavPricing" onclick="navigateTo('pricing')">
@@ -558,6 +584,42 @@
       <div id="historyList"><div class="history-loading i18n" data-key="loading">جاري التحميل...</div></div>
     </div>
   </div>
+<!-- MANUAL ENTRY PAGE -->
+  <div id="manualPage">
+    <div class="section-title i18n" data-key="nav_manual">إدخال يدوي</div>
+    <div class="manual-form">
+      <div class="manual-form-title i18n" data-key="manual_form_title">بيانات الصفقة</div>
+      <div class="form-group">
+        <label class="form-label i18n" data-key="symbol_col">رمز السهم</label>
+        <input class="form-input" id="mSymbol" type="text" dir="auto" placeholder="مثال: 2222" autocomplete="off" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label i18n" data-key="buy_col">مبلغ الشراء</label>
+          <input class="form-input" id="mBuy" type="number" min="0" step="0.01" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label class="form-label i18n" data-key="sell_col">مبلغ البيع</label>
+          <input class="form-input" id="mSell" type="number" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label i18n" data-key="stocks">عدد الأسهم</label>
+        <input class="form-input" id="mShares" type="number" min="1" step="1" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="mDateLabel">التاريخ <span style="color:var(--muted);font-size:10px;">(اختياري)</span></label>
+        <input class="form-input" id="mDate" type="date" />
+      </div>
+      <div class="manual-preview" id="manualPreview">
+        <div class="manual-preview-label i18n" data-key="total_pl">إجمالي الربح / الخسارة</div>
+        <div class="manual-preview-amount" id="manualPreviewAmount">—</div>
+        <div class="manual-preview-pct" id="manualPreviewPct"></div>
+      </div>
+      <button class="manual-save-btn i18n" id="manualSaveBtn" data-key="save_trade">حفظ في السجل</button>
+    </div>
+  </div>
+
 
   <!-- PRICING PAGE -->
   <div id="pricingPage">
@@ -700,7 +762,11 @@ const STRINGS = {
     payment_fail:'فشل تفعيل الخطة. تواصل مع الدعم.',
     copy_result:'نسخ النتيجة', copied:'تم النسخ ✓',
     best_trade:'أفضل صفقة', search_history:'ابحث برمز السهم أو التاريخ...',
-    vs_last_month:'مقارنة بالشهر الماضي',
+vs_last_month:'مقارنة بالشهر الماضي',
+    nav_manual:'إدخال يدوي',
+    manual_form_title:'بيانات الصفقة',
+    manual_required:'يرجى تعبئة جميع الحقول المطلوبة',
+    manual_saved:'تم حفظ الصفقة في السجل ✓',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -734,7 +800,11 @@ const STRINGS = {
     payment_fail:'Plan activation failed. Please contact support.',
     copy_result:'Copy Result', copied:'Copied ✓',
     best_trade:'Best Trade', search_history:'Search by symbol or date...',
-    vs_last_month:'vs last month',
+vs_last_month:'vs last month',
+    nav_manual:'Manual Entry',
+    manual_form_title:'Trade Details',
+    manual_required:'Please fill all required fields',
+    manual_saved:'Trade saved to history ✓',
   }
 };
 
@@ -922,7 +992,7 @@ window.navigateTo = function(page) {
   if (currentPage === page) return;
   history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
 
-  ['analyze','account','history','pricing'].forEach(p => {
+  ['analyze','account','history','pricing','manual'].forEach(p => {
     const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
     if (p === page) {
@@ -944,7 +1014,7 @@ window.navigateTo = function(page) {
   if (currentPage === 'history') renderHistoryPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-['account','history','pricing'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
+['account','history','pricing','manual'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
 
 // ══════════════════════════════════════════════════════
 // Upload
@@ -1606,6 +1676,95 @@ window.saveDisplayName = async function() {
 // ══════════════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════════════
+// Manual Entry Page
+// ══════════════════════════════════════════════════════
+function updateManualPreview() {
+  const buy   = parseFloat(document.getElementById('mBuy')?.value)  || 0;
+  const sell  = parseFloat(document.getElementById('mSell')?.value) || 0;
+  const prev  = document.getElementById('manualPreview');
+  const amtEl = document.getElementById('manualPreviewAmount');
+  const pctEl = document.getElementById('manualPreviewPct');
+  if (!prev) return;
+  if (buy > 0 && sell > 0) {
+    const profit = sell - buy;
+    const pct    = (profit / buy) * 100;
+    const isP    = profit >= 0;
+    prev.style.display = 'block';
+    amtEl.textContent  = (isP ? '+' : '') + fmt(profit) + ' ' + t('sar');
+    amtEl.style.color  = isP ? 'var(--green)' : 'var(--red)';
+    pctEl.textContent  = (isP ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(2) + '%';
+    pctEl.style.color  = isP ? 'var(--green)' : 'var(--red)';
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+['mBuy','mSell'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updateManualPreview);
+});
+
+document.getElementById('manualSaveBtn')?.addEventListener('click', async function() {
+  if (!currentUser) { doLogin(); return; }
+
+  const symEl    = document.getElementById('mSymbol');
+  const buyEl    = document.getElementById('mBuy');
+  const sellEl   = document.getElementById('mSell');
+  const sharesEl = document.getElementById('mShares');
+  const dateEl   = document.getElementById('mDate');
+
+  [symEl, buyEl, sellEl, sharesEl].forEach(el => el.classList.remove('error'));
+
+  const sym    = symEl.value.trim().toUpperCase();
+  const buy    = parseFloat(buyEl.value);
+  const sell   = parseFloat(sellEl.value);
+  const shares = parseFloat(sharesEl.value);
+  let valid    = true;
+
+  if (!sym)               { symEl.classList.add('error');    valid = false; }
+  if (!buy    || buy   <= 0) { buyEl.classList.add('error');    valid = false; }
+  if (!sell   || sell  <= 0) { sellEl.classList.add('error');   valid = false; }
+  if (!shares || shares <= 0) { sharesEl.classList.add('error'); valid = false; }
+
+  if (!valid) { showToast(t('manual_required'), 'red'); return; }
+
+  const profit   = sell - buy;
+  const pct      = (profit / buy) * 100;
+  const dateVal  = dateEl.value;
+  let tsOverride = null;
+  if (dateVal) { tsOverride = new Date(dateVal); tsOverride.setHours(12, 0, 0, 0); }
+
+  const btn = document.getElementById('manualSaveBtn');
+  btn.disabled    = true;
+  btn.textContent = t('save_trade_saving');
+
+  try {
+    await addDoc(collection(db, 'users', currentUser.uid, 'history'), {
+      ...(tsOverride ? { timestamp: tsOverride } : { timestamp: serverTimestamp() }),
+      totalProfit:   profit,
+      totalInvested: buy,
+      overallPct:    pct,
+      tradesCount:   1,
+      symbols:       [sym],
+      manual:        true,
+      rows: [{ sym, name: sym, buyTotal: buy, sellTotal: sell, profit, pct, shares }]
+    });
+
+    _historyCache = null;
+    showToast(t('manual_saved'), 'green');
+    ['mSymbol','mBuy','mSell','mShares','mDate'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('manualPreview').style.display = 'none';
+    setTimeout(() => navigateTo('history'), 700);
+
+  } catch(e) {
+    showToast(t('save_error') + e.message, 'red');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = t('save_trade');
+  }
+});
+
 applyLang();
 const hash = window.location.hash.replace('#','');
 if (hash && ['account','history','pricing'].includes(hash)) navigateTo(hash);

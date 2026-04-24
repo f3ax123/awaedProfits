@@ -1499,9 +1499,10 @@ const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
         const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleString(currentLang==='ar'?'ar-SA':'en-US'):'—';
         const syms=(dd.symbols||[]).map(s=>`<span class="symbol-chip">${s}</span>`).join('');
 return `<div class="history-card" onclick="expandHistory('${d.id}')">
-          <button class="delete-btn" onclick="deleteHistory('${d.id}',event)">${t('delete')}</button>
-          <button onclick="shareHistoryCard('${d.id}',event)" style="position:absolute;bottom:12px;${currentLang==='ar'?'right:70px':'left:70px'};background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:6px;transition:all .2s;font-family:inherit;">مشاركة
-          </button>
+          <div style="position:absolute;bottom:12px;${currentLang==='ar'?'right:12px':'left:12px'};display:flex;gap:6px;">
+            <button class="delete-btn" onclick="deleteHistory('${d.id}',event)" style="position:static;color:var(--red);border-color:rgba(212,87,74,0.4);background:rgba(212,87,74,0.06);">${t('delete')}</button>
+            <button onclick="shareHistoryCard('${d.id}',event)" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:6px;transition:all .2s;font-family:inherit;">${currentLang==='ar'?'مشاركة':'Share'}</button>
+          </div>
           <div class="history-card-top">
             <div class="history-date">${date}</div>
             <div style="display:flex;align-items:center;gap:6px">

@@ -940,7 +940,7 @@ function updateThemeIcon(isLight) {
   });
 }
 function applyTheme(isLight) {   document.body.classList.toggle('light', isLight);   updateThemeIcon(isLight);   localStorage.setItem('theme', isLight ? 'light' : 'dark');   const logoSrc = isLight ? '/images/logo_light.png' : '/images/logo_dark.png';   document.querySelectorAll('img[alt="ربحي"]').forEach(img => img.src = logoSrc); }
-if (localStorage.getItem('theme') === 'light') applyTheme(true);
+const _initLight = localStorage.getItem('theme') === 'light'; applyTheme(_initLight);
 document.getElementById('themeBtn').addEventListener('click',  () => applyTheme(!document.body.classList.contains('light')));
 document.getElementById('themeBtn2').addEventListener('click', () => applyTheme(!document.body.classList.contains('light')));
 

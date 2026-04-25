@@ -1182,7 +1182,7 @@ window.closeDrawer = function() {
 window.navigateTo = function(page) {
   closeDrawer();
   if (currentPage === page) return;
-  history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
+  const pageRoutes = {   analyze:   '/',   dashboard: '/dashboard',   manual:    '/add-trade',   history:   '/history',   pricing:   '/plans' }; history.replaceState(null, '', pageRoutes[page] || '/');
 
   ['analyze','dashboard','history','pricing','manual'].forEach(p => {
     const el  = document.getElementById(p + 'Page');
@@ -2069,8 +2069,14 @@ document.getElementById('manualSaveBtn')?.addEventListener('click', async functi
 });
 
 applyLang();
-const hash = window.location.hash.replace('#','');
-if (hash && ['account','history','pricing'].includes(hash)) navigateTo(hash);
+const pathMap = {
+  '/dashboard': 'dashboard',
+  '/add-trade': 'manual',
+  '/history':   'history',
+  '/plans':     'pricing'
+};
+const initPage = pathMap[window.location.pathname];
+if (initPage) navigateTo(initPage);
 </script>
 </body>
 </html>

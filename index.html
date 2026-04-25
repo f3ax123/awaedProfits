@@ -416,6 +416,103 @@ body.light .manual-save-btn { color: #fff4e6; }
     transition: opacity .18s ease;
   }
   #langOverlay.show { opacity: 1; pointer-events: all; }
+  /* ── Dashboard Page ── */
+#dashboardPage { display: none; }
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.dash-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px 20px;
+  position: relative; overflow: hidden; transition: border-color .2s;
+}
+.dash-card:hover { border-color: rgba(200,169,110,0.3); }
+.dash-card-label {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;
+}
+.dash-card-val {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+}
+.dash-card-val.green { color: var(--green); }
+.dash-card-val.red   { color: var(--red);   }
+.dash-card-val.gold  { color: var(--gold);  }
+.dash-card-sub {
+  font-size: 11px; color: var(--muted); margin-top: 5px;
+}
+.dash-section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; margin-bottom: 16px;
+}
+.dash-section-header {
+  padding: 16px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dash-section-title {
+  font-size: 13px; font-weight: 700;
+}
+.dash-section-link {
+  font-size: 12px; color: var(--accent);
+  background: none; border: none; cursor: pointer;
+  font-family: inherit;
+}
+.dash-recent-row {
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background .15s;
+}
+.dash-recent-row:last-child { border-bottom: none; }
+.dash-recent-row:hover { background: var(--card2); }
+.dash-recent-sym { font-weight: 700; font-size: 14px; }
+.dash-recent-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.dash-recent-profit { font-size: 15px; font-weight: 700; }
+.dash-recent-profit.profit { color: var(--green); }
+.dash-recent-profit.loss   { color: var(--red);   }
+.dash-capital-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; cursor: pointer; transition: border-color .2s;
+}
+.dash-capital-card:hover { border-color: rgba(200,169,110,0.4); }
+.dash-monthly {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 22px; margin-bottom: 16px;
+}
+.dash-monthly-title {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px;
+}
+.dash-monthly-bars {
+  display: flex; align-items: flex-end; gap: 8px; height: 100px;
+}
+.dash-bar-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 5px; height: 100%; justify-content: flex-end;
+}
+.dash-bar {
+  width: 100%; border-radius: 5px 5px 0 0; min-height: 4px; transition: height .5s;
+}
+.dash-bar.profit-bar { background: var(--green); }
+.dash-bar.loss-bar   { background: var(--red); }
+.dash-bar-label { font-size: 10px; color: var(--muted); }
+.dash-bar-val   { font-size: 9px; font-weight: 600; }
+.dash-empty {
+  text-align: center; padding: 44px 20px;
+  color: var(--muted); font-size: 13px;
+}
+.dash-analyze-cta {
+  width: 100%; padding: 16px;
+  background: var(--accent); border: none; border-radius: 14px;
+  color: var(--bg); font-size: 15px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: all .3s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 20px;
+}
+body.light .dash-analyze-cta { color: #fff4e6; }
+.dash-analyze-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,244,230,0.15); }
   
 </style>
 </head>
@@ -465,10 +562,10 @@ body.light .manual-save-btn { color: #fff4e6; }
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
       <span class="i18n" data-key="nav_analyze">تحليل الصفقة</span>
     </button>
-    <button class="drawer-item" id="dnavAccount" onclick="navigateTo('account')">
-      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-      <span class="i18n" data-key="nav_account">حسابي</span>
-    </button>
+<button class="drawer-item" id="dnavDashboard" onclick="navigateTo('dashboard')">
+  <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+  <span class="i18n" data-key="nav_dashboard">الرئيسية</span>
+</button>
 <button class="drawer-item" id="dnavHistory" onclick="navigateTo('history')">
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
       <span class="i18n" data-key="nav_history">السجل</span>
@@ -539,49 +636,69 @@ body.light .manual-save-btn { color: #fff4e6; }
     </div>
   </div>
 
-  <!-- ACCOUNT PAGE -->
-  <div id="accountPage">
-    <div id="accountContent" style="display:none;">
-      <div class="account-profile">
-        <img class="account-avatar" id="acctAvatar" src="" alt="">
-        <div class="account-info">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-            <h2 id="acctName"></h2>
-            <button onclick="toggleEditName()" style="background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;padding:3px 8px;border-radius:6px;transition:all .2s;font-family:inherit;" class="i18n" data-key="edit">تعديل</button>
-          </div>
-          <p id="acctEmail" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></p>
-          <span id="acctPlanBadge" class="plan-badge free"></span>
-          <div id="editNameForm" style="display:none;margin-top:12px;">
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input id="editNameInput" type="text" style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:14px;font-family:inherit;outline:none;" />
-              <button onclick="saveDisplayName()" style="background:var(--accent);color:var(--bg);border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;" class="i18n" data-key="save">حفظ</button>
-              <button onclick="toggleEditName()" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;" class="i18n" data-key="cancel">إلغاء</button>
-            </div>
-          </div>
-        </div>
+<!-- DASHBOARD PAGE -->
+<div id="dashboardPage">
+  <div id="dashboardContent">
+    <!-- زر تحليل سريع -->
+    <button class="dash-analyze-cta" onclick="navigateTo('analyze')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span class="i18n" data-key="analyze_btn">تحليل صفقة جديدة</span>
+    </button>
+
+    <!-- بطاقات الملخص -->
+    <div class="dash-grid" id="dashGrid">
+      <div class="dash-card">
+        <div class="dash-card-label">إجمالي الأرباح</div>
+        <div class="dash-card-val green" id="dashTotalProfit">—</div>
       </div>
-      <div class="account-stats">
-        <div class="account-stat"><div class="account-stat-value" id="acctTotalTrades">—</div><div class="account-stat-label i18n" data-key="total_trades">إجمالي الصفقات</div></div>
-        <div class="account-stat"><div class="account-stat-value green" id="acctTotalProfit">—</div><div class="account-stat-label i18n" data-key="total_profit">إجمالي الأرباح</div></div>
-        <div class="account-stat"><div class="account-stat-value" id="acctWinRate">—</div><div class="account-stat-label i18n" data-key="win_rate">نسبة الفوز</div></div>
-        <div class="account-stat"><div class="account-stat-value gold" id="acctUsage">—</div><div class="account-stat-label i18n" data-key="month_usage">استخدام الشهر</div></div>
-        <!-- بطاقة أفضل صفقة — تظهر فقط إن وُجدت بيانات -->
-        <div class="account-stat" id="acctBestTrade" style="display:none;">
-          <div class="best-trade-badge" id="acctBestBadge">أفضل صفقة</div>
-          <div class="account-stat-value green" id="acctBestProfit">—</div>
-          <div class="account-stat-label" id="acctBestLabel">—</div>
-        </div>
+      <div class="dash-card">
+        <div class="dash-card-label">الصفقات</div>
+        <div class="dash-card-val" id="dashTotalTrades">—</div>
       </div>
-      <div class="monthly-section">
-        <div class="monthly-title i18n" data-key="monthly_profit">الأرباح الشهرية</div>
-        <div class="monthly-bars" id="monthlyBars"></div>
+      <div class="dash-card">
+        <div class="dash-card-label">نسبة الفوز</div>
+        <div class="dash-card-val gold" id="dashWinRate">—</div>
       </div>
-      <div class="recent-section">
-        <div class="recent-header"><div class="recent-title i18n" data-key="recent_trades">آخر الصفقات</div><button class="view-all-btn" onclick="navigateTo('history')" class="i18n" data-key="view_all">عرض الكل</button></div>
-        <div id="recentList"></div>
+      <div class="dash-card">
+        <div class="dash-card-label">الاستخدام</div>
+        <div class="dash-card-val" id="dashUsage">—</div>
+        <div class="dash-card-sub" id="dashPlanLabel">—</div>
+      </div>
+    </div>
+
+    <!-- رأس المال والعائد الكلي -->
+    <div class="dash-capital-card" onclick="openCapitalModal()">
+      <div>
+        <div class="dash-card-label" id="dashCapitalLabel">رأس المال</div>
+        <div class="dash-card-val gold" id="dashCapital">—</div>
+      </div>
+      <div style="text-align:left;">
+        <div class="dash-card-label" id="dashReturnLabel">العائد الكلي</div>
+        <div class="dash-card-val" id="dashReturn">—</div>
+      </div>
+      <div style="color:var(--muted);font-size:18px;">✎</div>
+    </div>
+
+    <!-- الأرباح الشهرية -->
+    <div class="dash-monthly">
+      <div class="dash-monthly-title" id="dashMonthlyTitle">الأرباح الشهرية</div>
+      <div class="dash-monthly-bars" id="dashMonthlyBars">
+        <div class="dash-empty">لا توجد بيانات بعد</div>
+      </div>
+    </div>
+
+    <!-- آخر الصفقات -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <div class="dash-section-title" id="dashRecentTitle">آخر الصفقات</div>
+        <button class="dash-section-link" onclick="navigateTo('history')" id="dashViewAll">عرض الكل</button>
+      </div>
+      <div id="dashRecentList">
+        <div class="dash-empty">لا توجد صفقات بعد</div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- HISTORY PAGE -->
   <div id="historyPage">
@@ -825,6 +942,7 @@ const STRINGS = {
     manual_form_title:'بيانات الصفقة',
     manual_required:'يرجى تعبئة جميع الحقول المطلوبة',
     manual_saved:'تم حفظ الصفقة في السجل ✓',
+    nav_dashboard: 'الرئيسية',
   },
   en: {
     nav_analyze:'Analyze Trade', nav_account:'My Account', nav_history:'History', nav_pricing:'Plans',
@@ -872,6 +990,7 @@ const STRINGS = {
     manual_form_title:'Trade Details',
     manual_required:'Please fill all required fields',
     manual_saved:'Trade saved to history ✓',
+    nav_dashboard: 'Dashboard',
   }
 };
 
@@ -905,7 +1024,7 @@ window.toggleLang = function() {
     localStorage.setItem('lang', currentLang);
     _historyCache = null;
     applyLang();
-    if (currentPage === 'account') renderAccountPage();
+    if (currentPage === 'dashboard') renderDashboardPage();
     if (currentPage === 'history') renderHistoryPage();
     overlay.classList.remove('show');
   }, 180);
@@ -990,7 +1109,7 @@ if (tuc) tuc.style.display = 'none';    document.getElementById('drawerUserSecti
   // أخفِ الـ loading overlay بعد معرفة حالة المصادقة
   _hideAuthLoader();
 
-  if (currentPage === 'account') renderAccountPage();
+  if (currentPage === 'dashboard') renderDashboardPage();
   if (currentPage === 'history') renderHistoryPage();
 });
 
@@ -1065,7 +1184,7 @@ window.navigateTo = function(page) {
   if (currentPage === page) return;
   history.replaceState(null, '', page === 'analyze' ? '#' : '#' + page);
 
-  ['analyze','account','history','pricing','manual'].forEach(p => {
+  ['analyze','dashboard','history','pricing','manual'].forEach(p => {
     const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
     if (p === page) {
@@ -1083,11 +1202,11 @@ window.navigateTo = function(page) {
   });
 
   currentPage = page;
-  if (currentPage === 'account') renderAccountPage();
+  if (currentPage === 'dashboard') renderDashboardPage();
   if (currentPage === 'history') renderHistoryPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-['account','history','pricing','manual'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
+['dashboard','history','pricing','manual'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
 
 // ══════════════════════════════════════════════════════
 // Upload
@@ -1250,7 +1369,7 @@ window.saveCurrentResult = async function() {
     lastResultSaved = true; _historyCache = null;
     sb.textContent = t('save_trade_done'); sb.style.background = 'var(--muted)';
     showToast(t('save_trade_done'), 'green');
-    if (currentPage === 'account') renderAccountPage();
+    if (currentPage === 'dashboard') renderDashboardPage();
     if (currentPage === 'history') loadHistory(true);
   } catch(e) {
     sb.disabled = false; sb.textContent = t('save_trade');
@@ -1465,108 +1584,112 @@ async function activatePlan(plan, transactionId) {
 // ══════════════════════════════════════════════════════
 // Account Page
 // ══════════════════════════════════════════════════════
-async function renderAccountPage() {
+async function renderDashboardPage() {
   if (!currentUser) return;
-  document.getElementById('accountContent').style.display = 'block';
-  document.getElementById('acctAvatar').src  = currentUser.photoURL || '';
-  document.getElementById('acctName').textContent  = currentUser.displayName || '—';
-  document.getElementById('acctEmail').textContent = currentUser.email || '—';
-  document.getElementById('acctUsage').textContent = userPlan === 'max' ? '∞' : `${usageCount}/${PLANS[userPlan].limit}`;
+
+  // بيانات المستخدم
+  document.getElementById('dashUsage').textContent =
+    userPlan === 'max' ? '∞' : `${usageCount}/${PLANS[userPlan].limit}`;
+  document.getElementById('dashPlanLabel').textContent = planLabel(userPlan);
+
+  // تحديث النصوص
+  document.getElementById('dashCapitalLabel').textContent  = currentLang === 'ar' ? 'رأس المال' : 'Capital';
+  document.getElementById('dashReturnLabel').textContent   = currentLang === 'ar' ? 'العائد الكلي' : 'Total Return';
+  document.getElementById('dashRecentTitle').textContent   = t('recent_trades');
+  document.getElementById('dashViewAll').textContent       = t('view_all');
+  document.getElementById('dashMonthlyTitle').textContent  = t('monthly_profit');
 
   try {
+    // جلب رأس المال
+    const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    const capital  = userData.capital || 0;
+
+    // جلب السجل
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
-    const docs = snap.docs;
-    let tp = 0, ti = 0, wins = 0;
+    const docs  = snap.docs.sort((a,b) =>
+      (b.data().timestamp?.toMillis?.() || 0) - (a.data().timestamp?.toMillis?.() || 0)
+    );
+
+    let tp = 0, wins = 0;
     const monthly = {};
-
-    // لتحديد أفضل صفقة
-    let bestProfit = -Infinity, bestDoc = null;
-
     docs.forEach(d => {
       const dd = d.data();
-      const profit = dd.totalProfit || 0; const invested = dd.totalInvested || 0;
-      tp += profit; ti += invested;
+      const profit = dd.totalProfit || 0;
+      tp += profit;
       if (profit > 0) wins++;
-
-      // تتبع أفضل صفقة
-      if (profit > bestProfit) { bestProfit = profit; bestDoc = dd; }
-
       if (dd.timestamp?.toDate) {
         const dt = dd.timestamp.toDate();
         const k  = `${dt.getMonth()+1}/${dt.getFullYear().toString().slice(2)}`;
-        if (!monthly[k]) monthly[k] = 0; monthly[k] += profit;
+        if (!monthly[k]) monthly[k] = 0;
+        monthly[k] += profit;
       }
     });
 
-    const wr = docs.length > 0 ? (wins/docs.length*100) : 0, ip = tp >= 0;
-    document.getElementById('acctTotalTrades').textContent = docs.length;
-    const tpEl = document.getElementById('acctTotalProfit');
-    tpEl.textContent = (ip?'+':'') + fmt(tp) + ' ' + t('sar');
-    tpEl.className = 'account-stat-value ' + (ip?'green':'red');
-    document.getElementById('acctWinRate').textContent = wr.toFixed(0) + '%';
+    const wr = docs.length > 0 ? (wins / docs.length * 100) : 0;
+    const or = capital > 0 ? (tp / capital * 100) : 0;
+    const isP = tp >= 0;
 
-    // ── عرض أفضل صفقة ────────────────────────────────
-    const bestCard = document.getElementById('acctBestTrade');
-    if (bestCard && bestDoc && bestProfit > 0) {
-      bestCard.style.display = 'block';
-      document.getElementById('acctBestProfit').textContent = '+' + fmt(bestProfit) + ' ' + t('sar');
-      const syms = (bestDoc.symbols || []).slice(0, 3).join(', ');
-      document.getElementById('acctBestLabel').textContent = syms || t('total_profit');
-      document.getElementById('acctBestBadge').textContent = t('best_trade');
-    } else if (bestCard) {
-      bestCard.style.display = 'none';
-    }
+    // ملخص
+    const tpEl = document.getElementById('dashTotalProfit');
+    tpEl.textContent = (isP ? '+' : '') + fmt(tp) + ' ' + t('sar');
+    tpEl.className   = 'dash-card-val ' + (isP ? 'green' : 'red');
 
-    // ── مؤشر الاتجاه الشهري (trend) ──────────────────
+    document.getElementById('dashTotalTrades').textContent = docs.length;
+    document.getElementById('dashWinRate').textContent     = wr.toFixed(0) + '%';
+
+    // رأس المال
+    document.getElementById('dashCapital').textContent =
+      capital > 0 ? fmt(capital) + ' ' + t('sar') : '—';
+
+    const retEl = document.getElementById('dashReturn');
+    retEl.textContent = (or >= 0 ? '+' : '') + or.toFixed(2) + '%';
+    retEl.className   = 'dash-card-val ' + (or >= 0 ? 'green' : 'red');
+
+    // رسم بياني شهري
     const entries = Object.entries(monthly).slice(-6);
     const maxV    = Math.max(...entries.map(e => Math.abs(e[1])), 1);
-
-    // احسب الاتجاه بين الشهر الحالي والسابق
-    let trendHTML = '';
-    if (entries.length >= 2) {
-      const thisMonthVal = entries[entries.length - 1][1];
-      const lastMonthVal = entries[entries.length - 2][1];
-      const diff = thisMonthVal - lastMonthVal;
-      const absDiff = Math.abs(diff);
-      const diffPct = lastMonthVal !== 0
-        ? (absDiff / Math.abs(lastMonthVal) * 100).toFixed(1)
-        : (absDiff > 0 ? '∞' : '0');
-      const trendClass = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
-      const trendIcon  = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
-      const trendLabel = currentLang === 'ar'
-        ? `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`
-        : `${trendIcon} ${diff > 0 ? '+' : ''}${diffPct}% ${t('vs_last_month')}`;
-      trendHTML = `<span class="trend-badge ${trendClass}" style="margin-right:8px;">${trendLabel}</span>`;
+    const barsEl  = document.getElementById('dashMonthlyBars');
+    if (entries.length === 0) {
+      barsEl.innerHTML = `<div class="dash-empty">${t('no_history')}</div>`;
+    } else {
+      barsEl.innerHTML = entries.map(([label, val]) => {
+        const h   = Math.max((Math.abs(val) / maxV) * 100, 4);
+        const isP = val >= 0;
+        const valStr = Math.abs(val) >= 1000
+          ? (val/1000).toFixed(1) + 'k' : val.toFixed(0);
+        return `<div class="dash-bar-wrap">
+          <div class="dash-bar-val" style="color:${isP?'var(--green)':'var(--red)'}">${isP?'+':''}${valStr}</div>
+          <div class="dash-bar ${isP?'profit-bar':'loss-bar'}" style="height:${h}%"></div>
+          <div class="dash-bar-label">${label}</div>
+        </div>`;
+      }).join('');
     }
 
-    const monthTitleEl = document.querySelector('.monthly-title');
-    if (monthTitleEl) {
-      monthTitleEl.innerHTML = t('monthly_profit') + (trendHTML ? '<br><span style="font-size:11px;font-weight:400;">' + trendHTML + '</span>' : '');
+    // آخر الصفقات
+    const recentEl = document.getElementById('dashRecentList');
+    if (docs.length === 0) {
+      recentEl.innerHTML = `<div class="dash-empty">${t('no_recent')}</div>`;
+    } else {
+      recentEl.innerHTML = docs.slice(0, 5).map(d => {
+        const dd   = d.data();
+        const isP  = (dd.totalProfit || 0) >= 0;
+        const date = dd.timestamp?.toDate
+          ? dd.timestamp.toDate().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US')
+          : '—';
+        return `<div class="dash-recent-row">
+          <div>
+            <div class="dash-recent-sym">${(dd.symbols||[]).slice(0,3).join(', ')||'—'}</div>
+            <div class="dash-recent-date">${date}</div>
+          </div>
+          <div class="dash-recent-profit ${isP?'profit':'loss'}">
+            ${isP?'+':''}${fmt(dd.totalProfit||0)} ${t('sar')}
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    document.getElementById('monthlyBars').innerHTML = entries.map(([label, val]) => {
-      const h = Math.max((Math.abs(val)/maxV)*100, 4), isP = val >= 0;
-      return `<div class="monthly-bar-wrap">
-        <div class="monthly-bar-val" style="color:${isP?'var(--green)':'var(--red)'}">${isP?'+':''}${Math.abs(val)>=1000?(val/1000).toFixed(1)+'k':val.toFixed(0)}</div>
-        <div class="monthly-bar ${isP?'profit-bar':'loss-bar'}" style="height:${h}%"></div>
-        <div class="monthly-bar-label">${label}</div>
-      </div>`;
-    }).join('');
-
-    const recentHTML = docs.length === 0
-      ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">${t('no_recent')}</div>`
-      : docs.slice(0,5).map(d => {
-          const dd = d.data(), isP = (dd.totalProfit||0) >= 0;
-          const date = dd.timestamp?.toDate ? dd.timestamp.toDate().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US') : '—';
-          return `<div class="recent-row">
-            <div><div class="recent-sym">${(dd.symbols||[]).slice(0,3).join(', ')||'—'}</div><div class="recent-date">${date}</div></div>
-            <div class="recent-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ${t('sar')}</div>
-          </div>`;
-        }).join('');
-    document.getElementById('recentList').innerHTML = recentHTML;
-    document.querySelector('.recent-title').textContent = t('recent_trades');
-    document.querySelector('.view-all-btn').textContent = t('view_all');
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('renderDashboardPage error:', e); }
 }
 
 // ══════════════════════════════════════════════════════

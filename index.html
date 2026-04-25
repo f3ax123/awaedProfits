@@ -904,8 +904,8 @@ onAuthStateChanged(auth, async user => {
   currentUser = user;
   if (user) {
     hideLoginGate();
-    document.getElementById('topbarUserControls').style.display = 'none';
-    document.getElementById('drawerUserSection').style.display = 'block';
+const tuc = document.getElementById('topbarUserControls');
+if (tuc) tuc.style.display = 'flex';    document.getElementById('drawerUserSection').style.display = 'block';
     document.getElementById('drawerAvatar').src = user.photoURL || '';
     document.getElementById('drawerUserName').textContent = user.displayName || user.email;
     await loadUserPlan();
@@ -920,8 +920,8 @@ onAuthStateChanged(auth, async user => {
     }
   } else {
     showLoginGate();
-    document.getElementById('topbarUserControls').style.display = 'none';
-    document.getElementById('drawerUserSection').style.display = 'none';
+const tuc = document.getElementById('topbarUserControls');
+if (tuc) tuc.style.display = 'none';    document.getElementById('drawerUserSection').style.display = 'none';
     userPlan = 'free'; usageCount = 0; _historyCache = null;
     updatePlanUI();
   }

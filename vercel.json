@@ -8,8 +8,8 @@
     }
   },
   "rewrites": [
-  { "source": "/", "destination": "/landing.html" }
-]
+    { "source": "/", "destination": "/landing.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

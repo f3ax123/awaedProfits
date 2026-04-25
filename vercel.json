@@ -7,13 +7,14 @@
       "maxDuration": 15
     }
   },
-  "rewrites": [
+"rewrites": [
     { "source": "/",           "destination": "/landing.html" },
-    { "source": "/analyze",    "destination": "/index.html"   },
-    { "source": "/dashboard",  "destination": "/index.html"   },
-    { "source": "/add-trade",  "destination": "/index.html"   },
-    { "source": "/history",    "destination": "/index.html"   },
-    { "source": "/plans",      "destination": "/index.html"   }
+    { "source": "/analyze",    "destination": "/app.html"     },
+    { "source": "/dashboard",  "destination": "/app.html"     },
+    { "source": "/add-trade",  "destination": "/app.html"     },
+    { "source": "/history",    "destination": "/app.html"     },
+    { "source": "/plans",      "destination": "/app.html"     }
+  
   ],
   "headers": [
     {

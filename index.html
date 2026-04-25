@@ -904,7 +904,7 @@ onAuthStateChanged(auth, async user => {
   currentUser = user;
   if (user) {
     hideLoginGate();
-    document.getElementById('topbarUserControls').style.display = 'flex';
+    document.getElementById('topbarUserControls').style.display = 'none';
     document.getElementById('drawerUserSection').style.display = 'block';
     document.getElementById('drawerAvatar').src = user.photoURL || '';
     document.getElementById('drawerUserName').textContent = user.displayName || user.email;

@@ -1700,8 +1700,100 @@ listEl.innerHTML = listHTML;
 
 window.expandHistory = id => { const d=document.getElementById('detail-'+id); if(d) d.style.display=d.style.display==='none'?'block':'none'; };  window.shareHistoryCard = function(id, e) {   e.stopPropagation();   const data = _historyDataMap[id];   if (data) window.showShareCardFromHistory(data); };
 
-let _pendingDeleteId = null; let _historyDataMap = {};
-window.deleteHistory = (id, e) => {
+let _pendingDeleteId = null; let _historyDataMap = {}; let _currentCapital = 0;
+
+// ══════════════════════════════════════════════════════
+// Capital Management
+// ══════════════════════════════════════════════════════
+window.openCapitalModal = async function() {
+  const modal = document.getElementById('capitalModal');
+  // تحديث النصوص
+  document.getElementById('capitalModalTitle').textContent = t('capital_mgmt');
+  document.getElementById('capitalCurrentLabel').textContent = t('capital_current');
+  document.getElementById('capitalCurrentDisplay').textContent = _currentCapital > 0 ? fmt(_currentCapital) + ' ' + t('sar') : '—';
+  document.getElementById('tabSet').textContent = t('set_capital');
+  document.getElementById('tabAdd').textContent = t('add_funds');
+  document.getElementById('capitalSetBtn').textContent = t('save');
+  document.getElementById('capitalAddBtn').textContent = t('add_funds');
+  switchCapitalTab('set');
+  modal.classList.add('open');
+  // تحميل سجل الإيداعات
+  await loadCapitalHistory();
+};
+
+window.closeCapitalModal = () => document.getElementById('capitalModal').classList.remove('open');
+
+window.switchCapitalTab = function(tab) {
+  document.getElementById('capitalTabSet').style.display = tab === 'set' ? 'block' : 'none';
+  document.getElementById('capitalTabAdd').style.display = tab === 'add' ? 'block' : 'none';
+  document.getElementById('tabSet').classList.toggle('active', tab === 'set');
+  document.getElementById('tabAdd').classList.toggle('active', tab === 'add');
+};
+
+async function loadCapitalHistory() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'capitalHistory'));
+    const items = snap.docs
+      .map(d => ({ ...d.data(), id: d.id }))
+      .sort((a,b) => (b.timestamp?.toMillis?.()||0) - (a.timestamp?.toMillis?.()||0))
+      .slice(0, 10);
+    const listEl = document.getElementById('capitalHistoryList');
+    if (items.length === 0) { listEl.innerHTML = ''; return; }
+    const title = currentLang==='ar' ? 'آخر الإيداعات' : 'Recent Deposits';
+    listEl.innerHTML = `<div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:8px;">${title}</div>` +
+      items.map(item => {
+        const date = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US') : '—';
+        const typeLabel = item.type === 'set'
+          ? (currentLang==='ar' ? 'تحديد' : 'Set')
+          : (currentLang==='ar' ? 'إضافة' : 'Added');
+        return `<div class="capital-history-item">
+          <div>
+            <div style="font-weight:600;">${typeLabel}</div>
+            <div class="capital-history-date">${date}</div>
+          </div>
+          <div class="capital-history-amount">${fmt(item.amount)} ${t('sar')}</div>
+        </div>`;
+      }).join('');
+  } catch(e) { console.error('loadCapitalHistory error:', e); }
+}
+
+window.saveCapital = async function(type) {
+  if (!currentUser) return;
+  const inputId = type === 'set' ? 'capitalSetInput' : 'capitalAddInput';
+  const amount  = parseFloat(document.getElementById(inputId).value);
+  if (!amount || amount <= 0) { showToast(t('capital_error'), 'red'); return; }
+
+  const btnId = type === 'set' ? 'capitalSetBtn' : 'capitalAddBtn';
+  const btn   = document.getElementById(btnId);
+  btn.disabled = true;
+
+  try {
+    const newCapital = type === 'set' ? amount : _currentCapital + amount;
+    // تحديث رأس المال في users doc
+    await updateDoc(doc(db, 'users', currentUser.uid), { capital: newCapital });
+    // حفظ سجل الإيداع
+    await addDoc(collection(db, 'users', currentUser.uid, 'capitalHistory'), {
+      type,
+      amount,
+      capitalAfter: newCapital,
+      timestamp: serverTimestamp(),
+    });
+    _currentCapital = newCapital;
+    document.getElementById('capitalCurrentDisplay').textContent = fmt(newCapital) + ' ' + t('sar');
+    document.getElementById(inputId).value = '';
+    showToast(type === 'set' ? t('capital_saved') : t('capital_added'), 'green');
+    await loadCapitalHistory();
+    // تحديث الـ overview بدون إعادة تحميل كامل
+    _historyCache = null;
+    loadHistory(true);
+  } catch(e) {
+    showToast(t('capital_error'), 'red');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+};window.deleteHistory = (id, e) => {
   e.stopPropagation(); _pendingDeleteId = id;
   document.getElementById('deleteModalTitle').textContent   = t('delete_title');
   document.getElementById('deleteModalSub').textContent     = t('delete_sub');

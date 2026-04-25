@@ -397,13 +397,18 @@
 body.light .manual-save-btn { color: #fff4e6; }
 .manual-save-btn:disabled { opacity: .35; cursor: not-allowed; }
 .manual-save-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,244,230,0.15); }
-
+#langOverlay {
+    position: fixed; inset: 0; background: var(--bg);
+    z-index: 1500; opacity: 0; pointer-events: none;
+    transition: opacity .18s ease;
+  }
+  #langOverlay.show { opacity: 1; pointer-events: all; }
   
 </style>
 </head>
 <script src="/shareCard.js"></script>
 <body>
-
+<div id="langOverlay"></div>
 <!-- ── Auth Loading Overlay (يُخفى بعد التحقق من الجلسة) ── -->
 <div class="auth-loading" id="authLoading">
   <div class="spinner" style="width:36px;height:36px;border-width:2.5px;margin:0;"></div>
@@ -474,8 +479,10 @@ body.light .manual-save-btn { color: #fff4e6; }
     </div>
     <div class="topbar-center"><img src="images/logo_light.png" alt="ربحي" style="height:28px; width:auto; display:block;"></div>
     <div class="topbar-right">
-      <div id="topbarUserControls" style="display:none; align-items:center; gap:8px;"><span id="topbarPlanBadge" class="plan-badge free"></span></div>
-      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+<button class="drawer-item" id="dnavManual" onclick="navigateTo('manual')">
+      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+      <span class="i18n" data-key="nav_manual">إدخال يدوي</span>
+    </button>      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
     </div>
   </div>
 <div class="wrapper">
@@ -820,21 +827,27 @@ function applyLang() {
   const resetBtn   = document.getElementById('resetBtn');   if (resetBtn)   resetBtn.textContent   = t('new_analysis');
   const clearBtn   = document.getElementById('clearBtn');   if (clearBtn)   clearBtn.textContent   = t('remove');
   // تحديث placeholder البحث
-  const searchEl = document.getElementById('historySearch');
+const searchEl = document.getElementById('historySearch');
   if (searchEl) searchEl.placeholder = t('search_history');
   // تحديث badge أفضل صفقة
   const bestBadge = document.getElementById('acctBestBadge');
   if (bestBadge) bestBadge.textContent = t('best_trade');
+  const tmb = document.getElementById('topbarManualBtn');
+  if (tmb) tmb.textContent = currentLang === 'ar' ? 'إدخال يدوي' : 'Manual Entry';
   updatePlanUI();
 }
-
 window.toggleLang = function() {
-  currentLang = currentLang === 'ar' ? 'en' : 'ar';
-  localStorage.setItem('lang', currentLang);
-  _historyCache = null;   // ← أضف هذا السطر
-  applyLang();
-  if (currentPage === 'account') renderAccountPage();
-  if (currentPage === 'history') renderHistoryPage();
+  const overlay = document.getElementById('langOverlay');
+  overlay.classList.add('show');
+  setTimeout(() => {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    _historyCache = null;
+    applyLang();
+    if (currentPage === 'account') renderAccountPage();
+    if (currentPage === 'history') renderHistoryPage();
+    overlay.classList.remove('show');
+  }, 180);
 };
 
 // ══════════════════════════════════════════════════════
@@ -939,7 +952,7 @@ async function loadUserPlan() {
 function updatePlanUI() {
   const label = planLabel(userPlan);
   const cls   = 'plan-badge ' + userPlan;
-  ['topbarPlanBadge','acctPlanBadge'].forEach(id => {
+['acctPlanBadge','drawerPlanBadge'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = label; el.className = cls; }
   });

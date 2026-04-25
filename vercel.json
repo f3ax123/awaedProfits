@@ -9,6 +9,7 @@
   },
   "rewrites": [
     { "source": "/",           "destination": "/landing.html" },
+    { "source": "/analyze",    "destination": "/index.html"   },
     { "source": "/dashboard",  "destination": "/index.html"   },
     { "source": "/add-trade",  "destination": "/index.html"   },
     { "source": "/history",    "destination": "/index.html"   },

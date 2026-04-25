@@ -8,7 +8,11 @@
     }
   },
   "rewrites": [
-    { "source": "/", "destination": "/landing.html" }
+    { "source": "/",           "destination": "/landing.html" },
+    { "source": "/dashboard",  "destination": "/index.html"   },
+    { "source": "/add-trade",  "destination": "/index.html"   },
+    { "source": "/history",    "destination": "/index.html"   },
+    { "source": "/plans",      "destination": "/index.html"   }
   ],
   "headers": [
     {

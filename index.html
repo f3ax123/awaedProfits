@@ -377,6 +377,19 @@
   .share-dl-btn:hover { opacity:.85; }
   .share-close-btn { padding:12px 18px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s; }
   .share-close-btn:hover { color:var(--text); }
+/* ── Capital Modal ─────────────────────────────────────── */
+.capital-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:650;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px); }
+.capital-modal-overlay.open { display:flex;animation:fadeIn .2s ease; }
+.capital-modal { background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto; }
+.capital-modal-title { font-size:17px;font-weight:700;margin-bottom:20px; }
+.capital-tabs { display:flex;gap:8px;margin-bottom:20px; }
+.capital-tab { flex:1;padding:10px;border:1px solid var(--border);background:var(--card2);color:var(--muted);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s; }
+.capital-tab.active { background:var(--accent);color:var(--bg);border-color:var(--accent); }
+.capital-history-list { margin-top:16px;border-top:1px solid var(--border);padding-top:16px; }
+.capital-history-item { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px; }
+.capital-history-item:last-child { border-bottom:none; }
+.capital-history-amount { font-weight:700;color:var(--green); }
+.capital-history-date { font-size:11px;color:var(--muted); }
 
   /* ── Manual Entry Page ─────────────────────────────────── */
 #manualPage { display: none; }
@@ -710,6 +723,39 @@ body.light .manual-save-btn { color: #fff4e6; }
 </div>
 
 
+<!-- CAPITAL MODAL -->
+<div class="capital-modal-overlay" id="capitalModal" onclick="if(event.target===this)closeCapitalModal()">
+  <div class="capital-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="capital-modal-title" id="capitalModalTitle">إدارة رأس المال</div>
+      <button onclick="closeCapitalModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;" id="capitalCurrentLabel">رأس المال الحالي</div>
+      <div style="font-size:24px;font-weight:700;color:var(--gold);" id="capitalCurrentDisplay">—</div>
+    </div>
+    <div class="capital-tabs">
+      <button class="capital-tab active" id="tabSet" onclick="switchCapitalTab('set')">تحديد رأس المال</button>
+      <button class="capital-tab" id="tabAdd" onclick="switchCapitalTab('add')">إضافة أموال</button>
+    </div>
+    <div id="capitalTabSet">
+      <div class="form-group">
+        <label class="form-label" id="capitalSetLabel">المبلغ الجديد</label>
+        <input class="form-input" id="capitalSetInput" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+      <button onclick="saveCapital('set')" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;" id="capitalSetBtn">حفظ</button>
+    </div>
+    <div id="capitalTabAdd" style="display:none;">
+      <div class="form-group">
+        <label class="form-label" id="capitalAddLabel">مبلغ الإضافة</label>
+        <input class="form-input" id="capitalAddInput" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+      <button onclick="saveCapital('add')" style="width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;" id="capitalAddBtn">إضافة</button>
+      <div class="capital-history-list" id="capitalHistoryList"></div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -765,7 +811,16 @@ const STRINGS = {
     payment_fail:'فشل تفعيل الخطة. تواصل مع الدعم.',
     copy_result:'نسخ النتيجة', copied:'تم النسخ ✓',
     best_trade:'أفضل صفقة', search_history:'ابحث برمز السهم أو التاريخ...',
-vs_last_month:'مقارنة بالشهر الماضي',
+    vs_last_month:'مقارنة بالشهر الماضي',
+    capital_mgmt:'إدارة رأس المال',
+    set_capital:'تحديد رأس المال',
+    add_funds:'إضافة أموال',
+    capital_history:'سجل الإيداعات',
+    capital_current:'رأس المال الحالي',
+    capital_placeholder:'أدخل المبلغ',
+    capital_saved:'تم حفظ رأس المال ✓',
+    capital_added:'تمت إضافة الأموال ✓',
+    capital_error:'خطأ في حفظ رأس المال',
     nav_manual:'إدخال يدوي',
     manual_form_title:'بيانات الصفقة',
     manual_required:'يرجى تعبئة جميع الحقول المطلوبة',
@@ -803,7 +858,16 @@ vs_last_month:'مقارنة بالشهر الماضي',
     payment_fail:'Plan activation failed. Please contact support.',
     copy_result:'Copy Result', copied:'Copied ✓',
     best_trade:'Best Trade', search_history:'Search by symbol or date...',
-vs_last_month:'vs last month',
+    vs_last_month:'vs last month',
+    capital_mgmt:'Capital Management',
+    set_capital:'Set Capital',
+    add_funds:'Add Funds',
+    capital_history:'Deposit History',
+    capital_current:'Current Capital',
+    capital_placeholder:'Enter amount',
+    capital_saved:'Capital saved ✓',
+    capital_added:'Funds added ✓',
+    capital_error:'Error saving capital',
     nav_manual:'Manual Entry',
     manual_form_title:'Trade Details',
     manual_required:'Please fill all required fields',
@@ -1558,20 +1622,34 @@ async function loadHistory(forceRefresh = false) {
     document.getElementById('overviewGrid').innerHTML = _historyCache.overview;
     listEl.innerHTML = _historyCache.html; return;
   }
-  // عرض الـ skeleton أثناء التحميل
   if (!_historyCache) listEl.innerHTML = showHistorySkeleton();
   try {
-const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
+    // جلب رأس المال من Firestore
+    const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    _currentCapital = userData.capital || 0;
+
+    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
     const docs = snap.docs.sort((a,b) => (b.data().timestamp?.toMillis?.()||0) - (a.data().timestamp?.toMillis?.()||0));
     docs.forEach(d => { _historyDataMap[d.id] = d.data(); });
     const countText = docs.length + (currentLang==='ar' ? ' صفقة' : ' trades');
     document.getElementById('historyCount').textContent = countText;
-    let tpa=0,tia=0,wins=0;
-    docs.forEach(d => { const dd=d.data(); tpa+=dd.totalProfit||0; tia+=dd.totalInvested||0; if((dd.totalProfit||0)>0) wins++; });
-    const wr=docs.length>0?(wins/docs.length*100):0, or=tia>0?(tpa/tia*100):0, iov=tpa>=0;
-    const overviewHTML = docs.length===0 ? '' : `
+    let tpa=0, wins=0;
+    docs.forEach(d => { const dd=d.data(); tpa+=dd.totalProfit||0; if((dd.totalProfit||0)>0) wins++; });
+    const wr=docs.length>0?(wins/docs.length*100):0;
+    const or = _currentCapital > 0 ? (tpa / _currentCapital * 100) : 0;
+    const iov=tpa>=0;
+    const capitalLabel = currentLang==='ar' ? 'رأس المال' : 'Capital';
+    const editLabel = currentLang==='ar' ? 'تعديل' : 'Edit';
+    const overviewHTML = `
       <div class="overview-card"><div class="stat-label">${t('total_profit')}</div><div class="stat-value ${iov?'green':'red'}">${iov?'+':''}${fmt(tpa)} ${t('sar')}</div></div>
-      <div class="overview-card"><div class="stat-label">${t('total_invest')}</div><div class="stat-value gold">${fmt(tia)} ${t('sar')}</div></div>
+      <div class="overview-card" style="cursor:pointer;" onclick="openCapitalModal()">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="stat-label">${capitalLabel}</div>
+          <span style="font-size:10px;color:var(--accent);font-weight:600;">${editLabel} ✎</span>
+        </div>
+        <div class="stat-value gold">${_currentCapital > 0 ? fmt(_currentCapital)+' '+t('sar') : '—'}</div>
+      </div>
       <div class="overview-card"><div class="stat-label">${t('overall_return')}</div><div class="stat-value ${iov?'green':'red'}">${or>=0?'+':''}${or.toFixed(2)}%</div></div>
       <div class="overview-card"><div class="stat-label">${t('win_rate')}</div><div class="stat-value">${wr.toFixed(0)}%</div></div>`;
     document.getElementById('overviewGrid').innerHTML = overviewHTML;

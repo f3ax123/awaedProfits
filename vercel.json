@@ -7,6 +7,9 @@
       "maxDuration": 15
     }
   },
+  "rewrites": [
+  { "source": "/", "destination": "/landing.html" }
+]
   "headers": [
     {
       "source": "/api/(.*)",

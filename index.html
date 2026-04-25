@@ -1182,8 +1182,14 @@ window.closeDrawer = function() {
 window.navigateTo = function(page) {
   closeDrawer();
   if (currentPage === page) return;
-  const pageRoutes = {   analyze:   '/',   dashboard: '/dashboard',   manual:    '/add-trade',   history:   '/history',   pricing:   '/plans' }; history.replaceState(null, '', pageRoutes[page] || '/');
-
+const pageRoutes = {
+  analyze:   '/analyze',
+  dashboard: '/dashboard',
+  manual:    '/add-trade',
+  history:   '/history',
+  pricing:   '/plans'
+};
+history.replaceState(null, '', pageRoutes[page] || '/analyze');
   ['analyze','dashboard','history','pricing','manual'].forEach(p => {
     const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
@@ -2070,13 +2076,14 @@ document.getElementById('manualSaveBtn')?.addEventListener('click', async functi
 
 applyLang();
 const pathMap = {
+  '/analyze':   'analyze',
   '/dashboard': 'dashboard',
   '/add-trade': 'manual',
   '/history':   'history',
   '/plans':     'pricing'
 };
-const initPage = pathMap[window.location.pathname];
-if (initPage) navigateTo(initPage);
+const initPage = pathMap[window.location.pathname] || 'analyze';
+navigateTo(initPage);
 </script>
 </body>
 </html>

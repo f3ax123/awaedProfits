@@ -2095,7 +2095,12 @@ window.saveCapital = async function(type) {
 };
 window.closeDeleteModal = () => { document.getElementById('deleteModal').classList.remove('open'); _pendingDeleteId=null; };
 
-window.clearAllHistoryFromDrawer = function() {   closeDrawer();   setTimeout(() => clearAllHistory(), 200); };
+window.clearAllHistoryFromDrawer = function() {
+  closeDrawer();
+  setTimeout(() => clearAllHistory(), 200);
+};
+
+window.clearAllHistory = function() {
   document.getElementById('deleteModalTitle').textContent   = currentLang==='ar' ? 'حذف جميع الصفقات' : 'Delete All Trades';
   document.getElementById('deleteModalSub').textContent     = currentLang==='ar' ? 'سيتم حذف كامل السجل. هذا الإجراء لا يمكن التراجع عنه.' : 'All history will be deleted. This cannot be undone.';
   document.getElementById('deleteModalCancel').textContent  = t('cancel');

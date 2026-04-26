@@ -146,8 +146,11 @@
 
   .icon-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
   .icon-btn:hover { color: var(--text); border-color: var(--accent); }
-  .lang-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; font-family: inherit; }
-  .lang-btn:hover { color: var(--text); border-color: var(--accent); }
+.lang-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; font-family: inherit; }
+.lang-btn:hover { color: var(--text); border-color: var(--accent); }
+.currency-btn { height: 36px; padding: 0 10px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all .2s; flex-shrink: 0; font-family: inherit; }
+.currency-btn:hover { color: var(--text); border-color: var(--accent); }
+.currency-btn.active { color: var(--gold); border-color: rgba(200,169,110,0.4); }
 
   .hamburger-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; transition: all .2s; flex-shrink: 0; padding: 0; }
   .hamburger-btn:hover { border-color: var(--accent); }
@@ -499,6 +502,9 @@ body.light .manual-save-btn { color: #fff4e6; }
 .dash-bar.loss-bar   { background: var(--red); }
 .dash-bar-label { font-size: 10px; color: var(--muted); }
 .dash-bar-val   { font-size: 9px; font-weight: 600; }
+/* Line Chart */
+.dash-linechart-wrap { width:100%; overflow:hidden; }
+.dash-linechart-wrap svg { width:100%; display:block; }
 .dash-empty {
   text-align: center; padding: 44px 20px;
   color: var(--muted); font-size: 13px;
@@ -580,18 +586,15 @@ body.light .dash-analyze-cta { color: #fff4e6; }
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
       <span class="i18n" data-key="nav_pricing">الباقات</span>
     </button>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" id="drawerClearAllBtn" onclick="clearAllHistoryFromDrawer()" style="display:none;color:var(--red);">
-      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></span>
-      <span id="drawerClearAllLabel">حذف كل الصفقات</span>
-    </button>
+
   </nav>
 </div>
 
   <div class="topbar">
-    <div class="topbar-left">
+<div class="topbar-left">
       <button class="icon-btn" id="themeBtn"><svg id="themeBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
       <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+      <button class="currency-btn" id="currencyBtn" onclick="toggleCurrency()">﷼<span id="currencyLabel">SAR</span></button>
     </div>
     <div class="topbar-center"><img src="images/logo_light.png" alt="ربحي" style="height:28px; width:auto; display:block;"></div>
 <div class="topbar-right">
@@ -741,11 +744,11 @@ body.light .dash-analyze-cta { color: #fff4e6; }
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label i18n" data-key="buy_col">مبلغ الشراء</label>
-          <input class="form-input" id="mBuy" type="number" min="0" step="0.01" placeholder="0.00" />
+<label class="form-label"><span class="i18n" data-key="buy_col">مبلغ الشراء</span> <span id="mBuyUnit" style="color:var(--gold);font-size:10px;">ريال/سهم</span></label>
+        <input class="form-input" id="mBuy" type="number" min="0" step="0.01" placeholder="0.00" />
         </div>
         <div class="form-group">
-          <label class="form-label i18n" data-key="sell_col">مبلغ البيع</label>
+<label class="form-label"><span class="i18n" data-key="sell_col">مبلغ البيع</span> <span id="mSellUnit" style="color:var(--gold);font-size:10px;">ريال/سهم</span></label>
           <input class="form-input" id="mSell" type="number" min="0" step="0.01" placeholder="0.00" />
         </div>
       </div>
@@ -812,6 +815,11 @@ body.light .dash-analyze-cta { color: #fff4e6; }
       </div>
     </div>
 
+<!-- حذف كل الصفقات -->
+    <button onclick="clearAllHistory()" id="accountClearAllBtn" style="width:100%;padding:14px;background:transparent;border:1px solid rgba(212,87,74,0.2);color:var(--red);border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(212,87,74,0.06)'" onmouseout="this.style.background='transparent'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      <span id="accountClearAllLabel">حذف كل الصفقات</span>
+    </button>
     <!-- تسجيل الخروج -->
     <button onclick="doSignout()" style="width:100%;padding:14px;background:transparent;border:1px solid rgba(212,87,74,0.3);color:var(--red);border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;" onmouseover="this.style.background='rgba(212,87,74,0.08)'" onmouseout="this.style.background='transparent'" id="accountSignoutBtn">تسجيل الخروج</button>
   </div>
@@ -1060,6 +1068,40 @@ const STRINGS = {
 let currentLang = localStorage.getItem('lang') || 'ar';
 function t(key) { return STRINGS[currentLang][key] || STRINGS['ar'][key] || key; }
 
+// ── Currency ──────────────────────────────────────────
+let currentCurrency = localStorage.getItem('currency') || 'SAR';
+const USD_RATE = 3.75; // 1 USD = 3.75 SAR
+function toDisplayCurrency(sarAmount) {
+  if (currentCurrency === 'USD') return sarAmount / USD_RATE;
+  return sarAmount;
+}
+function currencySymbol() { return currentCurrency === 'USD' ? '$' : t('sar'); }
+function fmtC(sarAmount) { return fmt(toDisplayCurrency(sarAmount)); }
+window.toggleCurrency = function() {
+  currentCurrency = currentCurrency === 'SAR' ? 'USD' : 'SAR';
+  localStorage.setItem('currency', currentCurrency);
+  updateCurrencyBtn();
+  // إعادة رسم الصفحات الحالية
+  _historyCache = null;
+  if (currentPage === 'dashboard') renderDashboardPage();
+  if (currentPage === 'history')   loadHistory(true);
+  if (currentPage === 'account')   renderAccountPage();
+};
+function updateCurrencyBtn() {
+  const btn = document.getElementById('currencyBtn');
+  if (!btn) return;
+  if (currentCurrency === 'USD') {
+    btn.innerHTML = `$<span id="currencyLabel">USD</span>`;
+    btn.classList.add('active');
+  } else {
+    btn.innerHTML = `﷼<span id="currencyLabel">SAR</span>`;
+    btn.classList.remove('active');
+  }
+  const unitLabel = currentCurrency === 'USD' ? '$/ سهم' : 'ريال/سهم';
+  const buyU = document.getElementById('mBuyUnit'); if (buyU) buyU.textContent = unitLabel;
+  const sellU = document.getElementById('mSellUnit'); if (sellU) sellU.textContent = unitLabel;
+}
+
 function applyLang() {
   document.documentElement.lang = currentLang;
   document.body.classList.toggle('en', currentLang === 'en');
@@ -1111,6 +1153,7 @@ let lastResult = null, lastResultSaved = false;
 window.__lastResult = null;
 let currentPage = 'analyze';
 let _historyCache = null;
+let _dashCapital = 0;
 
 // ══════════════════════════════════════════════════════
 // Theme
@@ -1490,13 +1533,13 @@ function renderResults(data) {
   document.getElementById('summaryCard').className = 'summary-card ' + (ip?'profit':'loss');
   const sa = document.getElementById('summaryAmount');
   sa.className = 'summary-amount ' + (ip?'profit':'loss');
-  sa.textContent = (ip?'+':'') + fmt(tp) + ' ' + t('sar');
+sa.textContent = (ip?'+':'') + fmtC(tp) + ' ' + currencySymbol();
   const sp = document.getElementById('summaryPct');
   sp.className = 'summary-pct ' + (ip?'profit':'loss');
   sp.textContent = (ip?'▲ ':'▼ ') + Math.abs(op).toFixed(2) + '%';
 
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">${t('capital')}</div><div class="stat-value gold">${fmt(ti)} ${t('sar')}</div></div>
+document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">${t('capital')}</div><div class="stat-value gold">${fmtC(ti)} ${currencySymbol()}</div></div>
     <div class="stat-card"><div class="stat-label">${t('trades_count')}</div><div class="stat-value">${trades.length}</div></div>
     <div class="stat-card"><div class="stat-label">${t('return_pct')}</div><div class="stat-value ${ip?'green':'red'}">${op>=0?'+':''}${op.toFixed(2)}%</div></div>
     <div class="stat-card"><div class="stat-label">${t('stocks')}</div><div class="stat-value">${Object.keys(grouped).length}</div></div>`;
@@ -1663,18 +1706,142 @@ async function renderDashboardPage() {
       }).join('');
     }
     // آخر الصفقات
+async function renderDashboardPage() {
+  if (!currentUser) return;
+  try {
+    // جلب رأس المال
+    const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    _dashCapital = userData.capital || 0;
+
+    // جلب السجل
+    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'history'));
+    const docs = snap.docs.sort((a,b) =>
+      (b.data().timestamp?.toMillis?.()||0) - (a.data().timestamp?.toMillis?.()||0)
+    );
+
+    // ── بطاقات الملخص ──
+    let totalProfit = 0, wins = 0;
+    docs.forEach(d => {
+      const p = d.data().totalProfit || 0;
+      totalProfit += p;
+      if (p > 0) wins++;
+    });
+    const winRate    = docs.length > 0 ? (wins / docs.length * 100) : 0;
+    const isTotalPos = totalProfit >= 0;
+    const returnPct  = _dashCapital > 0 ? (totalProfit / _dashCapital * 100) : 0;
+
+    document.getElementById('dashTotalProfit').textContent =
+      (isTotalPos?'+':'') + fmtC(totalProfit) + ' ' + currencySymbol();
+    document.getElementById('dashTotalProfit').className =
+      'dash-card-val ' + (isTotalPos ? 'green' : 'red');
+    document.getElementById('dashTotalTrades').textContent = docs.length;
+    document.getElementById('dashWinRate').textContent     = winRate.toFixed(0) + '%';
+    document.getElementById('dashUsage').textContent       =
+      userPlan === 'max' ? '∞' : `${usageCount}/${PLANS[userPlan].limit}`;
+    document.getElementById('dashPlanLabel').textContent   = planLabel(userPlan);
+
+    // ── بطاقة رأس المال ──
+    const capLabel    = currentLang === 'ar' ? 'رأس المال' : 'Capital';
+    const retLabel    = currentLang === 'ar' ? 'العائد الكلي' : 'Total Return';
+    const monthTitle  = currentLang === 'ar' ? 'نمو رأس المال التراكمي' : 'Cumulative Capital Growth';
+    const recentTitle = currentLang === 'ar' ? 'آخر الصفقات' : 'Recent Trades';
+    const viewAllTxt  = currentLang === 'ar' ? 'عرض الكل' : 'View All';
+
+    document.getElementById('dashCapitalLabel').textContent = capLabel;
+    document.getElementById('dashCapital').textContent =
+      _dashCapital > 0 ? fmtC(_dashCapital) + ' ' + currencySymbol() : '—';
+    document.getElementById('dashReturnLabel').textContent = retLabel;
+    document.getElementById('dashReturn').textContent =
+      (returnPct >= 0 ? '+' : '') + returnPct.toFixed(2) + '%';
+    document.getElementById('dashReturn').className =
+      'dash-card-val ' + (returnPct >= 0 ? 'green' : 'red');
+    document.getElementById('dashMonthlyTitle').textContent = monthTitle;
+    document.getElementById('dashRecentTitle').textContent  = recentTitle;
+    document.getElementById('dashViewAll').textContent      = viewAllTxt;
+
+    // ── Line Chart: نمو رأس المال التراكمي ──
+    const lineEl = document.getElementById('dashLineChart');
+    if (!lineEl) { console.warn('dashLineChart element not found'); }
+    else if (docs.length < 2) {
+      lineEl.innerHTML = `<div class="dash-empty" style="padding:28px 0;">${t('no_recent')}</div>`;
+    } else {
+      const sorted = [...docs].sort((a,b) =>
+        (a.data().timestamp?.toMillis?.()||0) - (b.data().timestamp?.toMillis?.()||0)
+      );
+      let cumCapital = _dashCapital || 0;
+      const points = [];
+      sorted.forEach(d => {
+        cumCapital += (d.data().totalProfit || 0);
+        const date = d.data().timestamp?.toDate
+          ? d.data().timestamp.toDate().toLocaleDateString(
+              currentLang==='ar'?'ar-SA':'en-US', {month:'short',day:'numeric'})
+          : '';
+        points.push({ val: cumCapital, date });
+      });
+
+      const vals  = points.map(p => p.val);
+      const minV  = Math.min(...vals);
+      const maxV  = Math.max(...vals);
+      const range = maxV - minV || 1;
+      const W = 600, H = 110, PAD = 18;
+      const xs = points.map((_,i) => PAD + (i / (points.length-1)) * (W - PAD*2));
+      const ys = points.map(p  => PAD + (1 - (p.val - minV) / range) * (H - PAD*2));
+      const pathD = xs.map((x,i) => (i===0?`M${x},${ys[i]}`:`L${x},${ys[i]}`)).join(' ');
+      const fillD = `${pathD} L${xs[xs.length-1]},${H} L${xs[0]},${H} Z`;
+      const isPos = points[points.length-1].val >= points[0].val;
+      const lineC = isPos ? 'var(--green)' : 'var(--red)';
+
+      const labelIdxs   = [0, Math.floor(points.length/2), points.length-1];
+      const labelsHTML  = labelIdxs.map(i => `
+        <circle cx="${xs[i]}" cy="${ys[i]}" r="3.5" fill="${lineC}" stroke="var(--card)" stroke-width="1.5"/>
+        <text x="${xs[i]}" y="${H+12}" text-anchor="middle" font-size="9" fill="var(--muted)"
+          font-family="IBM Plex Sans Arabic,sans-serif">${points[i].date}</text>
+        <text x="${xs[i]}" y="${ys[i]-7}" text-anchor="middle" font-size="8.5" fill="${lineC}"
+          font-family="IBM Plex Sans Arabic,sans-serif" font-weight="700">${fmtC(points[i].val)}</text>
+      `).join('');
+
+      lineEl.innerHTML = `
+        <div style="width:100%;overflow:hidden;">
+          <svg viewBox="0 0 ${W} ${H+20}" xmlns="http://www.w3.org/2000/svg"
+            style="width:100%;display:block;" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lgFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${lineC}" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="${lineC}" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="${fillD}" fill="url(#lgFill)"/>
+            <path d="${pathD}" fill="none" stroke="${lineC}" stroke-width="2.2"
+              stroke-linejoin="round" stroke-linecap="round"/>
+            ${labelsHTML}
+          </svg>
+        </div>`;
+    }
+
+    // ── آخر الصفقات ──
     const recentEl = document.getElementById('dashRecentList');
-    if (docs.length===0) { recentEl.innerHTML=`<div class="dash-empty">${t('no_recent')}</div>`; }
-    else {
-      recentEl.innerHTML = docs.slice(0,5).map(d => {
-        const dd=d.data(), isP=(dd.totalProfit||0)>=0;
-        const date=dd.timestamp?.toDate?dd.timestamp.toDate().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US'):'—';
+    if (docs.length === 0) {
+      recentEl.innerHTML = `<div class="dash-empty">${t('no_recent')}</div>`;
+    } else {
+      recentEl.innerHTML = docs.slice(0, 5).map(d => {
+        const dd  = d.data();
+        const isP = (dd.totalProfit || 0) >= 0;
+        const date = dd.timestamp?.toDate
+          ? dd.timestamp.toDate().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US')
+          : '—';
         return `<div class="dash-recent-row">
-          <div><div class="dash-recent-sym">${(dd.symbols||[]).slice(0,3).join(', ')||'—'}</div><div class="dash-recent-date">${date}</div></div>
-          <div class="dash-recent-profit ${isP?'profit':'loss'}">${isP?'+':''}${fmt(dd.totalProfit||0)} ${t('sar')}</div>
+          <div>
+            <div class="dash-recent-sym">${(dd.symbols||[]).slice(0,3).join(', ')||'—'}</div>
+            <div class="dash-recent-date">${date}</div>
+          </div>
+          <div class="dash-recent-profit ${isP?'profit':'loss'}">
+            ${isP?'+':''}${fmtC(dd.totalProfit||0)} ${currencySymbol()}
+          </div>
         </div>`;
       }).join('');
     }
+
   } catch(e) { console.error('renderDashboardPage error:', e); }
 }
 async function activatePlan(plan, transactionId) {
@@ -1755,8 +1922,14 @@ async function activatePlan(plan, transactionId) {
   if (saveBtn) saveBtn.textContent = t('save');
   const signoutBtn = document.getElementById('accountSignoutBtn');
   if (signoutBtn) signoutBtn.textContent = t('signout');
-  const upgradeBtn2 = document.getElementById('accountUpgradeBtn');
+const upgradeBtn2 = document.getElementById('accountUpgradeBtn');
   if (upgradeBtn2) upgradeBtn2.textContent = t('upgrade');
+
+  // زر حذف كل الصفقات
+  const clearAllBtn = document.getElementById('accountClearAllBtn');
+  if (clearAllBtn) clearAllBtn.style.display = 'flex';
+  const clearAllLabel = document.getElementById('accountClearAllLabel');
+  if (clearAllLabel) clearAllLabel.textContent = currentLang === 'ar' ? 'حذف كل الصفقات' : 'Delete All Trades';
 
   // رفع صورة مخصصة (تخزين local فقط — Firebase Storage غير مفعّل)
   const avatarInput = document.getElementById('accountAvatarInput');
@@ -1936,10 +2109,11 @@ return `<div class="history-card" onclick="expandHistory('${d.id}')">
     }
 listEl.innerHTML = listHTML;
     _historyCache = { count:countText, overview:overviewHTML, html:listHTML };
-const drawerClearBtn = document.getElementById('drawerClearAllBtn');
-    if (drawerClearBtn) {
-      drawerClearBtn.style.display = docs.length > 0 ? 'flex' : 'none';
-      document.getElementById('drawerClearAllLabel').textContent =
+// تحديث زر حذف كل الصفقات في صفحة الحساب
+    const accountClearBtn = document.getElementById('accountClearAllBtn');
+    if (accountClearBtn) {
+      accountClearBtn.style.display = docs.length > 0 ? 'flex' : 'none';
+      document.getElementById('accountClearAllLabel').textContent =
         currentLang === 'ar' ? 'حذف كل الصفقات' : 'Delete All Trades';
     }
   } catch(e) { listEl.innerHTML = `<div class="history-loading">Error: ${e.message}</div>`; }
@@ -2159,8 +2333,8 @@ document.getElementById('manualSaveBtn')?.addEventListener('click', async functi
 
   if (!valid) { showToast(t('manual_required'), 'red'); return; }
 
-  const profit   = sell - buy;
-  const pct      = (profit / buy) * 100;
+const profit   = (sell - buy) * shares;
+  const pct      = ((sell - buy) / buy) * 100;
   const dateVal  = dateEl.value;
   let tsOverride = null;
   if (dateVal) { tsOverride = new Date(dateVal); tsOverride.setHours(12, 0, 0, 0); }
@@ -2173,12 +2347,12 @@ document.getElementById('manualSaveBtn')?.addEventListener('click', async functi
     await addDoc(collection(db, 'users', currentUser.uid, 'history'), {
       ...(tsOverride ? { timestamp: tsOverride } : { timestamp: serverTimestamp() }),
       totalProfit:   profit,
-      totalInvested: buy,
+      totalInvested: buy * shares,
       overallPct:    pct,
       tradesCount:   1,
       symbols:       [sym],
       manual:        true,
-      rows: [{ sym, name: sym, buyTotal: buy, sellTotal: sell, profit, pct, shares }]
+      rows: [{ sym, name: sym, buyTotal: buy * shares, sellTotal: sell * shares, profit, pct, shares }]
     });
 
     _historyCache = null;
@@ -2198,6 +2372,8 @@ document.getElementById('manualSaveBtn')?.addEventListener('click', async functi
 });
 
 applyLang();
+  updateCurrencyBtn();
+
 const pathMap = {
   '/analyze':   'analyze',
   '/dashboard': 'dashboard',

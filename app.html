@@ -1665,46 +1665,7 @@ window.closePayment = function() {
   document.getElementById('paymentModal').classList.remove('open');
   try { Paddle.Checkout.close(); } catch(e) {}
 };
-async function renderDashboardPage() {
-  if (!currentUser) return;
-  try {
-    const snap = await getDocs(query(collection(db, 'users', currentUser.uid, 'history'), orderBy('timestamp','desc')));
-    const docs = snap.docs;
-    let tp=0, wins=0, ti=0;
-    docs.forEach(d => { const dd=d.data(); tp+=dd.totalProfit||0; ti+=dd.totalInvested||0; if((dd.totalProfit||0)>0) wins++; });
-    const wr = docs.length>0 ? (wins/docs.length*100) : 0;
-    const lim = PLANS[userPlan].limit;
-    document.getElementById('dashTotalProfit').textContent = (tp>=0?'+':'')+fmt(tp)+' '+t('sar');
-    document.getElementById('dashTotalProfit').className = 'dash-card-val '+(tp>=0?'green':'red');
-    document.getElementById('dashTotalTrades').textContent = docs.length;
-    document.getElementById('dashWinRate').textContent = wr.toFixed(0)+'%';
-    document.getElementById('dashUsage').textContent = userPlan==='max' ? '∞' : usageCount+' / '+lim;
-    document.getElementById('dashPlanLabel').textContent = planLabel(userPlan);
-    // رأس المال
-    const userSnap = await getDoc(doc(db,'users',currentUser.uid));
-    const cap = userSnap.exists() ? (userSnap.data().capital||0) : 0;
-    _currentCapital = cap;
-    document.getElementById('dashCapital').textContent = cap>0 ? fmt(cap)+' '+t('sar') : '—';
-    const ret = cap>0 ? (tp/cap*100) : 0;
-    document.getElementById('dashReturn').textContent = cap>0 ? (ret>=0?'+':'')+ret.toFixed(2)+'%' : '—';
-    document.getElementById('dashReturn').className = 'dash-card-val '+(ret>=0?'green':'red');
-    // الأشهر
-    const monthMap = {};
-    docs.forEach(d => { const dd=d.data(); const dt=dd.timestamp?.toDate?.(); if(!dt) return; const k=dt.getFullYear()+'-'+(dt.getMonth()+1); monthMap[k]=(monthMap[k]||0)+(dd.totalProfit||0); });
-    const months = Object.keys(monthMap).sort().slice(-6);
-    const barsEl = document.getElementById('dashMonthlyBars');
-    if (months.length===0) { barsEl.innerHTML=`<div class="dash-empty">${t('no_history')}</div>`; }
-    else {
-      const maxAbs = Math.max(...months.map(m=>Math.abs(monthMap[m])),1);
-      barsEl.innerHTML = months.map(m => {
-        const v=monthMap[m], h=Math.round((Math.abs(v)/maxAbs)*90)+4;
-        return `<div class="dash-bar-wrap">
-          <div class="dash-bar-val" style="color:${v>=0?'var(--green)':'var(--red)'}">${v>=0?'+':''}${Math.abs(v)>=1000?(Math.abs(v)/1000).toFixed(1)+'k':Math.abs(v).toFixed(0)}</div>
-          <div class="dash-bar ${v>=0?'profit-bar':'loss-bar'}" style="height:${h}px"></div>
-          <div class="dash-bar-label">${m.split('-')[1]}</div>
-        </div>`;
-      }).join('');
-    }
+
     // آخر الصفقات
 async function renderDashboardPage() {
   if (!currentUser) return;

@@ -449,7 +449,22 @@
     transition: opacity .6s ease, transform .6s ease;
   }
   .reveal.visible { opacity: 1; transform: translateY(0); }
-
+.landing-theme-btn {
+  position: fixed; top: 16px; left: 16px; z-index: 200;
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.landing-theme-btn:hover { color: var(--text); border-color: var(--accent); }
+body.landing-light {
+  --bg: #fff4e6; --card: #fffaf3; --card2: #f5ece0;
+  --border: #e0d0bc; --accent: #4b2e2e; --gold: #8b5c2a;
+  --gold2: #c8851a; --red: #b83232; --green: #2e6e42;
+  --muted: #8a6e62; --text: #2a1a1a;
+  --grid: rgba(75,46,46,0.04);
+}
   @media (max-width: 700px) {
     nav { padding: 16px 20px; }
     .hero-stat { padding: 16px 20px; }
@@ -468,6 +483,13 @@
 <body>
 <div class="wrapper">
 
+<button class="landing-theme-btn" id="landingThemeBtn" title="تبديل الوضع">
+  <svg id="landingThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+</button>
+
+<!-- ── NAV ── -->
 <!-- ── NAV ── -->
 <nav>
   <div class="nav-logo">
@@ -752,6 +774,25 @@
 </div>
 
 <script>
+// ── Landing Theme ──
+const _lTheme = localStorage.getItem('landing-theme') === 'light';
+if (_lTheme) document.body.classList.add('landing-light');
+updateLandingThemeIcon(_lTheme);
+
+function updateLandingThemeIcon(isLight) {
+  const icon = document.getElementById('landingThemeIcon');
+  if (!icon) return;
+  icon.innerHTML = isLight
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+
+document.getElementById('landingThemeBtn').addEventListener('click', () => {
+  const isLight = !document.body.classList.contains('landing-light');
+  document.body.classList.toggle('landing-light', isLight);
+  localStorage.setItem('landing-theme', isLight ? 'light' : 'dark');
+  updateLandingThemeIcon(isLight);
+});  
 // Scroll reveal
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {

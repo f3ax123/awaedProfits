@@ -558,23 +558,32 @@ body.light .dash-analyze-cta { color: #fff4e6; }
     <button class="signout-drawer-btn" onclick="doSignout()" id="signoutBtn">—</button>
   </div>
   <nav class="drawer-nav">
-    <button class="drawer-item active" id="dnavAnalyze" onclick="navigateTo('analyze')">
-      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-      <span class="i18n" data-key="nav_analyze">تحليل الصفقة</span>
-    </button>
 <button class="drawer-item" id="dnavDashboard" onclick="navigateTo('dashboard')">
   <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
   <span class="i18n" data-key="nav_dashboard">الرئيسية</span>
+</button>
+<button class="drawer-item" id="dnavAnalyze" onclick="navigateTo('analyze')">
+  <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+  <span class="i18n" data-key="nav_analyze">تحليل الصفقة</span>
 </button>
 <button class="drawer-item" id="dnavHistory" onclick="navigateTo('history')">
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
       <span class="i18n" data-key="nav_history">السجل</span>
     </button>
 
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" id="dnavPricing" onclick="navigateTo('pricing')">
+<div class="drawer-divider"></div>
+    <button class="drawer-item" id="dnavAccount" onclick="navigateTo('account')">
+      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="i18n" data-key="nav_account">حسابي</span>
+    </button>
+<button class="drawer-item" id="dnavPricing" onclick="navigateTo('pricing')">
       <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
       <span class="i18n" data-key="nav_pricing">الباقات</span>
+    </button>
+    <div class="drawer-divider"></div>
+    <button class="drawer-item" id="drawerClearAllBtn" onclick="clearAllHistoryFromDrawer()" style="display:none;color:var(--red);">
+      <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></span>
+      <span id="drawerClearAllLabel">حذف كل الصفقات</span>
     </button>
   </nav>
 </div>
@@ -705,9 +714,8 @@ body.light .dash-analyze-cta { color: #fff4e6; }
     <div id="historyContent" style="display:none;">
 <div class="history-header">
         <div class="section-title i18n" data-key="trade_history">سجل الصفقات</div>
-        <div style="display:flex;gap:8px;align-items:center;">
+<div style="display:flex;gap:8px;align-items:center;">
           <span class="history-count" id="historyCount"></span>
-          <button id="clearAllBtn" onclick="clearAllHistory()" style="display:none;background:transparent;border:1px solid rgba(212,87,74,0.4);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;padding:4px 12px;border-radius:6px;transition:all .2s;font-family:inherit;">🗑️ حذف الكل</button>
         </div>
       </div>
       <!-- حقل البحث في التاريخ -->
@@ -751,6 +759,56 @@ body.light .dash-analyze-cta { color: #fff4e6; }
       </div>
       <button class="manual-save-btn i18n" id="manualSaveBtn" data-key="save_trade">حفظ في السجل</button>
     </div>
+  </div>
+
+<!-- ACCOUNT PAGE -->
+  <div id="accountPage" style="display:none;">
+    <div class="section-title i18n" data-key="nav_account">حسابي</div>
+
+    <!-- بطاقة الملف الشخصي -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div style="position:relative;display:inline-block;">
+          <img id="accountAvatarImg" src="" alt="" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;background:var(--card2);">
+          <label for="accountAvatarInput" style="position:absolute;bottom:0;left:0;width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </label>
+          <input type="file" id="accountAvatarInput" accept="image/*" style="display:none;">
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:18px;font-weight:700;margin-bottom:3px;" id="accountDisplayName">—</div>
+          <div style="font-size:13px;color:var(--muted);" id="accountEmail">—</div>
+          <div style="margin-top:6px;" id="accountPlanBadgeWrap"></div>
+        </div>
+      </div>
+
+      <!-- تعديل الاسم -->
+      <div style="border-top:1px solid var(--border);padding-top:18px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;" id="accountEditNameLabel">تعديل الاسم</div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="accountNameInput" type="text" dir="auto" placeholder="اسمك" style="flex:1;">
+          <button onclick="saveAccountName()" style="padding:0 18px;background:var(--accent);border:none;border-radius:12px;color:var(--bg);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;" id="accountSaveNameBtn">حفظ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- الباقة والاستخدام -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;" id="accountPlanSectionLabel">الباقة والاستخدام</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;" id="accountPlanName">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="accountUsageText">—</div>
+        </div>
+        <button onclick="navigateTo('pricing')" style="padding:8px 16px;background:var(--card2);border:1px solid var(--border);color:var(--accent);font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;" id="accountUpgradeBtn">ترقية</button>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div id="accountUsageBar" style="height:100%;background:var(--accent);border-radius:3px;transition:width .5s;width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- تسجيل الخروج -->
+    <button onclick="doSignout()" style="width:100%;padding:14px;background:transparent;border:1px solid rgba(212,87,74,0.3);color:var(--red);border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;" onmouseover="this.style.background='rgba(212,87,74,0.08)'" onmouseout="this.style.background='transparent'" id="accountSignoutBtn">تسجيل الخروج</button>
   </div>
 
 
@@ -1024,7 +1082,9 @@ window.toggleLang = function() {
     localStorage.setItem('lang', currentLang);
     _historyCache = null;
     applyLang();
-    if (currentPage === 'dashboard') renderDashboardPage();
+    if (currentPage === 'dashboard') renderDashboardPage();   if (currentPage === 'history') renderHistoryPage();
+  if (currentPage === 'history') renderHistoryPage();
+
     if (currentPage === 'history') renderHistoryPage();
     overlay.classList.remove('show');
   }, 180);
@@ -1109,7 +1169,7 @@ if (tuc) tuc.style.display = 'none';    document.getElementById('drawerUserSecti
   // أخفِ الـ loading overlay بعد معرفة حالة المصادقة
   _hideAuthLoader();
 
-  if (currentPage === 'dashboard') renderDashboardPage();
+  if (currentPage === 'dashboard') renderDashboardPage();   if (currentPage === 'history') renderHistoryPage();
   if (currentPage === 'history') renderHistoryPage();
 });
 
@@ -1190,7 +1250,7 @@ const pageRoutes = {
   pricing:   '/plans'
 };
 history.replaceState(null, '', pageRoutes[page] || '/analyze');
-  ['analyze','dashboard','history','pricing','manual'].forEach(p => {
+['analyze','dashboard','history','pricing','manual','account'].forEach(p => {
     const el  = document.getElementById(p + 'Page');
     const btn = document.getElementById('dnav' + p.charAt(0).toUpperCase() + p.slice(1));
     if (p === page) {
@@ -1210,10 +1270,11 @@ history.replaceState(null, '', pageRoutes[page] || '/analyze');
   currentPage = page;
   if (currentPage === 'dashboard') renderDashboardPage();
   if (currentPage === 'history') renderHistoryPage();
+  if (currentPage === 'account') renderAccountPage();
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-['dashboard','history','pricing','manual'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
-
+['dashboard','history','pricing','manual','account'].forEach(p => document.getElementById(p + 'Page').style.display = 'none');
 // ══════════════════════════════════════════════════════
 // Upload
 // ══════════════════════════════════════════════════════
@@ -1671,6 +1732,96 @@ async function renderDashboardPage() {
         </div>`;
       }).join('');
     }
+    // ══════════════════════════════════════════════════════
+// Account Page
+// ══════════════════════════════════════════════════════
+function renderAccountPage() {
+  if (!currentUser) return;
+
+  // بيانات المستخدم
+  const avatarImg = document.getElementById('accountAvatarImg');
+  if (avatarImg) avatarImg.src = currentUser.photoURL || '';
+  const nameEl = document.getElementById('accountDisplayName');
+  if (nameEl) nameEl.textContent = currentUser.displayName || '—';
+  const emailEl = document.getElementById('accountEmail');
+  if (emailEl) emailEl.textContent = currentUser.email || '—';
+  const nameInput = document.getElementById('accountNameInput');
+  if (nameInput) nameInput.value = currentUser.displayName || '';
+
+  // badge الباقة
+  const badgeWrap = document.getElementById('accountPlanBadgeWrap');
+  if (badgeWrap) badgeWrap.innerHTML = `<span class="plan-badge ${userPlan}">${planLabel(userPlan)}</span>`;
+
+  // الباقة والاستخدام
+  const planNameEl = document.getElementById('accountPlanName');
+  if (planNameEl) planNameEl.textContent = planLabel(userPlan);
+  const lim = PLANS[userPlan].limit;
+  const usageEl = document.getElementById('accountUsageText');
+  if (usageEl) usageEl.textContent = userPlan === 'max'
+    ? (currentLang === 'ar' ? 'غير محدود' : 'Unlimited')
+    : `${usageCount} / ${lim} ${currentLang === 'ar' ? 'تحليل هذا الشهر' : 'analyses this month'}`;
+  const bar = document.getElementById('accountUsageBar');
+  if (bar) {
+    const pct = userPlan === 'max' ? 100 : Math.min((usageCount / lim) * 100, 100);
+    bar.style.width = pct + '%';
+    bar.style.background = pct >= 80 ? 'var(--red)' : 'var(--accent)';
+  }
+  const upgradeBtn = document.getElementById('accountUpgradeBtn');
+  if (upgradeBtn) upgradeBtn.style.display = userPlan === 'max' ? 'none' : 'block';
+
+  // النصوص
+  const editLabel = document.getElementById('accountEditNameLabel');
+  if (editLabel) editLabel.textContent = currentLang === 'ar' ? 'تعديل الاسم' : 'Edit Name';
+  const planLabel2 = document.getElementById('accountPlanSectionLabel');
+  if (planLabel2) planLabel2.textContent = currentLang === 'ar' ? 'الباقة والاستخدام' : 'Plan & Usage';
+  const saveBtn = document.getElementById('accountSaveNameBtn');
+  if (saveBtn) saveBtn.textContent = t('save');
+  const signoutBtn = document.getElementById('accountSignoutBtn');
+  if (signoutBtn) signoutBtn.textContent = t('signout');
+  const upgradeBtn2 = document.getElementById('accountUpgradeBtn');
+  if (upgradeBtn2) upgradeBtn2.textContent = t('upgrade');
+
+  // رفع صورة مخصصة (تخزين local فقط — Firebase Storage غير مفعّل)
+  const avatarInput = document.getElementById('accountAvatarInput');
+  if (avatarInput && !avatarInput._bound) {
+    avatarInput._bound = true;
+    avatarInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const src = e.target.result;
+        document.getElementById('accountAvatarImg').src = src;
+        // حفظ في localStorage مؤقتاً
+        localStorage.setItem('customAvatar', src);
+        showToast(currentLang === 'ar' ? 'تم تحديث الصورة ✓' : 'Photo updated ✓', 'green');
+      };
+      reader.readAsDataURL(file);
+    });
+    // استرجاع الصورة المحفوظة
+    const saved = localStorage.getItem('customAvatar');
+    if (saved) document.getElementById('accountAvatarImg').src = saved;
+  }
+}
+
+window.saveAccountName = async function() {
+  const input = document.getElementById('accountNameInput');
+  const newName = input?.value.trim();
+  if (!newName || !currentUser) return;
+  const btn = document.getElementById('accountSaveNameBtn');
+  btn.disabled = true;
+  try {
+    await updateProfile(currentUser, { displayName: newName });
+    await updateDoc(doc(db, 'users', currentUser.uid), { displayName: newName });
+    document.getElementById('accountDisplayName').textContent = newName;
+    document.getElementById('drawerUserName').textContent = newName;
+    showToast(currentLang === 'ar' ? 'تم حفظ الاسم ✓' : 'Name saved ✓', 'green');
+  } catch(e) {
+    showToast(t('name_save_error') + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+  }
+};
 
     // آخر الصفقات
     const recentEl = document.getElementById('dashRecentList');
@@ -1726,8 +1877,7 @@ function renderHistoryPage() {
   // تحديث النصوص الثابتة في الصفحة
   const titleEl = document.querySelector('#historyPage .section-title');
   if (titleEl) titleEl.textContent = t('trade_history');
-  const clearAllBtn = document.getElementById('clearAllBtn');
-  if (clearAllBtn) clearAllBtn.innerHTML = `🗑️ ${t('delete')} ${currentLang === 'ar' ? 'الكل' : 'All'}`;
+
   // تحديث placeholder البحث حسب اللغة
   const searchEl = document.getElementById('historySearch');
   if (searchEl) searchEl.placeholder = t('search_history');
@@ -1770,8 +1920,14 @@ async function loadHistory(forceRefresh = false) {
     const iov=tpa>=0;
     const capitalLabel = currentLang==='ar' ? 'رأس المال' : 'Capital';
     const editLabel = currentLang==='ar' ? 'تعديل' : 'Edit';
+const cumulativeCapital = _currentCapital + tpa;
+    const cumulativeLabel   = currentLang === 'ar' ? 'رأس المال التراكمي' : 'Cumulative Capital';
     const overviewHTML = `
-      <div class="overview-card"><div class="stat-label">${t('total_profit')}</div><div class="stat-value ${iov?'green':'red'}">${iov?'+':''}${fmt(tpa)} ${t('sar')}</div></div>
+      <div class="overview-card">
+        <div class="stat-label">${t('total_profit')}</div>
+        <div class="stat-value ${iov?'green':'red'}">${iov?'+':''}${fmt(tpa)} ${t('sar')}</div>
+        <div style="font-size:11px;font-weight:600;margin-top:4px;color:${iov?'var(--green)':'var(--red)'};">(${or>=0?'+':''}${or.toFixed(2)}%)</div>
+      </div>
       <div class="overview-card" style="cursor:pointer;" onclick="openCapitalModal()">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div class="stat-label">${capitalLabel}</div>
@@ -1779,7 +1935,10 @@ async function loadHistory(forceRefresh = false) {
         </div>
         <div class="stat-value gold">${_currentCapital > 0 ? fmt(_currentCapital)+' '+t('sar') : '—'}</div>
       </div>
-      <div class="overview-card"><div class="stat-label">${t('overall_return')}</div><div class="stat-value ${iov?'green':'red'}">${or>=0?'+':''}${or.toFixed(2)}%</div></div>
+      <div class="overview-card">
+        <div class="stat-label">${cumulativeLabel}</div>
+        <div class="stat-value gold">${_currentCapital > 0 ? fmt(cumulativeCapital)+' '+t('sar') : '—'}</div>
+      </div>
       <div class="overview-card"><div class="stat-label">${t('win_rate')}</div><div class="stat-value">${wr.toFixed(0)}%</div></div>`;
     document.getElementById('overviewGrid').innerHTML = overviewHTML;
     let listHTML;
@@ -1822,8 +1981,12 @@ return `<div class="history-card" onclick="expandHistory('${d.id}')">
     }
 listEl.innerHTML = listHTML;
     _historyCache = { count:countText, overview:overviewHTML, html:listHTML };
-    const clearAllBtn = document.getElementById('clearAllBtn');
-    if (clearAllBtn) clearAllBtn.style.display = docs.length > 0 ? 'block' : 'none';
+const drawerClearBtn = document.getElementById('drawerClearAllBtn');
+    if (drawerClearBtn) {
+      drawerClearBtn.style.display = docs.length > 0 ? 'flex' : 'none';
+      document.getElementById('drawerClearAllLabel').textContent =
+        currentLang === 'ar' ? 'حذف كل الصفقات' : 'Delete All Trades';
+    }
   } catch(e) { listEl.innerHTML = `<div class="history-loading">Error: ${e.message}</div>`; }
 }
 
@@ -1932,7 +2095,7 @@ window.saveCapital = async function(type) {
 };
 window.closeDeleteModal = () => { document.getElementById('deleteModal').classList.remove('open'); _pendingDeleteId=null; };
 
-window.clearAllHistory = function() {
+window.clearAllHistoryFromDrawer = function() {   closeDrawer();   setTimeout(() => clearAllHistory(), 200); };
   document.getElementById('deleteModalTitle').textContent   = currentLang==='ar' ? 'حذف جميع الصفقات' : 'Delete All Trades';
   document.getElementById('deleteModalSub').textContent     = currentLang==='ar' ? 'سيتم حذف كامل السجل. هذا الإجراء لا يمكن التراجع عنه.' : 'All history will be deleted. This cannot be undone.';
   document.getElementById('deleteModalCancel').textContent  = t('cancel');

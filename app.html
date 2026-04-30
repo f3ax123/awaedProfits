@@ -564,6 +564,15 @@ body.light .dash-analyze-cta { color: #fff4e6; }
     <button class="signout-drawer-btn" onclick="doSignout()" id="signoutBtn">—</button>
   </div>
   <nav class="drawer-nav">
+      <div style="padding:8px 10px 6px; border-bottom:1px solid var(--border); display:flex; gap:6px; align-items:center;">
+    <button class="icon-btn" id="themeBtn" style="flex:1; width:auto; border-radius:10px;" title="تبديل الوضع">
+      <svg id="themeBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()" style="flex:1; width:auto; border-radius:10px;">EN</button>
+    <button class="currency-btn" id="currencyBtn" onclick="toggleCurrency()" style="flex:1; width:auto; border-radius:10px;">﷼<span id="currencyLabel">SAR</span></button>
+  </div>
 <button class="drawer-item" id="dnavDashboard" onclick="navigateTo('dashboard')">
   <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
   <span class="i18n" data-key="nav_dashboard">الرئيسية</span>
@@ -592,9 +601,7 @@ body.light .dash-analyze-cta { color: #fff4e6; }
 
   <div class="topbar">
 <div class="topbar-left">
-      <button class="icon-btn" id="themeBtn"><svg id="themeBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-      <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
-      <button class="currency-btn" id="currencyBtn" onclick="toggleCurrency()">﷼<span id="currencyLabel">SAR</span></button>
+
     </div>
     <div class="topbar-center"><img src="images/logo_light.png" alt="ربحي" style="height:28px; width:auto; display:block;"></div>
 <div class="topbar-right">

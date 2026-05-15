@@ -105,7 +105,7 @@
   .copy-result-btn:hover { color: var(--text); border-color: var(--accent); }
 
   /* ── Trend Badge ───────────────────────────────────────── */
-  .trend-badge {
+  /* ── Multi-Image Upload (Max Plan) ── */ .multi-upload-zone {   border: 2px dashed var(--border); border-radius: 16px;   padding: 28px 20px; text-align: center; cursor: pointer;   transition: all .3s; background: var(--card2);   margin-bottom: 12px; } .multi-upload-zone:hover { border-color: var(--accent); } .multi-thumbs {   display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; } .multi-thumb {   position: relative; width: 90px; height: 90px;   border-radius: 10px; overflow: hidden;   border: 1px solid var(--border); } .multi-thumb img { width: 100%; height: 100%; object-fit: cover; } .multi-thumb-del {   position: absolute; top: 4px; right: 4px;   width: 20px; height: 20px; border-radius: 50%;   background: rgba(212,87,74,0.85); border: none;   color: #fff; font-size: 12px; line-height: 1;   cursor: pointer; display: flex; align-items: center; justify-content: center; } .multi-thumb-label {   position: absolute; bottom: 0; left: 0; right: 0;   background: rgba(0,0,0,0.55); color: #fff;   font-size: 9px; font-weight: 700; text-align: center; padding: 2px 0; } .per-image-detail {   background: var(--card2); border: 1px solid var(--border);   border-radius: 14px; padding: 16px 18px; margin-bottom: 10px; } .per-image-detail-header {   display: flex; align-items: center; justify-content: space-between;   cursor: pointer; font-size: 13px; font-weight: 700; } .per-image-detail-body { margin-top: 12px; display: none; }  .trend-badge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 700; margin-top: 6px;
@@ -621,7 +621,7 @@ body.light .dash-analyze-cta { color: #fff4e6; }
       </div>
       <div class="limit-bar-track"><div class="limit-bar-fill" id="limitFill" style="width:0%"></div></div>
     </div>
-    <div class="upload-zone" id="uploadZone">
+    <!-- Max Plan: multi-image -->     <div id="multiUploadSection" style="display:none; margin-bottom:20px;">       <div class="multi-upload-zone" id="multiUploadZone">         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;display:block;opacity:.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>         <div style="font-size:14px;font-weight:600;margin-bottom:4px;" id="multiUploadTitle">أضف صور الصفقات</div>         <div style="font-size:12px;color:var(--muted);" id="multiUploadSub">يمكنك رفع حتى 5 صور</div>         <input type="file" id="multiFileInput" accept="image/*" multiple style="display:none;">       </div>       <div class="multi-thumbs" id="multiThumbs"></div>       <button class="analyze-btn" id="multiAnalyzeBtn" disabled style="margin-bottom:0;">         <span id="multiAnalyzeBtnText">تحليل الصور ودمج النتائج</span>       </button>     </div>      <div class="upload-zone" id="uploadZone">
       <div class="upload-zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
       <h3 class="i18n" data-key="upload_title">ارفع صورة الصفقة</h3>
       <p class="i18n" data-key="upload_sub">اسحب الصورة هنا أو اضغط للاختيار</p>
@@ -1091,8 +1091,9 @@ window.toggleCurrency = function() {
   // إعادة رسم الصفحات الحالية
   _historyCache = null;
   if (currentPage === 'dashboard') renderDashboardPage();
-  if (currentPage === 'history')   loadHistory(true);
+  if (currentPage === 'history')   renderHistoryPage();
   if (currentPage === 'account')   renderAccountPage();
+  if (currentPage === 'analyze')   updateAnalyzeUIForPlan();
 };
 function updateCurrencyBtn() {
   const btn = document.getElementById('currencyBtn');
@@ -1136,8 +1137,10 @@ window.toggleLang = function() {
     localStorage.setItem('lang', currentLang);
     _historyCache = null;
     applyLang();
-    if (currentPage === 'dashboard') renderDashboardPage();   if (currentPage === 'history') renderHistoryPage();
-  if (currentPage === 'history') renderHistoryPage();
+  if (currentPage === 'dashboard') renderDashboardPage();
+  if (currentPage === 'history')   renderHistoryPage();
+  if (currentPage === 'account')   renderAccountPage();
+  if (currentPage === 'analyze')   updateAnalyzeUIForPlan();
 
     if (currentPage === 'history') renderHistoryPage();
     overlay.classList.remove('show');
@@ -1205,6 +1208,8 @@ if (tuc) tuc.style.display = 'flex';    document.getElementById('drawerUserSecti
     document.getElementById('drawerUserName').textContent = user.displayName || user.email;
     await loadUserPlan();
     updatePlanUI();
+    if (currentPage === 'analyze') updateAnalyzeUIForPlan();
+
 
     // تفعيل خطة بعد redirect من Paddle
     const urlParams = new URLSearchParams(window.location.search);
@@ -1224,8 +1229,10 @@ if (tuc) tuc.style.display = 'none';    document.getElementById('drawerUserSecti
   // أخفِ الـ loading overlay بعد معرفة حالة المصادقة
   _hideAuthLoader();
 
-  if (currentPage === 'dashboard') renderDashboardPage();   if (currentPage === 'history') renderHistoryPage();
-  if (currentPage === 'history') renderHistoryPage();
+  if (currentPage === 'dashboard') renderDashboardPage();
+  if (currentPage === 'history')   renderHistoryPage();
+  if (currentPage === 'account')   renderAccountPage();
+  if (currentPage === 'analyze')   updateAnalyzeUIForPlan();
 });
 
 async function loadUserPlan() {
@@ -1273,6 +1280,7 @@ function updatePlanUI() {
   if (mp) { mp.disabled = userPlan === 'max'; mp.textContent = userPlan === 'max' ? t('current_plan') : t('subscribe'); }
   const proTag = document.getElementById('proCurrentTag'); if (proTag) proTag.style.display = userPlan === 'pro' ? 'block' : 'none';
   const maxTag = document.getElementById('maxCurrentTag'); if (maxTag) maxTag.style.display = userPlan === 'max' ? 'block' : 'none';
+  if (currentPage === 'analyze') updateAnalyzeUIForPlan();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1324,8 +1332,9 @@ history.replaceState(null, '', pageRoutes[page] || '/analyze');
 
   currentPage = page;
   if (currentPage === 'dashboard') renderDashboardPage();
-  if (currentPage === 'history') renderHistoryPage();
-  if (currentPage === 'account') renderAccountPage();
+  if (currentPage === 'history')   renderHistoryPage();
+  if (currentPage === 'account')   renderAccountPage();
+  if (currentPage === 'analyze')   updateAnalyzeUIForPlan();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -2338,6 +2347,189 @@ const profit   = (sell - buy) * shares;
     btn.textContent = t('save_trade');
   }
 });
+
+// ══════════════════════════════════════════════════════
+// Multi-Image Analysis (Max Plan only)
+// ══════════════════════════════════════════════════════
+let _multiFiles = []; // { file, base64, mime, name }
+
+function updateAnalyzeUIForPlan() {
+  const isMax = userPlan === 'max';
+  document.getElementById('multiUploadSection').style.display = isMax ? 'block' : 'none';
+  document.getElementById('uploadZone').style.display         = isMax ? 'none'  : 'block';
+  // تحديث نصوص
+  document.getElementById('multiUploadTitle').textContent =
+    currentLang === 'ar' ? 'أضف صور الصفقات' : 'Add trade screenshots';
+  document.getElementById('multiUploadSub').textContent =
+    currentLang === 'ar' ? 'يمكنك رفع حتى 5 صور' : 'Upload up to 5 images';
+  document.getElementById('multiAnalyzeBtnText').textContent =
+    currentLang === 'ar' ? 'تحليل الصور ودمج النتائج' : 'Analyze & merge results';
+}
+
+function renderMultiThumbs() {
+  const wrap = document.getElementById('multiThumbs');
+  wrap.innerHTML = _multiFiles.map((f, i) => `
+    <div class="multi-thumb">
+      <img src="data:${f.mime};base64,${f.base64}" alt="">
+      <button class="multi-thumb-del" onclick="removeMultiFile(${i})">✕</button>
+      <div class="multi-thumb-label">${currentLang==='ar'?'صورة':'Img'} ${i+1}</div>
+    </div>
+  `).join('');
+  document.getElementById('multiAnalyzeBtn').disabled = _multiFiles.length === 0;
+}
+
+window.removeMultiFile = function(i) {
+  _multiFiles.splice(i, 1);
+  renderMultiThumbs();
+};
+
+document.getElementById('multiUploadZone').addEventListener('click', () =>
+  document.getElementById('multiFileInput').click()
+);
+document.getElementById('multiUploadZone').addEventListener('dragover', e => {
+  e.preventDefault(); document.getElementById('multiUploadZone').style.borderColor = 'var(--accent)';
+});
+document.getElementById('multiUploadZone').addEventListener('dragleave', () =>
+  document.getElementById('multiUploadZone').style.borderColor = ''
+);
+document.getElementById('multiUploadZone').addEventListener('drop', e => {
+  e.preventDefault();
+  document.getElementById('multiUploadZone').style.borderColor = '';
+  handleMultiFiles(e.dataTransfer.files);
+});
+document.getElementById('multiFileInput').addEventListener('change', function() {
+  handleMultiFiles(this.files); this.value = '';
+});
+
+function handleMultiFiles(files) {
+  const remaining = 5 - _multiFiles.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      _multiFiles.push({ file, base64: e.target.result.split(',')[1], mime: file.type, name: file.name });
+      renderMultiThumbs();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('multiAnalyzeBtn').addEventListener('click', multiAnalyze);
+
+async function multiAnalyze() {
+  if (!currentUser || _multiFiles.length === 0) return;
+
+  errorBox.style.display  = 'none';
+  resultsEl.style.display = 'none';
+  loadingEl.style.display = 'block';
+  document.getElementById('multiAnalyzeBtn').disabled = true;
+  lastResult = null; lastResultSaved = false;
+
+  // أزل تفاصيل الصور السابقة
+  document.getElementById('perImageDetails')?.remove();
+
+  try {
+    const idToken = await currentUser.getIdToken(true);
+
+    // تحليل كل صورة بشكل متوازٍ
+    const promises = _multiFiles.map(f =>
+      fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({ imageBase64: f.base64, imageMime: f.mime }),
+      }).then(r => r.json())
+    );
+
+    const responses = await Promise.all(promises);
+    loadingEl.style.display = 'none';
+
+    // دمج الصفقات من كل الصور
+    const perImage = [];
+    let allTrades  = [];
+
+    responses.forEach((data, idx) => {
+      if (data.rawText) {
+        try {
+          const parsed = JSON.parse((data.rawText || '').replace(/```json|```/g, '').trim());
+          perImage.push({ idx, trades: parsed.trades || [], label: `${currentLang==='ar'?'صورة':'Image'} ${idx+1}` });
+          allTrades = allTrades.concat(parsed.trades || []);
+        } catch { /* تجاهل الصور غير القابلة للقراءة */ }
+      }
+      // تحديث usageCount من آخر استجابة
+      if (data.usageCount !== undefined) { usageCount = data.usageCount; updatePlanUI(); }
+    });
+
+    if (allTrades.length === 0) throw new Error(t('read_error'));
+
+    // رسم النتائج المدمجة
+    lastResult = renderResults({ trades: allTrades });
+    lastResultSaved = false;
+    window.__lastResult = lastResult;
+
+    // زر الحفظ
+    const sb = document.getElementById('saveResultBtn');
+    sb.style.display = 'block'; sb.style.background = 'var(--green)';
+    sb.textContent = t('save_trade'); sb.disabled = false;
+
+    // تفاصيل كل صورة
+    renderPerImageDetails(perImage);
+
+  } catch(err) {
+    loadingEl.style.display = 'none';
+    document.getElementById('multiAnalyzeBtn').disabled = false;
+    errorBox.style.display  = 'block';
+    errorBox.textContent    = err.message || 'Error';
+  }
+}
+
+function renderPerImageDetails(perImage) {
+  if (perImage.length <= 1) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'perImageDetails';
+  wrap.style.marginTop = '16px';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;';
+  title.textContent = currentLang === 'ar' ? 'تفاصيل كل صورة' : 'Per-image details';
+  wrap.appendChild(title);
+
+  perImage.forEach(img => {
+    const block = document.createElement('div');
+    block.className = 'per-image-detail';
+
+    let tp = 0;
+    img.trades.filter(tr => tr.type === 'sell').forEach(tr => tp += (tr.total||0));
+    img.trades.filter(tr => tr.type === 'buy').forEach(tr  => tp -= (tr.total||0));
+    const isP = tp >= 0;
+
+    block.innerHTML = `
+      <div class="per-image-detail-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span>${img.label}</span>
+        <span style="color:${isP?'var(--green)':'var(--red)'};font-size:14px;">
+          ${isP?'+':''}${fmt(tp)} ${t('sar')}
+          <span style="font-size:11px;color:var(--muted);margin-right:6px;">▼ ${currentLang==='ar'?'تفاصيل':'details'}</span>
+        </span>
+      </div>
+      <div class="per-image-detail-body">
+        ${img.trades.map(tr => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            <div>
+              <span style="font-weight:700;">${(tr.symbol||'').toUpperCase()}</span>
+              <span class="badge ${tr.type==='buy'?'buy':'profit'}" style="margin-right:6px;font-size:10px;">${tr.type==='buy'?(currentLang==='ar'?'شراء':'Buy'):(currentLang==='ar'?'بيع':'Sell')}</span>
+            </div>
+            <span style="color:var(--muted);">${fmt(tr.total||0)} ${t('sar')}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    wrap.appendChild(block);
+  });
+
+  // أضف بعد قسم النتائج
+  document.getElementById('results').appendChild(wrap);
+}
 
 applyLang();
   updateCurrencyBtn();
